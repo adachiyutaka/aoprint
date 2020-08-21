@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_21_054406) do
+ActiveRecord::Schema.define(version: 2020_08_21_085942) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -33,5 +33,70 @@ ActiveRecord::Schema.define(version: 2020_08_21_054406) do
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
   end
 
+  create_table "game_objects", force: :cascade do |t|
+    t.string "name", default: ""
+    t.string "text", default: ""
+    t.integer "game_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["game_id"], name: "index_game_objects_on_game_id"
+  end
+
+  create_table "games", force: :cascade do |t|
+    t.string "name", default: "", null: false
+    t.string "text", default: ""
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_games_on_user_id"
+  end
+
+  create_table "lines", force: :cascade do |t|
+    t.integer "s_x", null: false
+    t.integer "s_y", null: false
+    t.integer "e_x", null: false
+    t.integer "e_y", null: false
+    t.integer "stage_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["stage_id"], name: "index_lines_on_stage_id"
+  end
+
+  create_table "positions", force: :cascade do |t|
+    t.integer "x", null: false
+    t.integer "y", null: false
+    t.integer "game_object_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["game_object_id"], name: "index_positions_on_game_object_id"
+  end
+
+  create_table "stages", force: :cascade do |t|
+    t.integer "game_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["game_id"], name: "index_stages_on_game_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "name", default: "", null: false
+    t.string "text", default: ""
+    t.date "birthday"
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "game_objects", "games"
+  add_foreign_key "games", "users"
+  add_foreign_key "lines", "stages"
+  add_foreign_key "positions", "game_objects"
+  add_foreign_key "stages", "games"
 end
