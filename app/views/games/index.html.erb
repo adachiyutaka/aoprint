@@ -7,10 +7,22 @@
   </div>
 </div>
 
-<%# games/newへのリンク %>
-
+<%# games#new ボタン %>
 <% if user_signed_in? %>
-  <div class='create-btn'>
+  <div class='create-btn' id='create-btn'>
     <span class='create-btn-text'>作る</span>
   </div>
 <% end %>
+
+<%# games#new モーダル %>
+<div class='modal-background' id='modal-background'>
+  <div class='modal' id='modal'>
+    <div class='modal-content'>
+
+
+
+      <div class='exit-btn' id='exit-btn'>x</div>
+
+    </div>
+  </div>
+</div>
