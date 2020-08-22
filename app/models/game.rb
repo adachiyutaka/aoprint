@@ -1,6 +1,6 @@
 class Game < ApplicationRecord
   with_options presence: true do
-    validates :name, uniqueness: { case_sensitive: true }
+    validates :name
   end
   
   belongs_to :user
