@@ -3,15 +3,14 @@
   <div class='introduce'>
   </div>
   <div class='game-contents'>
-  <%# <%= render partial: 'game', collection: @games %>  </div>
+    <%# <%= render partial: 'game', collection: @games %>
+  </div>
 </div>
 
 <%# games/newへのリンク %>
 
-<%# <% if user_signed_in? %>
-  <%# <%= link_to new_item_path do %>
-    <%# <div class='create-btn'> %>
-      <%# <span class='create-btn-text'>作る</span> %>
-    <%# </div> %>
-  <%# <% end %>
-<%# <% end %>
+<% if user_signed_in? %>
+  <div class='create-btn'>
+    <span class='create-btn-text'>作る</span>
+  </div>
+<% end %>
