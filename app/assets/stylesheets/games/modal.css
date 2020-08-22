@@ -35,3 +35,15 @@
   color: white;
   background-color: #cc5555;
 }
+
+
+
+/* inside-modal */
+
+.form-list{
+  list-style: none;
+}
+
+.form-list li{
+  margin-top: 30px;
+}

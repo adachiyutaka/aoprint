@@ -1,4 +1,4 @@
-<%= render "shared/header" %>
+<%= render 'shared/header' %>
 <div class='main'>
   <div class='introduce'>
   </div>
@@ -19,7 +19,50 @@
   <div class='modal' id='modal'>
     <div class='modal-content'>
 
+      <%# Game#newのフォーム %>
+      <%= form_with url: games_path, local: true do |f| %>
 
+      <%#= render 'shared/error_messages', model: @item %>
+      <ul class='form-list'>
+        <li>
+          <div class='form-title'>
+            ステージ
+          </div>
+          <div class='click-upload'>
+            <p>
+              クリックしてファイルをアップロード
+            </p>
+            <%= f.file_field :stage %>
+          </div>
+        </li>
+        <li>
+          <div class='form-title'>
+            プレイヤー
+          </div>
+          <div class='click-upload'>
+            <p>
+              クリックしてファイルをアップロード
+            </p>
+            <%= f.file_field :player %>
+          </div>
+        </li>
+        <li>
+          <div class='form-title'>
+            タイトル
+          </div>
+          <%= f.text_area :name, class:'name', placeholder:'ゲームのタイトル（40文字まで)', maxlength:'40' %>
+        </li>
+        <li>
+          <div class='form-title'>
+            説明文
+          </div>
+            <%= f.text_area :text, class:'text', placeholder:'ゲームの説明' ,rows:'7' ,maxlength:'1000' %>
+        </li>
+        <li>
+          <%= f.submit '遊ぶ' ,class:"sell-btn" %>
+        </li>
+      <% end %>
+      <%# Game#newのフォーム %>
 
       <div class='exit-btn' id='exit-btn'>x</div>
 
