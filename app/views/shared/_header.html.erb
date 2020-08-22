@@ -9,18 +9,21 @@
   </div>
   <div class='right'> 
     <ul class='right-list'>
-      <li class='sign-in'>
-        <span>ログイン</span>
-      </li>
-      <li class='sign-up'>
-        <span>ユーザー登録</span>
-      </li>
-      <li class='user-icon'>
-        <span>ユーザーアイコン</span>
-      </li>
-      <li class='sign-out'>
-        <span>ログアウト</span>
-      </li>
+      <% if user_signed_in? %>
+        <li class='user-icon'>
+          <span><%= current_user.name %></span>
+        </li>
+        <li class='sign-out'>
+          <%= link_to 'ログアウト', destroy_user_session_path, method: :DELETE %>
+        </li>
+      <% else %>
+        <li class='sign-in'>
+          <%= link_to 'ログイン', new_user_session_path %>
+        </li>
+        <li class='sign-up'>
+          <%= link_to 'ユーザー登録', new_user_registration_path %>
+        </li>
+      <% end %>
     </ul>
   </div>
 </header>
