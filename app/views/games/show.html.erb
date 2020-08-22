@@ -1,0 +1,15 @@
+<%= render 'shared/header' %>
+<div class='main'>
+  <div class='game'>
+    <div class='name'>
+      <%= @game.name %>
+      <%= @game.user.name %>
+    </div>
+    <div class='text'>
+      <%= @game.text %>
+    </div>
+  </div>
+  <div class='game-contents'>
+    <%# <%= render partial: 'game', collection: @games %>
+  </div>
+</div>
