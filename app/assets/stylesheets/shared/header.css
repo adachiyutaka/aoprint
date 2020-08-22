@@ -36,7 +36,7 @@
   display: flex;
 }
 
-li {
+.right-list li {
   margin-left: 10px;
   background-color: #dddddd;
 }
