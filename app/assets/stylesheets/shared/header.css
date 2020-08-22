@@ -1,0 +1,42 @@
+* {
+  box-sizing: border-box;
+}
+
+.header-content{
+  display: flex;
+  justify-content: space-between
+}
+
+.left{
+  display: flex;
+
+}
+
+.logo{
+  width: 150px;
+  height: 60px;
+  color: white;
+  font-size: 40px;
+  font-family: sans-serif;
+  text-align: center;
+  background-color: #3050bb;
+}
+
+.search-content{
+  width: 300px;
+  height: 60px;
+  background-color: #dddddd;
+}
+
+.right{
+  background-color: #f7f7f7;
+}
+.right-list{
+  list-style: none;
+  display: flex;
+}
+
+li {
+  margin-left: 10px;
+  background-color: #dddddd;
+}
