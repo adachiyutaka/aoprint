@@ -1,11 +1,12 @@
-/* <%= link_to "#" do %> */
+<%#= link_to  do %>
 <div class='game-images'>
   <span class='game-stage'>
-  <%# <%= image_tag game.stage.image, class: "item-img" %>
+  <%binding.pry%>
+    <%#= image_tag games.stages[0].images, class: "games-img"%>
 </div>
-<div class='item-info'>
-  <h3 class='item-name'>
-    タイトル
-    <%# <%= item.name %>
+<div class='game-info'>
+  <h3 class='game-name'>
+    <%= games.name if games %>
   </h3>
 </div>
+<%# end %>

@@ -2,9 +2,13 @@
 <div class='main'>
   <div class='introduce'>
   </div>
+
+  <%# games一覧 %>
   <div class='game-contents'>
-    <%# <%= render partial: 'game', collection: @games %>
+    <%= render partial: 'shared/games', collection: @games %>
   </div>
+  <%# games一覧 %>
+
 </div>
 
 <%# games#new ボタン %>

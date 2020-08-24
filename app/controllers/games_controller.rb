@@ -1,8 +1,9 @@
 class GamesController < ApplicationController
 
-  # def index
-  #   @game = GameForm.new
-  # end
+  def index
+     @games = Game.all
+  end
+  
   def show
     @game = Game.find_by(id: params[:id])
   end
