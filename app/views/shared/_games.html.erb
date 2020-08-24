@@ -1,12 +1,12 @@
-<%#= link_to  do %>
-<div class='game-images'>
-  <span class='game-stage'>
-  <%binding.pry%>
-    <%#= image_tag games.stages[0].images, class: "games-img"%>
+<%= link_to game_path(games) do %>
+<div class="game-content">
+  <div class='game-images'>
+    <%= image_tag games.stages[0].image.variant(resize: '200x200'), class: "stage-img" %>
+  </div>
+  <div class='game-info'>
+    <h3 class='game-name'>
+      <%= games.name if games %>
+    </h3>
+  </div>
 </div>
-<div class='game-info'>
-  <h3 class='game-name'>
-    <%= games.name if games %>
-  </h3>
-</div>
-<%# end %>
+<% end %>
