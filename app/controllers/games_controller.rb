@@ -1,8 +1,9 @@
 class GamesController < ApplicationController
 
-  # def index
-  #   @game = GameForm.new
-  # end
+  def index
+    @games = Game.all
+  end
+
   def show
     @game = Game.find_by(id: params[:id])
   end
@@ -18,6 +19,6 @@ class GamesController < ApplicationController
   end
 
   def game_params
-    params.permit(:stage, :player, :name, :text)
+    params.permit(:stage_img, :player_img, :name, :text).merge(user_id: current_user.id)
   end
 end

@@ -2,9 +2,13 @@
 <div class='main'>
   <div class='introduce'>
   </div>
+
+  <%# games一覧 %>
   <div class='game-contents'>
-    <%# <%= render partial: 'game', collection: @games %>
+    <%= render partial: 'shared/games', collection: @games %>
   </div>
+  <%# games一覧 %>
+
 </div>
 
 <%# games#new ボタン %>
@@ -32,7 +36,7 @@
             <p>
               クリックしてファイルをアップロード
             </p>
-            <%= f.file_field :stage %>
+            <%= f.file_field :stage_img %>
           </div>
         </li>
         <li>
@@ -43,7 +47,7 @@
             <p>
               クリックしてファイルをアップロード
             </p>
-            <%= f.file_field :player %>
+            <%= f.file_field :player_img %>
           </div>
         </li>
         <li>
