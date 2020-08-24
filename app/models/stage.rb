@@ -1,5 +1,5 @@
 class Stage < ApplicationRecord
-  has_many_attached :images
+  has_one_attached :image
 
   belongs_to :game
   has_many :lines
