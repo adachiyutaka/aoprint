@@ -49,6 +49,8 @@
             </p>
             <%= f.file_field :player_img %>
           </div>
+          <div id='imageContainer'>
+          </div>
         </li>
         <li>
           <div class='form-title'>
@@ -65,6 +67,8 @@
         <li>
           <%= f.submit '遊ぶ' ,class:"sell-btn" %>
         </li>
+        <%# png画像変換用のcanvas %>
+        <canvas id='canvas' class='hidden'></canvas>
       <% end %>
       <%# Game#newのフォーム %>
 
