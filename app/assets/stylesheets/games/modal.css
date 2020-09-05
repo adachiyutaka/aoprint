@@ -14,7 +14,7 @@
   position: fixed;
   left: 15vw;
   top: 15vh;
-  padding: 50px;
+  padding: 20px;
   background-color: white;
 }
 
@@ -36,8 +36,6 @@
   background-color: #cc5555;
 }
 
-
-
 /* inside-modal */
 
 .form-list{
@@ -46,4 +44,18 @@
 
 .form-list li{
   margin-top: 30px;
+}
+
+.hidden{
+  display: none;
+}
+
+img{
+  height: 100px;
+  width: 100px;
+}
+
+#imageContainer{
+  height: 100px;
+  width: 400px;
 }
