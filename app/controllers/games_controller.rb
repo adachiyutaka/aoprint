@@ -2,6 +2,7 @@ class GamesController < ApplicationController
 
   def index
     @games = Game.all
+    @game = Game.new
   end
 
   def show
@@ -16,6 +17,10 @@ class GamesController < ApplicationController
     else
       render "new"
     end
+  end
+
+  def image
+    render json: { url: "test" }
   end
 
   def game_params

@@ -2,6 +2,9 @@
 <div class="game-content">
   <div class='game-images'>
     <%= image_tag games.stages[0].image.variant(resize: '200x200'), class: "stage-img" %>
+    <% if games.game_objects[0].image %>
+      <%= image_tag games.game_objects[0].image.variant(resize: '200x200'), class: "player-img" %>
+    <% end %>
   </div>
   <div class='game-info'>
     <h3 class='game-name'>

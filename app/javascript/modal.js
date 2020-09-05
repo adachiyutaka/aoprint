@@ -5,7 +5,6 @@ const modal = () => {
 
   
   button.addEventListener('click', () => {
-    console.log('create-btn');
     modalBackground.style.display = 'block';
   });
   
