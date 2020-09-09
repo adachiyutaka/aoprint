@@ -7,6 +7,19 @@
 
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+
+    <%# unity表示関連 %>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="shortcut icon" href="../assets/TemplateData/favicon.ico">
+    <link rel="stylesheet" href="../assets/TemplateData/style.css">
+    <script src="../assets/TemplateData/UnityProgress.js"></script>
+    <script src="../assets/Build/UnityLoader.js"></script>
+    <script>
+      var unityInstance = UnityLoader.instantiate("unityContainer", "../assets/Build/JStest01.json", {onProgress: UnityProgress});
+    </script>
+    <%# unity表示関連 %>
+
   </head>
 
   <body>

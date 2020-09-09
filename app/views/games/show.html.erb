@@ -1,16 +1,26 @@
 <%= render 'shared/header' %>
-<div class='main'>
-  <div class='game'>
-    <div class='name'>
-      <%= @game.name %>
-      <%= @game.user.name %>
+    <div class="webgl-content">
+      <div id="unityContainer"></div>
+      <div class="footer">
+        <div class="fullscreen" onclick="unityInstance.SetFullscreen(1)"></div>
+      </div>
     </div>
-    <div class='text'>
-      <%= @game.text %>
-      <%= image_tag @game.stages[0].image %>
+    <div class='main'>
+      <div class='game'>
+        <div class='name'>
+          <%= @game.name %>
+          <%= @game.user.name %>
+        </div>
+        <div class='text' id='text'>
+          <%= @game.text %>
+        </div>
+        <div>
+          <%= image_tag @game.stages[0].image, id: 'stage' %>
+          <%= image_tag @game.game_objects[0].image, id: 'player' %>
+        <div>
+        </div>
+      </div>
+      <div class='game-contents'>
+        <%# <%= render partial: 'game', collection: @games %>
+      </div>
     </div>
-  </div>
-  <div class='game-contents'>
-    <%# <%= render partial: 'game', collection: @games %>
-  </div>
-</div>
