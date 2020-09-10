@@ -24,7 +24,7 @@ Twitter: @rich_clark
 
 html, body, div, span, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-abbr, address, cite, code,
+a, abbr, address, cite, code,
 del, dfn, em, img, ins, kbd, q, samp,
 small, strong, sub, sup, var,
 b, i,
@@ -45,6 +45,7 @@ time, mark, audio, video {
 
 body {
   line-height:1;
+  background-color: #f7f7f7;
 }
 
 article,aside,details,figcaption,figure,
@@ -72,6 +73,28 @@ a {
   font-size:100%;
   vertical-align:baseline;
   background:transparent;
+}
+
+a:link {
+  color: #000;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #000;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #000;
+  text-decoration: none;
+}
+
+a img {
+  border-width: 0px;
+  border-style: none;
+  border-color: #fff;
+  background: transparent;
 }
 
 /* change colours to suit your needs */
