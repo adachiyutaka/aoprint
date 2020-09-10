@@ -1,14 +1,16 @@
 <%= render 'shared/header' %>
 <div class='main'>
-  <div class='introduce'>
-  </div>
+  <div class='main-container'>
+    <div class='introduce'>
+    </div>
 
-  <%# games一覧 %>
-  <div class='game-contents'>
-    <%= render partial: 'shared/games', collection: @games %>
-  </div>
-  <%# games一覧 %>
+    <%# games一覧 %>
+    <div class='game-contents'>
+      <%= render partial: 'shared/games', collection: @games %>
+    </div>
+    <%# games一覧 %>
 
+  </div>
 </div>
 
 <%# games#new ボタン %>
