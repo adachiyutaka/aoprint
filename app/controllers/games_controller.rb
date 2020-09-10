@@ -20,7 +20,8 @@ class GamesController < ApplicationController
   end
 
   def image
-    render json: { url: "test" }
+    image = Game.find_by(id: params[:id]).game_objects[0].image
+    send_data image.download, type: image.content_type, disposition: 'inline', stats: :ok
   end
 
   def game_params
