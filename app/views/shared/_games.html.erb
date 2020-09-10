@@ -1,5 +1,5 @@
 <div class='game-content'>
-  <%= link_to game_path(games) do %>
+  <%= link_to game_path(games, anchor: 'main') do %>
     <div class='game-container'>
       <div class='game-images'>
         <%= image_tag games.stages[0].image.variant(resize: '200x200'), class: "stage-img" %>
