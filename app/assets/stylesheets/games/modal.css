@@ -22,7 +22,7 @@
 
 .modal-content{
   height: 100%;
-  padding: 15px 15px 0px 15px;
+  padding: 25px 15px 0px 15px;
   overflow: auto; 
 }
 
@@ -55,7 +55,6 @@
   height: 190px;
   width: 600px;
   padding-top: 40px;
-  margin-bottom: 10px;
   background-color: #1074c5;
   line-height: 70px;
   text-align: center;
@@ -96,6 +95,10 @@
   color: white;
 }
 
+.submit-btn:hover {
+  background-color:#418dca;
+}
+
 .form-list{
   display: flex;
   flex-direction: column;
@@ -105,12 +108,19 @@
 img{
   height: 100px;
   width: 100px;
+  margin-bottom: 10px;
   position: relative;
 }
 
-#imageContainer{
-  height: 100px;
-  width: 400px;
+.image-container{
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  height: 190px;
+  width: 600px;
+  margin-bottom: 10px;
+  background-color: #f7f7f7;
+  overflow: auto;
 }
 
 .selected{

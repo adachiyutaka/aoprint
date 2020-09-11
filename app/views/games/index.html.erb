@@ -30,7 +30,7 @@
 
       <%#= render 'shared/error_messages', model: @item %>
       <div class='form-list'>
-        <div class='stage-image-container' id='stageImageContainer'>
+        <div class='image-container' id='stageImageContainer'>
           <label class='label' id='stage_label'>
             <p class='label-plus'>+</p>
             <p class='label-text' id='stage-click_or_dd'>
@@ -42,7 +42,7 @@
             <%= f.file_field :stage_input, class: 'hidden'%>
           </label>
         </div>
-        <div id='playerImageContainer' id='playerImageContainer'>
+        <div class='image-container' id='playerImageContainer'>
           <label class='label' id='player_label'>
             <p class='label-plus'>+</p>
             <p class='label-text' id='player-click_or_dd'>

@@ -6,11 +6,12 @@ const sendImage = () => {
   const stageClickOrDD = document.getElementById('click_or_dd');
   const stagePleaseDrop = document.getElementById('please_drop');
   const playerForm = document.getElementById('player_input');
+  const playerLabel = document.getElementById('player_label');
 
   stageForm.addEventListener('change', (e) => {
     // ユーザーがセットしたファイルから画像ファイルを読み取り
     const file = e.target.files[0];
-    stageLabel.classList.add('hidden')
+    stageLabel.classList.add('hidden');
     splitImage(file, 'stage')
   });
 
@@ -37,7 +38,7 @@ const sendImage = () => {
       e.preventDefault();
       const file = e.dataTransfer.files[0];
       stagePleaseDrop.innerText = file.name;
-      stageLabel.classList.add('hidden')
+      stageLabel.classList.add('hidden');
       splitImage(file, 'stage')
   });
 
@@ -45,6 +46,7 @@ const sendImage = () => {
   playerForm.addEventListener('change', (e) => {
     // ユーザーがセットしたファイルから画像ファイルを読み取り
     const file = e.target.files[0];
+    playerLabel.classList.add('hidden');
     splitImage(file, 'player')
   });
 };
