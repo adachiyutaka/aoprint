@@ -26,58 +26,50 @@
     <div class='modal-content'>
 
       <%# Game#newのフォーム %>
-      <%= form_with id: 'game_form', url: games_path, local: true do |f| %>
+      <%= form_with id: 'game_form', url: games_path, class: 'game-form', local: true do |f| %>
 
       <%#= render 'shared/error_messages', model: @item %>
-      <ul class='form-list'>
-        <li>
-          <div class='form-title'>
-            ステージ
-          </div>
-          <div class='click-upload'>
-            <p>
-              クリックしてファイルをアップロード
+      <div class='form-list'>
+        <div class='stage-image-container' id='stageImageContainer'>
+          <label class='label' id='stage_label'>
+            <p class='label-plus'>+</p>
+            <p class='label-text' id='stage-click_or_dd'>
+            クリックかドラッグ＆ドロップでステージ用の画像ファイルをアップロード
             </p>
-            <%= f.file_field :stage_input %>
-          </div>
-          <div id='stageImageContainer'>
-          </div>
-        </li>
-        <li>
-          <div class='form-title'>
-            プレイヤー
-          </div>
-          <div class='click-upload'>
-            <p>
-              クリックしてファイルをアップロード
+            <p class='label-text hidden' id='stage-please_drop'>
+            画像ファイルをドロップしてください
             </p>
-            <%= f.file_field :player_input %>
-          </div>
-          <div id='playerImageContainer'>
-          </div>
-        </li>
-        <li>
-          <div class='form-title'>
-            タイトル
-          </div>
+            <%= f.file_field :stage_input, class: 'hidden'%>
+          </label>
+        </div>
+        <div id='playerImageContainer' id='playerImageContainer'>
+          <label class='label' id='player_label'>
+            <p class='label-plus'>+</p>
+            <p class='label-text' id='player-click_or_dd'>
+            クリックかドラッグ＆ドロップでプレイヤー用の画像ファイルをアップロード
+            </p>
+            <p class='label-text hidden' id='player-please_drop'>
+            画像ファイルをドロップしてください
+            </p>
+            <%= f.file_field :player_input, class: 'hidden'%>
+          </label>
+        </div>
+        <div id='textContainer'>
           <%= f.text_area :name, class:'name', placeholder:'ゲームのタイトル（40文字まで)', maxlength:'40' %>
-        </li>
-        <li>
-          <div class='form-title'>
-            説明文
-          </div>
-            <%= f.text_area :text, class:'text', placeholder:'ゲームの説明' ,rows:'3' ,maxlength:'1000' %>
-        </li>
-        <li>
-          <%= f.submit '遊ぶ' ,class:"sell-btn" %>
-        </li>
+          <%= f.text_area :text, class:'text', placeholder:'ゲームの説明' ,rows:'3' ,maxlength:'1000' %>
+        </div>
         <%# png画像変換用のcanvas %>
-        <canvas id='canvas' class='hidden'></canvas>
+        <div class='submit-line'>
+          <%= f.submit 'これで遊ぶ' ,class:"submit-btn" %>
+        </div>
+      </div>
       <% end %>
       <%# Game#newのフォーム %>
 
-      <div class='exit-btn' id='exit-btn'>x</div>
+      <div class='exit-btn' id='exit-btn'>×</div>
 
     </div>
   </div>
 </div>
+<%# png画像変換用のcanvas %>
+<canvas id='canvas' class='hidden'></canvas>

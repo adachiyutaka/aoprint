@@ -1,8 +1,9 @@
 .create-btn {
+  height: 45px;
   width: 120px;
-  background: #3ccace;
+  background: #1074c5;
   text-align: center;
-  border-radius: 4%;
+  border-radius: 3%;
   bottom: 32px;
   right: 32px;
   position: fixed;
@@ -12,7 +13,7 @@
 .create-btn-text {
   color: #fff;
   display: block;
-  font-size: 18px;
+  font-size: 14px;
   text-decoration: none;
   margin-bottom: 5px;
 }
