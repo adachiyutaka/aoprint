@@ -1,7 +1,7 @@
 class GamesController < ApplicationController
 
   def index
-    @games = Game.all
+    @games = Game.all.order(created_at: 'DESC')
     @game = Game.new
   end
 
@@ -11,6 +11,7 @@ class GamesController < ApplicationController
   end
 
   def create
+    binding.pry
     @game = GameForm.new(game_params)
     if @game.valid?
       @game.save

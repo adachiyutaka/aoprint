@@ -7,7 +7,9 @@ class GameForm
 
   def save
     @game = Game.create(name: name, text: text, user_id: user_id)
-    stage = Stage.create(image: stage_img, game_id: @game.id)
+    stage = Stage.new(game_id: @game.id)
+    stage.save
+    stage.parse_base64(stage_img)
     Line.create(s_x: 0, s_y: 0, e_x: 0, e_y: 0, stage_id: stage.id)
     gameObject = GameObject.new(game_id: @game.id)
     gameObject.save

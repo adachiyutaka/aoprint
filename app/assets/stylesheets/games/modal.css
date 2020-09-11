@@ -9,13 +9,12 @@
 }
 
 .modal{
-  width: 80vw;
+  width: 800px;
   height: 80vh;
-  position: fixed;
+  margin: 10vh auto;
   border-radius: 3px;
-  left: 10vw;
-  top: 10vh;
   background-color: white;
+  position: relative;
 }
 
 /* inside-modal */
