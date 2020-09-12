@@ -5,7 +5,6 @@ class Stage < ApplicationRecord
   has_many :lines
 
   def parse_base64(image)
-    binding.pry
     if image.present?
       content_type = 'png'
       contents = image.sub %r/data:image\/png;base64/, ''

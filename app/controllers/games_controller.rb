@@ -1,3 +1,6 @@
+require 'base64'
+require 'json'
+
 class GamesController < ApplicationController
 
   def index
@@ -11,7 +14,6 @@ class GamesController < ApplicationController
   end
 
   def create
-    binding.pry
     @game = GameForm.new(game_params)
     if @game.valid?
       @game.save
@@ -22,11 +24,17 @@ class GamesController < ApplicationController
   end
 
   def image
-    image = Game.find_by(id: params[:id]).game_objects[0].image
-    send_data image.download, type: image.content_type, disposition: 'inline', stats: :ok
+    stageImg = Game.find_by(id: params[:id]).game_objects[0].image
+    playerImg = Game.find_by(id: params[:id]).game_objects[0].image
+    image = { stage: imageToBase64(stageImg), player: imageToBase64(playerImg) }
+    render json: image
   end
 
   def game_params
     params.permit(:stage_img, :player_img, :name, :text).merge(user_id: current_user.id)
+  end
+
+  def imageToBase64(image)
+    return Base64.encode64(image.download)
   end
 end
