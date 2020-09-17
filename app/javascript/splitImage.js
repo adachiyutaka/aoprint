@@ -1,17 +1,52 @@
 const sendImage = () => {
 
-  // リスナーをセットするプレイヤーフォーム要素を取得
+  // リスナーをセットするステージフォーム要素を取得
   const stageForm = document.getElementById('stage_input');
+  const stageLabel = document.getElementById('stage_label');
+  const stageClickOrDD = document.getElementById('click_or_dd');
+  const stagePleaseDrop = document.getElementById('please_drop');
+  const playerForm = document.getElementById('player_input');
+  const playerLabel = document.getElementById('player_label');
+
   stageForm.addEventListener('change', (e) => {
     // ユーザーがセットしたファイルから画像ファイルを読み取り
     const file = e.target.files[0];
+    stageLabel.classList.add('hidden');
     splitImage(file, 'stage')
   });
 
-  const playerForm = document.getElementById('player_input');
+  // ドロップ可能エリアに入った時
+  stageLabel.addEventListener('dragenter', () => {
+    stageLabel.style.backgroundColor = "#418dca"
+    stageClickOrDD.classList.add('hidden');
+    stagePleaseDrop.classList.remove('hidden');
+  });
+
+  // ドロップ可能エリアを出た時
+  stageLabel.addEventListener('dragleave', () => {
+    stageLabel.style.backgroundColor = "#1074c5"
+    stageClickOrDD.classList.remove('hidden');
+    stagePleaseDrop.classList.add('hidden');
+  });
+
+  stageLabel.addEventListener('dragover', (e) => {
+    e.preventDefault();
+  });
+
+  // ファイルをドロップした時
+  stageLabel.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      stagePleaseDrop.innerText = file.name;
+      stageLabel.classList.add('hidden');
+      splitImage(file, 'stage')
+  });
+
+  // プレイヤーフォームにリスナー要素をセット
   playerForm.addEventListener('change', (e) => {
     // ユーザーがセットしたファイルから画像ファイルを読み取り
     const file = e.target.files[0];
+    playerLabel.classList.add('hidden');
     splitImage(file, 'player')
   });
 };
@@ -58,9 +93,15 @@ const splitImage = (file, type) => {
       jsons.forEach( (json) => {
         var img = document.createElement("img");
         img.src = `data:image/png;base64,${json['result']}`;
-        img.classList.add('split-player');
+        img.classList.add('split-img');
+        img.classList.add(`${type}`);
         imageContainer.appendChild(img);
+        img.addEventListener('click', (e) => {
+          resetSelect(type);
+          addSelect(img);
+        });
       });
+      addSelect(document.getElementsByClassName(`split-img ${type}`)[0]);
 
       if (XHR.status != 200) {
         // レスポンスの HTTP ステータスを解析し、該当するエラーメッセージをアラートで表示するようにしている
@@ -75,5 +116,16 @@ const splitImage = (file, type) => {
     };
   };
 };
+
+const addSelect = (img) => {
+  img.classList.add('selected');
+}
+
+const resetSelect = (type) => {
+  splitImages = Array.from(document.getElementsByClassName(`split-img ${type} selected`));
+  splitImages.forEach( (splitImage) => {
+    splitImage.classList.remove('selected');
+  });
+}
 
 window.addEventListener('load', sendImage);

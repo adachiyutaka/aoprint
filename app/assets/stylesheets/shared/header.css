@@ -4,16 +4,16 @@
 
 .header-content{
   display: flex;
-  justify-content: space-between
+  justify-content: space-between;
+  background-color: #fff;
 }
 
 .left{
   display: flex;
-
 }
 
 .logo{
-  width: 150px;
+  width: 200px;
   height: 60px;
   padding-top: 12px;
   color: white;
@@ -21,21 +21,21 @@
   font-family: sans-serif;
   font-weight: 900;
   text-align: center;
-  background-color: #3050bb;
+  background-color: #1074c5;
 }
 
 .logo-slash{
+  color: white;
   font-weight: 100;
 }
 
 .search-content{
   width: 300px;
   height: 60px;
-  background-color: #dddddd;
 }
 
 .right{
-  background-color: #f7f7f7;
+  background-color: #fff;
 }
 .right-list{
   list-style: none;
