@@ -24,7 +24,7 @@ class GamesController < ApplicationController
   end
 
   def image
-    stageImg = Game.find_by(id: params[:id]).game_objects[0].image
+    stageImg = Game.find_by(id: params[:id]).stages[0].image
     playerImg = Game.find_by(id: params[:id]).game_objects[0].image
     image = { stage: imageToBase64(stageImg), player: imageToBase64(playerImg) }
     render json: image
