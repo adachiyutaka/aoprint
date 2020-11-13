@@ -97,6 +97,7 @@ const splitImage = (file, type) => {
         img.classList.add(`${type}`);
         imageContainer.appendChild(img);
         img.addEventListener('click', (e) => {
+          // 該当するtype(player, stageなど)の"selected"クラスを全てはずし、選択されたimgタグに"selected"classを付ける
           resetSelect(type);
           addSelect(img);
         });
