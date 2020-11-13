@@ -50,7 +50,7 @@ class GamesController < ApplicationController
   end
 
   def game_params
-    params.permit(:stage_img, :player_img, :name, :text).merge(user_id: current_user.id)
+    params.permit(:stage_img, :player_img, :object_img, :name, :text).merge(user_id: current_user.id)
   end
 
   def imageToBase64(image)

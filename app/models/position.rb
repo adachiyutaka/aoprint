@@ -6,6 +6,7 @@ class Position < ApplicationRecord
     validates :width
     validates :height
   end
-
-  belongs_to :game_object
+  
+  has_one :object_position
+  belongs_to :stage
 end

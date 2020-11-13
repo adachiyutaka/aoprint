@@ -55,6 +55,18 @@
             <%= f.file_field :player_input, class: 'hidden'%>
           </label>
         </div>
+        <div class='image-container' id='objectImageContainer'>
+          <label class='label' id='object_label'>
+            <p class='label-plus'>+</p>
+            <p class='label-text' id='object-click_or_dd'>
+            クリックかドラッグ＆ドロップでオブジェクト用の画像ファイルをアップロード
+            </p>
+            <p class='label-text hidden' id='object-please_drop'>
+            画像ファイルをドロップしてください
+            </p>
+            <%= f.file_field :object_input, class: 'hidden'%>
+          </label>
+        </div>
         <div id='textContainer'>
           <%= f.text_area :name, class:'name', placeholder:'ゲームのタイトル（40文字まで)', maxlength:'40' %>
           <%= f.text_area :text, class:'text', placeholder:'ゲームの説明' ,rows:'3' ,maxlength:'1000' %>

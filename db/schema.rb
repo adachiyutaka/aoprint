@@ -108,9 +108,7 @@ ActiveRecord::Schema.define(version: 2020_11_13_030741) do
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "game_objects", "games"
   add_foreign_key "games", "users"
   add_foreign_key "object_positions", "game_objects"
   add_foreign_key "object_positions", "positions"
-  add_foreign_key "stages", "games"
 end

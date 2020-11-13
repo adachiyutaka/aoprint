@@ -7,7 +7,13 @@ const sendImage = () => {
   const stagePleaseDrop = document.getElementById('please_drop');
   const playerForm = document.getElementById('player_input');
   const playerLabel = document.getElementById('player_label');
+  const objectForm = document.getElementById('object_input');
+  const objectLabel = document.getElementById('object_label');
 
+  console.log(stageClickOrDD);
+  console.log(stagePleaseDrop);
+
+  // ステージフォームの処理
   stageForm.addEventListener('change', (e) => {
     // ユーザーがセットしたファイルから画像ファイルを読み取り
     const file = e.target.files[0];
@@ -18,6 +24,7 @@ const sendImage = () => {
   // ドロップ可能エリアに入った時
   stageLabel.addEventListener('dragenter', () => {
     stageLabel.style.backgroundColor = "#418dca"
+    console.log(stageClickOrDD.classList)
     stageClickOrDD.classList.add('hidden');
     stagePleaseDrop.classList.remove('hidden');
   });
@@ -42,12 +49,20 @@ const sendImage = () => {
       splitImage(file, 'stage')
   });
 
-  // プレイヤーフォームにリスナー要素をセット
+  // プレイヤーフォームの処理
   playerForm.addEventListener('change', (e) => {
     // ユーザーがセットしたファイルから画像ファイルを読み取り
     const file = e.target.files[0];
     playerLabel.classList.add('hidden');
     splitImage(file, 'player')
+  });
+
+  // オブジェクトフォームの処理
+  objectForm.addEventListener('change', (e) => {
+    // ユーザーがセットしたファイルから画像ファイルを読み取り
+    const file = e.target.files[0];
+    objectLabel.classList.add('hidden');
+    splitImage(file, 'object')
   });
 };
 
@@ -74,8 +89,8 @@ const splitImage = (file, type) => {
     if (type == 'stage') {
       XHR.open("POST", `http://127.0.0.1:5000/stage`, true);
     }
-    else if (type == 'player') {
-      XHR.open("POST", `http://127.0.0.1:5000/player`, true);
+    else if (type == 'player' || type == 'object') {
+      XHR.open("POST", `http://127.0.0.1:5000/object`, true);
     }
     XHR.setRequestHeader('Content-Type', 'application/json');
     var data = {};
@@ -97,7 +112,7 @@ const splitImage = (file, type) => {
         img.classList.add(`${type}`);
         imageContainer.appendChild(img);
         img.addEventListener('click', (e) => {
-          // 該当するtype(player, stageなど)の"selected"クラスを全てはずし、選択されたimgタグに"selected"classを付ける
+          // 該当するtypeの"selected"クラスを全てはずし、選択されたimgタグに"selected"classを付ける
           resetSelect(type);
           addSelect(img);
         });

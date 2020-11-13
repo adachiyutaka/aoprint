@@ -1,8 +1,8 @@
-class GameObject < ApplicationRecord
+class Stage < ApplicationRecord
   has_one_attached :image
 
   belongs_to :game
-  has_one :object_position
+  has_many :positions
 
   # 画像をbase64形式のファイルに変換
   def parse_base64(image)

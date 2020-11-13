@@ -6,8 +6,8 @@ class CreateGameObjects < ActiveRecord::Migration[6.0]
       t.string :text,           default: ""
       t.boolean :player,        default: false
       t.boolean :object,        default: false
-      t.references :game,       foreign_key: true
-
+      t.references :game
+      
       t.timestamps
     end
   end
