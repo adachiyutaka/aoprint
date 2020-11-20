@@ -88,55 +88,69 @@ const splitImage = (file, type) => {
     const png = imgURL.match(/,(.*)$/)[0];
 
     // 画像のテキストを読み取り
-    const readText = new ReadText();
-    readText.readText(imgURL);
+    // const readText = new ReadText();
+    // readText.readText(imgURL);
+    console.log("読み取り開始");
+    const XHR = new XMLHttpRequest();
+    // openでリクエストを初期化する
+    XHR.open("GET", `/games/read_text`, true);
+    // レスポンスのタイプを指定する
+    XHR.responseType = "json";
+    // sendでリクエストを送信する
+    XHR.send();
+
+    XHR.onload = () => {
+      const item = XHR.response;
+      console.log(item);
+    }
+
 
     // Ajaxに必要なオブジェクトを生成し画像データを送信
-    const XHR = new XMLHttpRequest();
-    if (type == 'stage') {
-      XHR.open("POST", `http://127.0.0.1:5000/stage`, true);
-    }
-    else if (type == 'player' || type == 'object') {
-      XHR.open("POST", `http://127.0.0.1:5000/object`, true);
-    }
-    XHR.setRequestHeader('Content-Type', 'application/json');
-    var data = {};
-    data.image = png;
-    var json = JSON.stringify(data);
-    XHR.send(json);
+    // const XHR = new XMLHttpRequest();
+    // if (type == 'stage') {
+    //   XHR.open("POST", `http://127.0.0.1:5000/stage`, true);
+    // }
+    // else if (type == 'player' || type == 'object') {
+    //   XHR.open("POST", `http://127.0.0.1:5000/object`, true);
+    // }
+    // XHR.setRequestHeader('Content-Type', 'application/json');
+    // var data = {};
+    // data.image = png;
+    // var json = JSON.stringify(data);
+    // XHR.send(json);
 
     // レスポンスを受け取った時の処理を記述する
-    XHR.onload = () => {
-      // 受け取ったデータをJSON形式にパースする
-      const jsons = JSON.parse(XHR.response);
-      // 画像を格納するdivタグ要素を取得
-      const imageContainer = document.getElementById(`${type}ImageContainer`);
-      // 各データに対応するimgタグを生成する
-      jsons.forEach( (json) => {
-        var img = document.createElement("img");
-        img.src = `data:image/png;base64,${json['result']}`;
-        img.classList.add('split-img');
-        img.classList.add(`${type}`);
-        imageContainer.appendChild(img);
-        img.addEventListener('click', (e) => {
-          // 該当するtypeの"selected"クラスを全てはずし、選択されたimgタグに"selected"classを付ける
-          resetSelect(type);
-          addSelect(img);
-        });
-      });
-      addSelect(document.getElementsByClassName(`split-img ${type}`)[0]);
+    // XHR.onload = () => {
+    //   // 受け取ったデータをJSON形式にパースする
+    //   const jsons = JSON.parse(XHR.response);
+    //   // 画像を格納するdivタグ要素を取得
+    //   const imageContainer = document.getElementById(`${type}ImageContainer`);
+    //   // 各データに対応するimgタグを生成する
+    //   jsons.forEach( (json) => {
+    //     var img = document.createElement("img");
+    //     img.src = `data:image/png;base64,${json['result']}`;
+    //     img.classList.add('split-img');
+    //     img.classList.add(`${type}`);
+    //     imageContainer.appendChild(img);
+    //     img.addEventListener('click', (e) => {
+    //       // 該当するtypeの"selected"クラスを全てはずし、選択されたimgタグに"selected"classを付ける
+    //       resetSelect(type);
+    //       addSelect(img);
+    //     });
+    //   });
+    //   addSelect(document.getElementsByClassName(`split-img ${type}`)[0]);
 
-      if (XHR.status != 200) {
-        // レスポンスの HTTP ステータスを解析し、該当するエラーメッセージをアラートで表示するようにしている
-        alert(`Error ${XHR.status}: ${XHR.statusText}`);
-      } else {
-        return null;
-      }
-    };
-    リクエストが送信できなかった時
-    XHR.onerror = () => {
-      alert('Request failed');
-    };
+    //   if (XHR.status != 200) {
+    //     // レスポンスの HTTP ステータスを解析し、該当するエラーメッセージをアラートで表示するようにしている
+    //     alert(`Error ${XHR.status}: ${XHR.statusText}`);
+    //   } else {
+    //     return null;
+    //   }
+    // };
+    // リクエストが送信できなかった時
+    // XHR.onerror = () => {
+    //   alert('Request failed');
+    // };
   };
 };
 
