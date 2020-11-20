@@ -1,3 +1,5 @@
+import ReadText from "./readText.js"
+
 const sendImage = () => {
 
   // リスナーをセットするステージフォーム要素を取得
@@ -82,7 +84,12 @@ const splitImage = (file, type) => {
     canvas.setAttribute('width', dw);
     canvas.setAttribute('height', dh);
     context.drawImage(img, dx, dy, dw, dh);
-    const png = canvas.toDataURL('image/png').match(/,(.*)$/)[0];
+    var imgURL = canvas.toDataURL('image/png');
+    const png = imgURL.match(/,(.*)$/)[0];
+
+    // 画像のテキストを読み取り
+    const readText = new ReadText();
+    readText.readText(imgURL);
 
     // Ajaxに必要なオブジェクトを生成し画像データを送信
     const XHR = new XMLHttpRequest();
@@ -95,7 +102,7 @@ const splitImage = (file, type) => {
     XHR.setRequestHeader('Content-Type', 'application/json');
     var data = {};
     data.image = png;
-    json = JSON.stringify(data);
+    var json = JSON.stringify(data);
     XHR.send(json);
 
     // レスポンスを受け取った時の処理を記述する
@@ -138,7 +145,7 @@ const addSelect = (img) => {
 }
 
 const resetSelect = (type) => {
-  splitImages = Array.from(document.getElementsByClassName(`split-img ${type} selected`));
+  var splitImages = Array.from(document.getElementsByClassName(`split-img ${type} selected`));
   splitImages.forEach( (splitImage) => {
     splitImage.classList.remove('selected');
   });

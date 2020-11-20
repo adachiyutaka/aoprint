@@ -6,5 +6,8 @@ Rails.application.routes.draw do
     member do
       get 'image'
     end
+    collection do
+      get 'read_text'
+    end
   end
 end

@@ -8,6 +8,8 @@ require("turbolinks").start()
 require("@rails/activestorage").start()
 require("channels")
 require("../modal")
+// require("../readText")
+require("../readTextTest")
 require("../splitImage")
 require("../create")
 
