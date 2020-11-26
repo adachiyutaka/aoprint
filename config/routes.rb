@@ -7,7 +7,7 @@ Rails.application.routes.draw do
       get 'image'
     end
     collection do
-      get 'read_text'
+      post 'read_text'
     end
   end
 end

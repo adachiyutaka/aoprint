@@ -1,4 +1,4 @@
-import ReadText from "./readText.js"
+// import ReadText from "./readText.js"
 
 const sendImage = () => {
 
@@ -85,25 +85,49 @@ const splitImage = (file, type) => {
     canvas.setAttribute('height', dh);
     context.drawImage(img, dx, dy, dw, dh);
     var imgURL = canvas.toDataURL('image/png');
-    const png = imgURL.match(/,(.*)$/)[0];
+    const png = imgURL.match(/,(.*)$/)[0].slice(1);
 
     // 画像のテキストを読み取り
     // const readText = new ReadText();
     // readText.readText(imgURL);
     console.log("読み取り開始");
-    const XHR = new XMLHttpRequest();
-    // openでリクエストを初期化する
-    XHR.open("GET", `/games/read_text`, true);
-    // レスポンスのタイプを指定する
-    XHR.responseType = "json";
-    // sendでリクエストを送信する
-    XHR.send();
+    
+    Promise.resolve(png)
+    .then(sendAPI)
+    .then(res => {
+      console.log('SUCCESS!', res);
+      document.querySelector('pre').innerHTML = JSON.stringify(res, null, 2);
+    })
+    .catch(err => {
+      console.log('FAILED:(', err);
+      document.querySelector('pre').innerHTML = JSON.stringify(err, null, 2);
+    });
 
-    XHR.onload = () => {
-      const item = XHR.response;
-      console.log(item);
-    }
+    // ↓rubyと通信する場合の記述
 
+    // const token = document.getElementsByName('csrf-token')[0].content;
+    // const XHR = new XMLHttpRequest();
+    // // openでリクエストを初期化する
+    // XHR.open("POST", `/games/read_text`, true);
+    // // レスポンスのタイプを指定する
+
+    // XHR.responseType = "json";
+    // XHR.setRequestHeader('Content-Type', 'application/json');
+    // XHR.setRequestHeader("X-CSRF-Token", token);  // リクエストヘッダーを追加（セキュリティトークンの追加）
+
+    // // sendでリクエストを送信する
+    // var data = {};
+    // data.url = imgURL;
+    // var json = JSON.stringify(data);
+    // XHR.send(json);
+    // // XHR.send();
+
+    // XHR.onload = () => {
+    //   const item = XHR.response;
+    //   console.log(item);
+    // }
+
+    // ↑rubyと通信する場合の記述
 
     // Ajaxに必要なオブジェクトを生成し画像データを送信
     // const XHR = new XMLHttpRequest();
@@ -163,6 +187,28 @@ const resetSelect = (type) => {
   splitImages.forEach( (splitImage) => {
     splitImage.classList.remove('selected');
   });
+}
+
+const sendAPI = (base64string) => {
+  let body = {
+    requests: [
+      {image: {content: base64string}, features: [{type: 'DOCUMENT_TEXT_DETECTION'}], "imageContext": {"languageHints": ["jp-t-i0-handwrit"]}}
+    ]
+  };
+  const api_key = GOOGLE_API_KEY;
+  const url = `https://vision.googleapis.com/v1/images:annotate`;
+  const XHR = new XMLHttpRequest();
+  XHR.open('POST', `${url}?key=${api_key}`, true);
+  XHR.setRequestHeader('Content-Type', 'application/json');
+  const p = new Promise((resolve, reject) => {
+    XHR.onreadystatechange = () => {
+      if (XHR.readyState != XMLHttpRequest.DONE) return;
+      if (XHR.status >= 400) return reject({message: `Failed with ${XHR.status}:${XHR.statusText}`});
+      resolve(JSON.parse(XHR.responseText));
+    };
+  })
+  XHR.send(JSON.stringify(body));
+  return p;
 }
 
 window.addEventListener('load', sendImage);

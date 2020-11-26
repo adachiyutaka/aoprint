@@ -12,6 +12,7 @@
     <%# games一覧 %>
     <div id='read-btn'>テストボタン</div>
     <div id='result'><%= @result %></div>
+      <img style="max-width: 400px;"><input type="file" accept="image/*" />
   </div>
 </div>
 
@@ -72,6 +73,7 @@
           <%= f.text_area :name, class:'name', placeholder:'ゲームのタイトル（40文字まで)', maxlength:'40' %>
           <%= f.text_area :text, class:'text', placeholder:'ゲームの説明' ,rows:'3' ,maxlength:'1000' %>
         </div>
+        <pre></pre>
         <%# png画像変換用のcanvas %>
         <div class='submit-line'>
           <%= f.submit 'これで遊ぶ' ,class:"submit-btn" %>
