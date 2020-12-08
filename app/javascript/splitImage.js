@@ -70,6 +70,7 @@ const sendImage = () => {
 
 const splitImage = (file, type) => {
 // pngに変換するためにcanvasを準備
+  let id = 0;
   const canvas = document.getElementById('canvas');
   const context = canvas.getContext('2d');
   const img = new Image();
@@ -90,18 +91,18 @@ const splitImage = (file, type) => {
     // 画像のテキストを読み取り
     // const readText = new ReadText();
     // readText.readText(imgURL);
-    console.log("読み取り開始");
+    // console.log("読み取り開始");
     
-    Promise.resolve(png)
-    .then(sendAPI)
-    .then(res => {
-      console.log('SUCCESS!', res);
-      document.querySelector('pre').innerHTML = JSON.stringify(res, null, 2);
-    })
-    .catch(err => {
-      console.log('FAILED:(', err);
-      document.querySelector('pre').innerHTML = JSON.stringify(err, null, 2);
-    });
+    // Promise.resolve(png)
+    // .then(sendAPI)
+    // .then(res => {
+    //   console.log('SUCCESS!', res);
+    //   document.querySelector('pre').innerHTML = JSON.stringify(res, null, 2);
+    // })
+    // .catch(err => {
+    //   console.log('FAILED:(', err);
+    //   document.querySelector('pre').innerHTML = JSON.stringify(err, null, 2);
+    // });
 
     // ↓rubyと通信する場合の記述
 
@@ -130,51 +131,75 @@ const splitImage = (file, type) => {
     // ↑rubyと通信する場合の記述
 
     // Ajaxに必要なオブジェクトを生成し画像データを送信
-    // const XHR = new XMLHttpRequest();
-    // if (type == 'stage') {
-    //   XHR.open("POST", `http://127.0.0.1:5000/stage`, true);
-    // }
-    // else if (type == 'player' || type == 'object') {
-    //   XHR.open("POST", `http://127.0.0.1:5000/object`, true);
-    // }
-    // XHR.setRequestHeader('Content-Type', 'application/json');
-    // var data = {};
-    // data.image = png;
-    // var json = JSON.stringify(data);
-    // XHR.send(json);
+    const XHR = new XMLHttpRequest();
+    if (type == 'stage') {
+      XHR.open("POST", `http://127.0.0.1:5000/stage`, true);
+    }
+    else if (type == 'player' || type == 'object') {
+      XHR.open("POST", `http://127.0.0.1:5000/object`, true);
+    }
+    XHR.setRequestHeader('Content-Type', 'application/json');
+    var data = {};
+    data.image = png;
+    var json = JSON.stringify(data);
+    XHR.send(json);
 
     // レスポンスを受け取った時の処理を記述する
-    // XHR.onload = () => {
-    //   // 受け取ったデータをJSON形式にパースする
-    //   const jsons = JSON.parse(XHR.response);
-    //   // 画像を格納するdivタグ要素を取得
-    //   const imageContainer = document.getElementById(`${type}ImageContainer`);
-    //   // 各データに対応するimgタグを生成する
-    //   jsons.forEach( (json) => {
-    //     var img = document.createElement("img");
-    //     img.src = `data:image/png;base64,${json['result']}`;
-    //     img.classList.add('split-img');
-    //     img.classList.add(`${type}`);
-    //     imageContainer.appendChild(img);
-    //     img.addEventListener('click', (e) => {
-    //       // 該当するtypeの"selected"クラスを全てはずし、選択されたimgタグに"selected"classを付ける
-    //       resetSelect(type);
-    //       addSelect(img);
-    //     });
-    //   });
-    //   addSelect(document.getElementsByClassName(`split-img ${type}`)[0]);
+    XHR.onload = () => {
+      // 受け取ったデータをJSON形式にパースする
+      const jsons = JSON.parse(XHR.response);
+      // 画像を格納するdivタグ要素を取得
+      const stageImageList = document.getElementById(`stageImageList`);
+      const objectImageList = document.getElementById(`objectImageList`);
+      const playerImageList = document.getElementById(`playerImageList`);
+      // const enemyImageList = document.getElementById(`enemyImagList`);
 
-    //   if (XHR.status != 200) {
-    //     // レスポンスの HTTP ステータスを解析し、該当するエラーメッセージをアラートで表示するようにしている
-    //     alert(`Error ${XHR.status}: ${XHR.statusText}`);
-    //   } else {
-    //     return null;
-    //   }
-    // };
+      // 各データに対応するimgタグを生成する
+      jsons.forEach( (json) => {
+        let imgCard = `
+          <div class='img-card' id='${id}'>
+            <input type="radio" name="type" value="stage"> ステージ
+            <input type="radio" name="type" value="position"> 位置
+          </div>
+        `
+        let img = document.createElement("img");
+        img.src = `data:image/png;base64,${json['image']}`;
+        img.classList.add('split-img');
+        img.classList.add(`${json['type']}`);
+        switch (json['type']){
+          case 'stage':
+            stageImageList.insertAdjacentHTML("afterend", imgCard)
+            stageImageList.appendChild(img);
+            break;
+          case 'object':
+            objectImageList.insertAdjacentHTML("afterend", imgCard)
+            objectImageList.appendChild(img);
+            break;
+          case 'player':
+            playerImageList.appendChild(img);
+            break;
+        }
+        img.addEventListener('click', (e) => {
+          // 該当するtypeの"selected"クラスを全てはずし、選択されたimgタグに"selected"classを付ける
+          resetSelect(json['type']);
+          addSelect(img);
+        });
+        id += 1
+        console.log(`type: ${json['type']}, vertices: {x: ${json['vertices']['x']}, y: ${json['vertices']['y']}, w: ${json['vertices']['w']}, h: ${json['vertices']['h']}}`);
+      });
+      addSelect(document.getElementsByClassName(`split-img ${type}`)[0]);
+
+      if (XHR.status != 200) {
+        // レスポンスの HTTP ステータスを解析し、該当するエラーメッセージをアラートで表示するようにしている
+        alert(`Error ${XHR.status}: ${XHR.statusText}`);
+      } else {
+        return null;
+      }
+    };
     // リクエストが送信できなかった時
-    // XHR.onerror = () => {
-    //   alert('Request failed');
-    // };
+    XHR.onerror = () => {
+      alert('Request failed');
+    };
   };
 };
 
@@ -195,7 +220,7 @@ const sendAPI = (base64string) => {
       {image: {content: base64string}, features: [{type: 'DOCUMENT_TEXT_DETECTION'}], "imageContext": {"languageHints": ["jp-t-i0-handwrit"]}}
     ]
   };
-  const api_key = GOOGLE_API_KEY;
+  const api_key = `AIzaSyBjOlfBh0BJUTVG9dDoySZABiEjT6GJb74`;
   const url = `https://vision.googleapis.com/v1/images:annotate`;
   const XHR = new XMLHttpRequest();
   XHR.open('POST', `${url}?key=${api_key}`, true);

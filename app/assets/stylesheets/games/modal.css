@@ -122,6 +122,29 @@
   overflow: auto;
 }
 
+.stage-image-list{
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  flex-wrap: wrap;
+  width: 600px;
+  margin-bottom: 10px;
+  background-color: #f7f7f7;
+  overflow: auto;
+}
+
+.object-image-list{
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  flex-wrap: wrap;
+  width: 600px;
+  margin-bottom: 10px;
+  background-color: #f7f7f7;
+  overflow: auto;
+}
+
+
 .selected{
   border: 3px solid #1074c5;
 }
