@@ -156,8 +156,9 @@ const splitImage = (file, type) => {
 
       // 各データに対応するimgタグを生成する
       jsons.forEach( (json) => {
+        const type = json['type']
         let imgCard = `
-          <div class='img-card' id='${id}'>
+          <div class='img-card' id='imgCard${id}'>
             <input type="radio" name="type" value="stage"> ステージ
             <input type="radio" name="type" value="position"> 位置
           </div>
@@ -165,15 +166,15 @@ const splitImage = (file, type) => {
         let img = document.createElement("img");
         img.src = `data:image/png;base64,${json['image']}`;
         img.classList.add('split-img');
-        img.classList.add(`${json['type']}`);
-        switch (json['type']){
+        img.classList.add(type);
+        switch (type){
           case 'stage':
-            stageImageList.insertAdjacentHTML("afterend", imgCard)
             stageImageList.appendChild(img);
+            stageImageList.insertAdjacentHTML("beforeend", imgCard);
             break;
           case 'object':
-            objectImageList.insertAdjacentHTML("afterend", imgCard)
             objectImageList.appendChild(img);
+            objectImageList.insertAdjacentHTML("beforeend", imgCard);
             break;
           case 'player':
             playerImageList.appendChild(img);
@@ -181,8 +182,15 @@ const splitImage = (file, type) => {
         }
         img.addEventListener('click', (e) => {
           // 該当するtypeの"selected"クラスを全てはずし、選択されたimgタグに"selected"classを付ける
-          resetSelect(json['type']);
-          addSelect(img);
+          console.log("add listener")
+          if (type == 'stage') {
+            console.log("type stage")
+            // makeRadioButton(img);
+            makeRadioButton(img);
+          } else {
+            console.log("type else")
+            makeCheckBox(img);
+          }
         });
         id += 1
         console.log(`type: ${json['type']}, vertices: {x: ${json['vertices']['x']}, y: ${json['vertices']['y']}, w: ${json['vertices']['w']}, h: ${json['vertices']['h']}}`);
@@ -203,12 +211,30 @@ const splitImage = (file, type) => {
   };
 };
 
+const makeRadioButton = (img) => {
+  resetSelect(img);
+  addSelect(img);
+}
+
+const makeCheckBox = (img) => {
+  if (img.classList.contains('selected') == true) {
+    removeSelect(img);
+  } else {
+    addSelect(img);
+  }
+}
+
 const addSelect = (img) => {
   img.classList.add('selected');
 }
 
-const resetSelect = (type) => {
-  var splitImages = Array.from(document.getElementsByClassName(`split-img ${type} selected`));
+const removeSelect = (img) => {
+  img.classList.remove('selected');
+}
+
+const resetSelect = (img) => {
+  const type = img.classList[1];
+  let splitImages = Array.from(document.getElementsByClassName(`split-img ${type} selected`));
   splitImages.forEach( (splitImage) => {
     splitImage.classList.remove('selected');
   });
