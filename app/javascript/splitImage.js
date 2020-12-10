@@ -149,54 +149,50 @@ const splitImage = (file, type) => {
       // 受け取ったデータをJSON形式にパースする
       const jsons = JSON.parse(XHR.response);
       // 画像を格納するdivタグ要素を取得
-      const stageImageList = document.getElementById(`stageImageList`);
-      const objectImageList = document.getElementById(`objectImageList`);
-      const playerImageList = document.getElementById(`playerImageList`);
+      const objectList = document.getElementById(`objectList`);
       // const enemyImageList = document.getElementById(`enemyImagList`);
 
       // 各データに対応するimgタグを生成する
       jsons.forEach( (json) => {
         const type = json['type']
-        let imgCard = `
-          <div class='img-card' id='imgCard${id}'>
-            <input type="radio" name="type" value="stage"> ステージ
-            <input type="radio" name="type" value="position"> 位置
-          </div>
-        `
-        let img = document.createElement("img");
+        let img = document.createElement('img');
         img.src = `data:image/png;base64,${json['image']}`;
         img.classList.add('split-img');
-        img.classList.add(type);
-        switch (type){
-          case 'stage':
-            stageImageList.appendChild(img);
-            stageImageList.insertAdjacentHTML("beforeend", imgCard);
-            break;
-          case 'object':
-            objectImageList.appendChild(img);
-            objectImageList.insertAdjacentHTML("beforeend", imgCard);
-            break;
-          case 'player':
-            playerImageList.appendChild(img);
-            break;
-        }
-        img.addEventListener('click', (e) => {
-          // 該当するtypeの"selected"クラスを全てはずし、選択されたimgタグに"selected"classを付ける
-          console.log("add listener")
-          if (type == 'stage') {
-            console.log("type stage")
-            // makeRadioButton(img);
-            makeRadioButton(img);
-          } else {
-            console.log("type else")
-            makeCheckBox(img);
+        objectList.insertAdjacentHTML("beforeend", makeCard(id, json));
+        card = document.getElementById(`${id}`);
+        positionContainer = card.children[1];
+        objectContainer = card.children[2];
+        positionContainer.insertBefore(img.cloneNode(), positionContainer.children[0]);
+        a = img.cloneNode()
+        objectContainer.insertBefore(a, objectContainer.children[0]);
+        // objectContainer.insertBefore(img.cloneNode(), objectContainer.children[0]);
+        // Array.from(radioGroup.children).forEach((e) => {
+        //   e.addEventListener('click', (e) => {
+        //     if (e.toElement.value == 'position'){
+        //       e.toElement.checked = true;
+        //       positionList.insertAdjacentHTML("beforeend", makeCard(id, 'symbol'));
+        //       symbolCard = document.getElementById(`symbol${id}`);
+        //       symbolCard.insertBefore(img, symbolCard.children[0]);
+        //       textInput = document.createElement('input');
+        //       textInput.setAttribute('type', 'text');
+        //       symbolCard.insertBefore(textInput, symbolCard.children[0]);              
+        //     }
+        //   });
+        // })
+        addCheckBox(positionContainer.children[0]);
+        deleteButton = Array.from(objectContainer.children).find((o) => o.id === 'deleteButton');
+        console.log(deleteButton);
+        deleteButton.addEventListener('click', (e) => {
+          a.remove();
+          console.log("click");
+          if (Array.from(objectContainer.children).find((o) => o.classList == 'split-img')){
+            console.log("if");
+            a.remove();
           }
         });
+        
         id += 1
-        console.log(`type: ${json['type']}, vertices: {x: ${json['vertices']['x']}, y: ${json['vertices']['y']}, w: ${json['vertices']['w']}, h: ${json['vertices']['h']}}`);
       });
-      addSelect(document.getElementsByClassName(`split-img ${type}`)[0]);
-
       if (XHR.status != 200) {
         // レスポンスの HTTP ステータスを解析し、該当するエラーメッセージをアラートで表示するようにしている
         alert(`Error ${XHR.status}: ${XHR.statusText}`);
@@ -211,17 +207,54 @@ const splitImage = (file, type) => {
   };
 };
 
+const makeCard = (id, json) =>{
+  let card = `
+  <div class='object-card' id='${id}' ${verticesDataTag(json)}>
+    <div class='symbol container'>
+      <input type='text' class='symbol-input'>
+    </div>
+    <div class='position container'>
+      <div class='position-indicator'></div>
+    </div>
+    <div class='object container'>
+      <div class='delete-btn' id='deleteButton'>削除</div>
+      <div class='object new-btn'>+</div>
+    </div>
+    <div class='script container'>
+      <select class='script select' id='scriptSelect' name="example">
+        <option value="no_selection">未選択</option>
+        <option value="player">プレイヤー</option>
+        <option value="enemy">敵</option>
+      </select>
+      <div class='object new-btn'>+</div>
+    </div>
+  </div>
+  `
+  return card
+}
+const verticesDataTag = (json) => {
+  let dataset = [];
+  vertices = json['vertices']
+  for (key in vertices) {
+    dataset.push(`data-${key}=${vertices[key]} `)
+  }
+  return dataset
+}
+
 const makeRadioButton = (img) => {
+  // 該当するtypeの"selected"クラスを全てはずし、選択されたimgタグに"selected"classを付ける
   resetSelect(img);
   addSelect(img);
 }
 
-const makeCheckBox = (img) => {
-  if (img.classList.contains('selected') == true) {
-    removeSelect(img);
-  } else {
-    addSelect(img);
-  }
+const addCheckBox = (img) => {
+  img.addEventListener('click', (e) => {
+    if (img.classList.contains('selected') == true) {
+      removeSelect(img);
+    } else {
+      addSelect(img);
+    }
+  });
 }
 
 const addSelect = (img) => {

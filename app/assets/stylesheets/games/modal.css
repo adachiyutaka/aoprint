@@ -105,9 +105,9 @@
 }
 
 .split-img{
-  height: 100px;
-  width: 100px;
-  margin-bottom: 10px;
+  height: 80px;
+  width: 80px;
+  margin-right: 8px;
   position: relative;
 }
 
@@ -122,7 +122,7 @@
   overflow: auto;
 }
 
-.stage-image-list{
+.object-list{
   display: flex;
   justify-content: flex-start;
   flex-direction: column;
@@ -133,17 +133,39 @@
   overflow: auto;
 }
 
-.object-image-list{
+.object-card{
   display: flex;
-  justify-content: flex-start;
-  flex-direction: column;
   flex-wrap: wrap;
-  width: 600px;
-  margin-bottom: 10px;
-  background-color: #f7f7f7;
-  overflow: auto;
+  padding: 8px;
+  border-bottom: 1px solid #dddddd;
 }
 
+.container{
+  display: flex;
+  margin-right: 16px;
+}
+
+.symbol-input{
+  width: 64px;
+}
+
+.select{
+  width: 64px;
+}
+
+.delete-btn{
+  width: 16px;
+  height: 8px;
+}
+
+.new-btn{
+  height: 80px;
+  width: 80px;
+  margin-right: 16px;
+  font-size: 40pt;
+  background-color: white;
+  color: #333333;
+}
 
 .selected{
   border: 3px solid #1074c5;
