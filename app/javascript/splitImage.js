@@ -19,7 +19,6 @@ const sendImage = () => {
   stageForm.addEventListener('change', (e) => {
     // ユーザーがセットしたファイルから画像ファイルを読み取り
     const file = e.target.files[0];
-    stageLabel.classList.add('hidden');
     splitImage(file, 'stage')
   });
 
@@ -55,8 +54,7 @@ const sendImage = () => {
   playerForm.addEventListener('change', (e) => {
     // ユーザーがセットしたファイルから画像ファイルを読み取り
     const file = e.target.files[0];
-    playerLabel.classList.add('hidden');
-    splitImage(file, 'player')
+    splitImage(file, 'character')
   });
 
   // オブジェクトフォームの処理
@@ -70,22 +68,24 @@ const sendImage = () => {
 
 const splitImage = (file, type) => {
 // pngに変換するためにcanvasを準備
-  let id = 0;
+  let stageId = 0;
   const canvas = document.getElementById('canvas');
   const context = canvas.getContext('2d');
+  const imageDialog = document.getElementById('imageDialog');
+  let dialogImageList = [];
   const img = new Image();
   img.src = window.URL.createObjectURL(file);
 
   img.onload = () => {
     // 画像ファイルと同じ大きさのcanvasに画像を貼り、png画像のbase64データに加工
-    var dx = 0;
-    var dy = 0;
-    var dw = img.naturalWidth;
-    var dh = img.naturalHeight;
+    let dx = 0;
+    let dy = 0;
+    let dw = img.naturalWidth;
+    let dh = img.naturalHeight;
     canvas.setAttribute('width', dw);
     canvas.setAttribute('height', dh);
     context.drawImage(img, dx, dy, dw, dh);
-    var imgURL = canvas.toDataURL('image/png');
+    let imgURL = canvas.toDataURL('image/png');
     const png = imgURL.match(/,(.*)$/)[0].slice(1);
 
     // 画像のテキストを読み取り
@@ -135,8 +135,8 @@ const splitImage = (file, type) => {
     if (type == 'stage') {
       XHR.open("POST", `http://127.0.0.1:5000/stage`, true);
     }
-    else if (type == 'player' || type == 'object') {
-      XHR.open("POST", `http://127.0.0.1:5000/object`, true);
+    else if (type == 'character') {
+      XHR.open("POST", `http://127.0.0.1:5000/character`, true);
     }
     XHR.setRequestHeader('Content-Type', 'application/json');
     var data = {};
@@ -150,48 +150,57 @@ const splitImage = (file, type) => {
       const jsons = JSON.parse(XHR.response);
       // 画像を格納するdivタグ要素を取得
       const objectList = document.getElementById(`objectList`);
+      const imageList = document.getElementById(`imageList`);
       // const enemyImageList = document.getElementById(`enemyImagList`);
 
       // 各データに対応するimgタグを生成する
       jsons.forEach( (json) => {
-        const type = json['type']
+        let type = json['type'];
+
         let img = document.createElement('img');
         img.src = `data:image/png;base64,${json['image']}`;
         img.classList.add('split-img');
-        objectList.insertAdjacentHTML("beforeend", makeCard(id, json));
-        card = document.getElementById(`${id}`);
-        positionContainer = card.children[1];
-        objectContainer = card.children[2];
-        positionContainer.insertBefore(img.cloneNode(), positionContainer.children[0]);
-        a = img.cloneNode()
-        objectContainer.insertBefore(a, objectContainer.children[0]);
-        // objectContainer.insertBefore(img.cloneNode(), objectContainer.children[0]);
-        // Array.from(radioGroup.children).forEach((e) => {
-        //   e.addEventListener('click', (e) => {
-        //     if (e.toElement.value == 'position'){
-        //       e.toElement.checked = true;
-        //       positionList.insertAdjacentHTML("beforeend", makeCard(id, 'symbol'));
-        //       symbolCard = document.getElementById(`symbol${id}`);
-        //       symbolCard.insertBefore(img, symbolCard.children[0]);
-        //       textInput = document.createElement('input');
-        //       textInput.setAttribute('type', 'text');
-        //       symbolCard.insertBefore(textInput, symbolCard.children[0]);              
-        //     }
-        //   });
-        // })
-        addCheckBox(positionContainer.children[0]);
-        deleteButton = Array.from(objectContainer.children).find((o) => o.id === 'deleteButton');
-        console.log(deleteButton);
-        deleteButton.addEventListener('click', (e) => {
-          a.remove();
-          console.log("click");
-          if (Array.from(objectContainer.children).find((o) => o.classList == 'split-img')){
-            console.log("if");
-            a.remove();
-          }
-        });
+        console.log("here");
         
-        id += 1
+        if (type == 'stage') {
+          objectList.insertAdjacentHTML("beforeend", makeStageCard(stageId, json));
+          const card = document.getElementById(`${stageId}`);
+          let symbolContainer = card.children[0];
+          let positionContainer = card.children[1];
+          let objectContainer = card.children[2];
+          positionContainer.insertBefore(img.cloneNode(), positionContainer.children[0]);
+          objectContainer.insertBefore(img.cloneNode(), objectContainer.children[0]);
+
+          let symbolDeleteBtn = Array.from(symbolContainer.children).find((o) => o.classList.contains('delete-btn'));
+          let objectDeleteBtn = Array.from(objectContainer.children).find((o) => o.classList.contains('delete-btn'));
+          let objectNewBtn = Array.from(objectContainer.children).find((o) => o.classList.contains('new-btn'));
+          let objectImg = Array.from(objectContainer.children).find((o) => o.classList.contains('split-img'));
+
+          objectNewBtn.addEventListener('click', (e) => {
+            Array.from(objectList.children).forEach((card) => {
+              dialogImageList.push(Array.from(card.children[2].children).find((o) => o.classList.contains('split-img')).cloneNode());
+            });
+            Array.from(imageList.children).forEach((img) => {
+              dialogImageList.push(img.cloneNode());
+            });
+            
+            dialogImageList.forEach((img) => {
+              img.addEventListener('click', (e) => {
+                objectContainer.insertBefore(e.target.cloneNode(), objectContainer.children[0]);
+                imageDialog.classList.add('hidden');
+              });
+              imageDialog.appendChild(img);
+            });
+            imageDialog.classList.remove('hidden');
+          });
+          objectDeleteBtn.addEventListener('click', (e) => {
+            objectImg.remove();
+            objectDeleteBtn.remove();
+          });
+          stageId += 1
+        } else if (type == 'character') {
+          imageList.appendChild(img);
+        }
       });
       if (XHR.status != 200) {
         // レスポンスの HTTP ステータスを解析し、該当するエラーメッセージをアラートで表示するようにしている
@@ -207,13 +216,14 @@ const splitImage = (file, type) => {
   };
 };
 
-const makeCard = (id, json) =>{
+const makeStageCard = (id, json) =>{
   let card = `
   <div class='object-card' id='${id}' ${verticesDataTag(json)}>
     <div class='symbol container'>
       <input type='text' class='symbol-input'>
     </div>
     <div class='position container'>
+      <div class='delete-btn' id='deleteButton'>削除</div>
       <div class='position-indicator'></div>
     </div>
     <div class='object container'>

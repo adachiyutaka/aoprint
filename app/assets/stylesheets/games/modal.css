@@ -52,7 +52,7 @@
 .label{
   display: block;
   height: 190px;
-  width: 600px;
+  width: 640px;
   padding-top: 40px;
   background-color: #1074c5;
   line-height: 70px;
@@ -116,7 +116,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
   height: 190px;
-  width: 600px;
+  width: 640px;
   margin-bottom: 10px;
   background-color: #f7f7f7;
   overflow: auto;
@@ -127,7 +127,7 @@
   justify-content: flex-start;
   flex-direction: column;
   flex-wrap: wrap;
-  width: 600px;
+  width: 640px;
   margin-bottom: 10px;
   background-color: #f7f7f7;
   overflow: auto;
