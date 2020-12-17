@@ -160,7 +160,6 @@ const splitImage = (file, type) => {
         let img = document.createElement('img');
         img.src = `data:image/png;base64,${json['image']}`;
         img.classList.add('split-img');
-        console.log("here");
         
         if (type == 'stage') {
           objectList.insertAdjacentHTML("beforeend", makeStageCard(stageId, json));
@@ -177,17 +176,23 @@ const splitImage = (file, type) => {
           let objectImg = Array.from(objectContainer.children).find((o) => o.classList.contains('split-img'));
 
           objectNewBtn.addEventListener('click', (e) => {
+            console.log(dialogImageList);
+            dialogImageList = [];
+            console.log(dialogImageList);
             Array.from(objectList.children).forEach((card) => {
               dialogImageList.push(Array.from(card.children[2].children).find((o) => o.classList.contains('split-img')).cloneNode());
             });
             Array.from(imageList.children).forEach((img) => {
               dialogImageList.push(img.cloneNode());
             });
-            
+            console.log(dialogImageList);
             dialogImageList.forEach((img) => {
               img.addEventListener('click', (e) => {
                 objectContainer.insertBefore(e.target.cloneNode(), objectContainer.children[0]);
                 imageDialog.classList.add('hidden');
+                Array.from(imageDialog.children).forEach((o) => {
+                  o.remove()
+                });
               });
               imageDialog.appendChild(img);
             });
@@ -220,7 +225,7 @@ const makeStageCard = (id, json) =>{
   let card = `
   <div class='object-card' id='${id}' ${verticesDataTag(json)}>
     <div class='symbol container'>
-      <input type='text' class='symbol-input'>
+      <input type='text' class='symbol-input' id='symbolInput'>
     </div>
     <div class='position container'>
       <div class='delete-btn' id='deleteButton'>削除</div>
@@ -231,7 +236,7 @@ const makeStageCard = (id, json) =>{
       <div class='object new-btn'>+</div>
     </div>
     <div class='script container'>
-      <select class='script select' id='scriptSelect' name="example">
+      <select class='script-select' id='scriptSelect' name="example">
         <option value="no_selection">未選択</option>
         <option value="player">プレイヤー</option>
         <option value="enemy">敵</option>
