@@ -3,17 +3,14 @@
 const sendImage = () => {
 
   // リスナーをセットするステージフォーム要素を取得
-  const stageForm = document.getElementById('stage_input');
+  const stageForm = document.getElementById('game_form_stage_input');
   const stageLabel = document.getElementById('stage_label');
   const stageClickOrDD = document.getElementById('click_or_dd');
   const stagePleaseDrop = document.getElementById('please_drop');
-  const playerForm = document.getElementById('player_input');
+  const playerForm = document.getElementById('game_form_player_input');
   const playerLabel = document.getElementById('player_label');
-  const objectForm = document.getElementById('object_input');
+  const objectForm = document.getElementById('game_form_object_input');
   const objectLabel = document.getElementById('object_label');
-
-  console.log(stageClickOrDD);
-  console.log(stagePleaseDrop);
 
   // ステージフォームの処理
   stageForm.addEventListener('change', (e) => {
@@ -223,11 +220,12 @@ const splitImage = (file, type) => {
 
 const makeStageCard = (id, json) =>{
   let card = `
-  <div class='object-card' id='${id}' ${verticesDataTag(json)}>
+  <div class='object-card' id='${id}'>
     <div class='symbol container'>
       <input type='text' class='symbol-input' id='symbolInput'>
     </div>
     <div class='position container'>
+      <div id='vertices' ${verticesDataTag(json)}></div>
       <div class='delete-btn' id='deleteButton'>削除</div>
       <div class='position-indicator'></div>
     </div>
@@ -237,7 +235,7 @@ const makeStageCard = (id, json) =>{
     </div>
     <div class='script container'>
       <select class='script-select' id='scriptSelect' name="example">
-        <option value="no_selection">未選択</option>
+        <option value="object">未選択</option>
         <option value="player">プレイヤー</option>
         <option value="enemy">敵</option>
       </select>
@@ -247,6 +245,7 @@ const makeStageCard = (id, json) =>{
   `
   return card
 }
+
 const verticesDataTag = (json) => {
   let dataset = [];
   vertices = json['vertices']

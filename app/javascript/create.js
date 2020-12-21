@@ -3,45 +3,44 @@ const create = () => {
   form.addEventListener('submit', (e) => {
     // デフォルト動作のデータ送信をキャンセル
     e.preventDefault;
+
     // 選択されたimg要素を取得
+    let objectData = [];
+
     Array.from(document.getElementsByClassName('object-card')).forEach((card) => {
       let symbolContainer = card.children[0];
       let positionContainer = card.children[1];
       let objectContainer = card.children[2];
       let scriptContainer = card.children[3];
 
+      // 入力されたsymbolの値を取得
       let symbolInput = Array.from(symbolContainer.children).find((o) => o.id == 'symbolInput').value;
-      console.log(symbolInput);
 
-      let positionImage = getImage(positionContainer);
-      let positionBase64 = positionImage.src;
-      let positions = positionImage.dataset;
-      console.log(positionBase64);
-      console.log(positions);
+      // position表示画像と値を取得
+      let positionBase64 = getImage(positionContainer).src;
+      let positions = Array.from(positionContainer.children).find((o) => o.id == 'vertices').dataset;
 
+      // objectの画像を取得
       let objectBase64 = getImage(objectContainer).src;
-      console.log(objectBase64);
 
+      // scriptの値を取得
       let script = Array.from(scriptContainer.children).find((o) => o.id == 'scriptSelect').value;
-      console.log(script);
+
+      // JSONとして配列に加える
+      const gameObject = {symbol: symbolInput, position: {image: positionBase64, h: positions.h, w: positions.w, x: positions.x, y: positions.y}, object: objectBase64, script: script};
+      objectData.push(gameObject);
     });
-    var slectedStage = document.getElementsByClassName('split-img stage selected')[0];
-    var slectedPlayer = document.getElementsByClassName('split-img player selected')[0];
-    var slectedObject = document.getElementsByClassName('split-img object selected')[0];
-    // 選択されたimg要素をinput要素として挿入
+    
     const renderDom = document.getElementById('game_form');
-    const stageImg = `<input value=${slectedStage.src} type='hidden' name='stage_img'>`;
-    const playerImg = `<input value=${slectedPlayer.src} type='hidden' name='player_img'>`;
-    const objectImg = `<input value=${slectedObject.src} type='hidden' name='object_img'>`;
-    renderDom.insertAdjacentHTML("beforeend", stageImg);
-    renderDom.insertAdjacentHTML("beforeend", playerImg);
-    renderDom.insertAdjacentHTML("beforeend", objectImg);
+    // const gameInput = `<input value=${JSON.stringify(objectData)} type='hidden' name='game_form[objects]'>`;
+    const gameInput = `<input value=${JSON.stringify({text: "test"})} type='hidden' name='game_form[objects]'>`;
+    renderDom.insertAdjacentHTML("beforeend", gameInput);
     // デフォルトのinputタグからname属性を削除
-    document.getElementById('stage_input').removeAttribute('name');
-    document.getElementById('player_input').removeAttribute('name');
-    document.getElementById('object_input').removeAttribute('name');
+    document.getElementById('game_form_stage_input').removeAttribute('name');
+    document.getElementById('game_form_player_input').removeAttribute('name');
+    document.getElementById('game_form_object_input').removeAttribute('name');
     // データを送信
-    // document.getElementById('game_form').submit();
+    document.getElementById('game_form').submit();
   });
 }
 

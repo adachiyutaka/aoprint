@@ -29,7 +29,7 @@
     <div class='modal-content'>
 
       <%# Game#newのフォーム %>
-      <%= form_with id: 'game_form', url: games_path, class: 'game-form', local: true do |f| %>
+      <%= form_with model: @gameForm, id: 'game_form', url: games_path, class: 'game-form', local: true do |f| %>
 
       <%#= render 'shared/error_messages', model: @item %>
       <div class='form-list'>

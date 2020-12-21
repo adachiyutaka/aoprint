@@ -1,6 +1,6 @@
 class GameForm
   include ActiveModel::Model
-  attr_accessor :stage_img, :player_img, :object_img, :name, :text, :user_id
+  attr_accessor :name, :text, :objects, :user_id
 
   # with_options presence: true do
   # end

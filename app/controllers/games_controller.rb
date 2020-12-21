@@ -6,7 +6,7 @@ class GamesController < ApplicationController
 
   def index
     @games = Game.all.order(created_at: 'DESC')
-    @game = Game.new
+    @gameForm = GameForm.new
   end
 
   def show
@@ -15,13 +15,18 @@ class GamesController < ApplicationController
   end
 
   def create
+    puts "here"
     @game = GameForm.new(game_params)
-    if @game.valid?
-      @game.save
-      return redirect_to game_path(@game.game)
-    else
-      render "new"
-    end
+    puts "here"
+    json = @game.objects
+    JSON.parse json
+    puts json[:text]
+    # if @game.valid?
+    #   @game.save
+    #   return redirect_to game_path(@game.game)
+    # else
+    #   render "new"
+    # end
   end
 
   def read_text
@@ -61,7 +66,7 @@ class GamesController < ApplicationController
   end
 
   def game_params
-    params.permit(:stage_img, :player_img, :object_img, :name, :text).merge(user_id: current_user.id)
+    params.require(:game_form).permit(:name, :text, :objects).merge(user_id: current_user.id)
   end
 
   def url_params
