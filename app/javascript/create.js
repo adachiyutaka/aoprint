@@ -32,15 +32,16 @@ const create = () => {
     });
     
     const renderDom = document.getElementById('game_form');
-    // const gameInput = `<input value=${JSON.stringify(objectData)} type='hidden' name='game_form[objects]'>`;
-    const gameInput = `<input value=${JSON.stringify({text: "test"})} type='hidden' name='game_form[objects]'>`;
+    const gameInput = `<input value=${JSON.stringify(objectData)} type='hidden' name='game_form[objects]'>`;
+    // const gameInput = `<input value=${[JSON.stringify({test1: "1"}), JSON.stringify({test2: "2"})]} type='hidden' name='game_form[objects]'>`;
+    console.log([JSON.stringify({test1: "1"}), JSON.stringify({test2: "2"})]);
     renderDom.insertAdjacentHTML("beforeend", gameInput);
     // デフォルトのinputタグからname属性を削除
     document.getElementById('game_form_stage_input').removeAttribute('name');
     document.getElementById('game_form_player_input').removeAttribute('name');
     document.getElementById('game_form_object_input').removeAttribute('name');
     // データを送信
-    document.getElementById('game_form').submit();
+    // document.getElementById('game_form').submit();
   });
 }
 

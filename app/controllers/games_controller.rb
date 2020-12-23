@@ -17,10 +17,12 @@ class GamesController < ApplicationController
   def create
     puts "here"
     @game = GameForm.new(game_params)
-    puts "here"
-    json = @game.objects
-    JSON.parse json
-    puts json[:text]
+    # json = @game.objects
+    # puts json
+    # hash = JSON.parse(json, symbolize_names: true)
+    # puts hash[0][:symbol]
+    @game.save
+
     # if @game.valid?
     #   @game.save
     #   return redirect_to game_path(@game.game)

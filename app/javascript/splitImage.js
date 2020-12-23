@@ -1,6 +1,7 @@
 // import ReadText from "./readText.js"
 
 const sendImage = () => {
+  console.log([JSON.stringify({test1: "1"}), JSON.stringify({test2: "2"})]);
 
   // リスナーをセットするステージフォーム要素を取得
   const stageForm = document.getElementById('game_form_stage_input');
