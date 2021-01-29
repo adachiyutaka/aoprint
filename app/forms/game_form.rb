@@ -8,34 +8,31 @@ class GameForm
   def save
     # Gameの作成
     @game = Game.create(name: name, text: text, user_id: user_id)
-    
+
     # Stageの作成
-    stage = Stage.new(game_id: @game.id)
-    stage.save
+    stage = Stage.create(game_id: @game.id)
 
     # 各オブジェクトを作成
     JSON.parse(objects, symbolize_names: true).each do |object|
       # GameObjectの作成
-      gameObject = GameObject.new(symbol: object[:symbol], game_id: game.id)
+      game_object = GameObject.new(symbol: object[:symbol], game_id: game.id)
       case object[:script]
         when 'object'
-          gameObject.object = true
+          game_object.object = true
         when 'player'
-          gameObject.player = true
+          game_object.player = true
         when 'enemy'
           #
       end
-      gameObject.save
-      gameObject.parse_base64(object[:object])
+      game_object.save
+      game_object.parse_base64(object[:object])
       
       # Positionの作成
       positions = object[:position]
-      position = Position.new(symbol: object[:symbol], x: positions[:x], y: positions[:y], width: positions[:w],  height: positions[:h], stage_id: stage.id)
-      position.save
-
+      position = Position.create(symbol: object[:symbol], x: positions[:x], y: positions[:y], width: positions[:w],  height: positions[:h], stage_id: stage.id)
+      
       # ObjectPositionの作成
-      objectPosition = ObjectPosition.new(game_object_id: gameObject.id, position_id: position.id)
-      objectPosition.save
+      object_position = ObjectPosition.create(game_object_id: game_object.id, position_id: position.id)
     end
     # stage = Stage.new(game_id: @game.id)
     # stage.save

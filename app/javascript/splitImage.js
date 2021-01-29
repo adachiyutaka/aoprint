@@ -1,7 +1,6 @@
 // import ReadText from "./readText.js"
 
 const sendImage = () => {
-  console.log([JSON.stringify({test1: "1"}), JSON.stringify({test2: "2"})]);
 
   // リスナーをセットするステージフォーム要素を取得
   const stageForm = document.getElementById('game_form_stage_input');
@@ -248,10 +247,10 @@ const makeStageCard = (id, json) =>{
 }
 
 const verticesDataTag = (json) => {
-  let dataset = [];
+  let dataset = '';
   vertices = json['vertices']
   for (key in vertices) {
-    dataset.push(`data-${key}=${vertices[key]} `)
+    dataset += (`data-${key}=${vertices[key]} `)
   }
   return dataset
 }

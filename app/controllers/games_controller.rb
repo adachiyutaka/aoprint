@@ -15,10 +15,10 @@ class GamesController < ApplicationController
   end
 
   def create
-    puts "here"
     @game = GameForm.new(game_params)
-    # json = @game.objects
-    # puts json
+    json = @game.objects
+    puts "json"
+    puts json
     # hash = JSON.parse(json, symbolize_names: true)
     # puts hash[0][:symbol]
     @game.save
@@ -60,11 +60,27 @@ class GamesController < ApplicationController
   end
 
   def image
-    stageImg = Game.find_by(id: params[:id]).stages[0].image
-    playerImg = Game.find_by(id: params[:id]).game_objects.where(player: true)[0].image
-    objectImg = Game.find_by(id: params[:id]).game_objects.where(object: true)[0].image
-    image = { stage: imageToBase64(stageImg), player: imageToBase64(playerImg), gameObject: imageToBase64(objectImg)}
-    render json: image
+    game = Game.find_by(id: params[:id])
+
+    # Objectをhash化
+    objects = []
+    game.game_objects.each do |obj|
+      object = {symbol: obj.symbol, image: imageToBase64(obj.image)}
+      object[:object] = true if obj.object == true
+      object[:player] = true if obj.player == true
+      objects << object
+    end
+
+    # Position, ObjectPositionをhash化
+    positions = []
+    game.stages.first.positions.each do |pos|
+      position = {symbole: pos.object_position.game_object.symbol, h: pos.height, w: pos.width, x: pos.x, y: pos.y}
+      objects << position
+    end
+
+    hash = { objects: objects, positions: positions}
+
+    render json: hash
   end
 
   def game_params

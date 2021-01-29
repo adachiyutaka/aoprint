@@ -27,14 +27,12 @@ const create = () => {
       let script = Array.from(scriptContainer.children).find((o) => o.id == 'scriptSelect').value;
 
       // JSONとして配列に加える
-      const gameObject = {symbol: symbolInput, position: {image: positionBase64, h: positions.h, w: positions.w, x: positions.x, y: positions.y}, object: objectBase64, script: script};
+      const gameObject = {symbol: symbolInput, position: {h: positions.h, w: positions.w, x: positions.x, y: positions.y, image: positionBase64}, object: objectBase64, script: script};
       objectData.push(gameObject);
     });
     
     const renderDom = document.getElementById('game_form');
     const gameInput = `<input value=${JSON.stringify(objectData)} type='hidden' name='game_form[objects]'>`;
-    // const gameInput = `<input value=${[JSON.stringify({test1: "1"}), JSON.stringify({test2: "2"})]} type='hidden' name='game_form[objects]'>`;
-    console.log([JSON.stringify({test1: "1"}), JSON.stringify({test2: "2"})]);
     renderDom.insertAdjacentHTML("beforeend", gameInput);
     // デフォルトのinputタグからname属性を削除
     document.getElementById('game_form_stage_input').removeAttribute('name');

@@ -6,5 +6,4 @@ class Game < ApplicationRecord
   belongs_to :user
   has_many :game_objects
   has_many :stages
-  has_many :object_positions
 end
