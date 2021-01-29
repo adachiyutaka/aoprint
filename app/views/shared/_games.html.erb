@@ -2,7 +2,6 @@
   <%= link_to game_path(games, anchor: 'main') do %>
     <div class='game-container'>
       <div class='game-images'>
-        <% puts games.stages[0].positions[0].nil? %>
         <% unless games.stages[0].nil? %>
           <%# <%= image_tag games.stages[0].image.variant(resize: '200x200'), class: "stage-img" %>
         <% end %>

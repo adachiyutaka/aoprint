@@ -17,18 +17,7 @@ class GamesController < ApplicationController
   def create
     @game = GameForm.new(game_params)
     json = @game.objects
-    puts "json"
-    puts json
-    # hash = JSON.parse(json, symbolize_names: true)
-    # puts hash[0][:symbol]
     @game.save
-
-    # if @game.valid?
-    #   @game.save
-    #   return redirect_to game_path(@game.game)
-    # else
-    #   render "new"
-    # end
   end
 
   def read_text
@@ -75,10 +64,12 @@ class GamesController < ApplicationController
     positions = []
     game.stages.first.positions.each do |pos|
       position = {symbole: pos.object_position.game_object.symbol, h: pos.height, w: pos.width, x: pos.x, y: pos.y}
-      objects << position
+      positions << position
     end
 
     hash = { objects: objects, positions: positions}
+
+    puts hash
 
     render json: hash
   end
