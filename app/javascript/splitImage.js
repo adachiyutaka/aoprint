@@ -141,7 +141,7 @@ const splitImage = (file, type) => {
     var json = JSON.stringify(data);
     XHR.send(json);
 
-    // レスポンスを受け取った時の処理を記述する
+    // レスポンスを受け取った時の処理
     XHR.onload = () => {
       // 受け取ったデータをJSON形式にパースする
       const jsons = JSON.parse(XHR.response);

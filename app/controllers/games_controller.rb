@@ -55,21 +55,30 @@ class GamesController < ApplicationController
     objects = []
     game.game_objects.each do |obj|
       object = {symbol: obj.symbol, image: imageToBase64(obj.image)}
-      object[:object] = true if obj.object == true
-      object[:player] = true if obj.player == true
+      # key名がupperCamelなのは、C#クラスとの互換のため
+      object[:isObject] = true if obj.object == true
+      object[:isPlayer] = true if obj.player == true
       objects << object
     end
 
-    # Position, ObjectPositionをhash化
+    # Positionをhash化
     positions = []
     game.stages.first.positions.each do |pos|
-      position = {symbole: pos.object_position.game_object.symbol, h: pos.height, w: pos.width, x: pos.x, y: pos.y}
-      positions << position
+      positions << {symbol: pos.symbol, height: pos.height, width: pos.width, x: pos.x, y: pos.y}
     end
 
-    hash = { objects: objects, positions: positions}
+    # Object-Positionをhash化
+    # TODO: 1object対多positionに対応する必要あり
+    object_positions = []
+    game.game_objects.each do |obj|
+      objpos = obj.object_position
+      # key名がupperCamelなのは、C#クラスとの互換のため
+      object_positions << {objectId: objects.index{|obj| obj[:symbol] == objpos.game_object.symbol}, positionId: positions.index{|pos| pos[:symbol] == objpos.position.symbol}}
+    end
 
-    puts hash
+    # key名がupperCamelなのは、C#クラスとの互換のため
+    hash = {objects: objects, positions: positions, objectPositions: object_positions}
+    p hash
 
     render json: hash
   end

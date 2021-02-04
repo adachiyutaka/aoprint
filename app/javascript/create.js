@@ -6,7 +6,8 @@ const create = () => {
 
     // 選択されたimg要素を取得
     let objectData = [];
-
+    
+    // TODO: 1object対多positionに対応する必要あり
     Array.from(document.getElementsByClassName('object-card')).forEach((card) => {
       let symbolContainer = card.children[0];
       let positionContainer = card.children[1];
