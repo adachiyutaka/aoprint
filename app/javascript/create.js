@@ -34,7 +34,8 @@ const create = () => {
     
     const renderDom = document.getElementById('game_form');
     const gameInput = `<input value=${JSON.stringify(objectData)} type='hidden' name='game_form[objects]'>`;
-    renderDom.insertAdjacentHTML("beforeend", gameInput);
+    const canvasInput = `<input value=${JSON.stringify({width: canvas.width, height: canvas.height})} type='hidden' name='game_form[canvas]'>`;
+    renderDom.insertAdjacentHTML("beforeend", gameInput+canvasInput);
     // デフォルトのinputタグからname属性を削除
     document.getElementById('game_form_stage_input').removeAttribute('name');
     document.getElementById('game_form_player_input').removeAttribute('name');

@@ -31,6 +31,9 @@
       <%# Game#newのフォーム %>
       <%= form_with model: @gameForm, id: 'game_form', url: games_path, class: 'game-form', local: true do |f| %>
 
+      <%# png画像変換用のcanvas %>
+      <canvas id='canvas' class='hidden'></canvas>
+
       <%#= render 'shared/error_messages', model: @item %>
       <div class='form-list'>
         <div class='image-container' id='stageImageContainer'>
@@ -82,7 +85,6 @@
           <%= f.text_area :text, class:'text', placeholder:'ゲームの説明' ,rows:'3' ,maxlength:'1000' %>
         </div>
         <pre></pre>
-        <%# png画像変換用のcanvas %>
         <div class='submit-line'>
           <%= f.submit 'これで遊ぶ' ,class:"submit-btn" %>
         </div>
@@ -95,5 +97,3 @@
     </div>
   </div>
 </div>
-<%# png画像変換用のcanvas %>
-<canvas id='canvas' class='hidden'></canvas>

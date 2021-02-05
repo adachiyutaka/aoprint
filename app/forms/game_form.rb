@@ -1,6 +1,6 @@
 class GameForm
   include ActiveModel::Model
-  attr_accessor :name, :text, :objects, :user_id
+  attr_accessor :name, :text, :objects, :canvas, :user_id
 
   # with_options presence: true do
   # end
@@ -12,6 +12,8 @@ class GameForm
     # Stageの作成
     stage = Stage.create(game_id: @game.id)
 
+    puts canvas
+    binding.pry
     # TODO: 1object対多positionに対応する必要あり
     # 各オブジェクトを作成
     JSON.parse(objects, symbolize_names: true).each do |object|

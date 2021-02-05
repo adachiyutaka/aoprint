@@ -78,13 +78,12 @@ class GamesController < ApplicationController
 
     # key名がupperCamelなのは、C#クラスとの互換のため
     hash = {objects: objects, positions: positions, objectPositions: object_positions}
-    p hash
 
     render json: hash
   end
 
   def game_params
-    params.require(:game_form).permit(:name, :text, :objects).merge(user_id: current_user.id)
+    params.require(:game_form).permit(:name, :text, :objects, :canvas).merge(user_id: current_user.id)
   end
 
   def url_params
