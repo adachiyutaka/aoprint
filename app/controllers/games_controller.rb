@@ -50,6 +50,10 @@ class GamesController < ApplicationController
 
   def image
     game = Game.find_by(id: params[:id])
+    stage = game.stages.first
+
+    # Stageをhash化
+    stage_size = {height: stage.height , width: stage.width}
 
     # Objectをhash化
     objects = []
@@ -63,7 +67,7 @@ class GamesController < ApplicationController
 
     # Positionをhash化
     positions = []
-    game.stages.first.positions.each do |pos|
+    stage.positions.each do |pos|
       positions << {symbol: pos.symbol, height: pos.height, width: pos.width, x: pos.x, y: pos.y}
     end
 
@@ -77,7 +81,7 @@ class GamesController < ApplicationController
     end
 
     # key名がupperCamelなのは、C#クラスとの互換のため
-    hash = {objects: objects, positions: positions, objectPositions: object_positions}
+    hash = {stage: stage_size, objects: objects, positions: positions, objectPositions: object_positions}
 
     render json: hash
   end

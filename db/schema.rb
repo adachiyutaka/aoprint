@@ -86,6 +86,8 @@ ActiveRecord::Schema.define(version: 2020_11_13_030741) do
   end
 
   create_table "stages", force: :cascade do |t|
+    t.integer "width", null: false
+    t.integer "height", null: false
     t.integer "game_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false

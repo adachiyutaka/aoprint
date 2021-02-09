@@ -28,7 +28,7 @@ const create = () => {
       let script = Array.from(scriptContainer.children).find((o) => o.id == 'scriptSelect').value;
 
       // JSONとして配列に加える
-      const gameObject = {symbol: symbolInput, position: {h: positions.h, w: positions.w, x: positions.x, y: positions.y, image: positionBase64}, object: objectBase64, script: script};
+      const gameObject = {symbol: symbolInput, position: {height: positions.height, width: positions.width, x: positions.x, y: positions.y, image: positionBase64}, object: objectBase64, script: script};
       objectData.push(gameObject);
     });
     
