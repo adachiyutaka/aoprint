@@ -65,7 +65,6 @@ const sendImage = () => {
 
 const splitImage = (file, type) => {
 // pngに変換するためにcanvasを準備
-  let stageId = 0;
   const canvas = document.getElementById('canvas');
   const context = canvas.getContext('2d');
   const imageDialog = document.getElementById('imageDialog');
@@ -136,71 +135,102 @@ const splitImage = (file, type) => {
       XHR.open("POST", `http://127.0.0.1:5000/character`, true);
     }
     XHR.setRequestHeader('Content-Type', 'application/json');
-    var data = {};
+    let data = {};
     data.image = png;
-    var json = JSON.stringify(data);
+    let json = JSON.stringify(data);
     XHR.send(json);
 
     // レスポンスを受け取った時の処理
     XHR.onload = () => {
+      // ステージ画像から生成したオブジェクトを表示するレイアウトのid
+      let stageCardId = 0;
+
       // 受け取ったデータをJSON形式にパースする
       const jsons = JSON.parse(XHR.response);
+      
       // 画像を格納するdivタグ要素を取得
       const objectList = document.getElementById(`objectList`);
       const imageList = document.getElementById(`imageList`);
-      // const enemyImageList = document.getElementById(`enemyImagList`);
 
       // 各データに対応するimgタグを生成する
       jsons.forEach( (json) => {
-        let type = json['type'];
-
+        // 分割した画像をimg要素に設定
         let img = document.createElement('img');
         img.src = `data:image/png;base64,${json['image']}`;
         img.classList.add('split-img');
-        
+
+        // 画像がステージかキャラクターかで条件分岐
+        let type = json['type'];
         if (type == 'stage') {
-          objectList.insertAdjacentHTML("beforeend", makeStageCard(stageId, json));
-          const card = document.getElementById(`${stageId}`);
+          // ステージ画像の場合
+
+          // 分割した画像ごとにステージカードのリストを生成し、objectListに挿入
+          objectList.insertAdjacentHTML("beforeend", makeStageCard(stageCardId, json));
+          const card = document.getElementById(`${stageCardId}`);
+
+          // カード内のシンボル、位置、オブジェクトを配置するコンテナ要素を取得
           let symbolContainer = card.children[0];
           let positionContainer = card.children[1];
           let objectContainer = card.children[2];
+
+          // 位置、オブジェクトのコンテナに画像を配置する
           positionContainer.insertBefore(img.cloneNode(), positionContainer.children[0]);
           objectContainer.insertBefore(img.cloneNode(), objectContainer.children[0]);
 
+          // オブジェクト画像、オブジェクトの削除・追加ボタンの要素を取得
           let symbolDeleteBtn = Array.from(symbolContainer.children).find((o) => o.classList.contains('delete-btn'));
           let objectDeleteBtn = Array.from(objectContainer.children).find((o) => o.classList.contains('delete-btn'));
           let objectNewBtn = Array.from(objectContainer.children).find((o) => o.classList.contains('new-btn'));
           let objectImg = Array.from(objectContainer.children).find((o) => o.classList.contains('split-img'));
 
+          // オブジェクト追加ボタンに押下時の処理
           objectNewBtn.addEventListener('click', (e) => {
-            console.log(dialogImageList);
+            // dialogImageListを空にする
             dialogImageList = [];
-            console.log(dialogImageList);
+
+            // 各ステージカードのオブジェクト画像と、キャラクター画像をdialogImageListに格納
             Array.from(objectList.children).forEach((card) => {
               dialogImageList.push(Array.from(card.children[2].children).find((o) => o.classList.contains('split-img')).cloneNode());
             });
             Array.from(imageList.children).forEach((img) => {
               dialogImageList.push(img.cloneNode());
             });
-            console.log(dialogImageList);
+
+            // オブジェクト追加ダイアログにdialogImageListの各画像を配置
             dialogImageList.forEach((img) => {
+              imageDialog.appendChild(img);
+
+              // dialogImageList内の各画像にボタン押下時の処理
               img.addEventListener('click', (e) => {
+                // オブジェクトを新規作成するオブジェクトコンテナにクリックした画像を追加
                 objectContainer.insertBefore(e.target.cloneNode(), objectContainer.children[0]);
+                // オブジェクト追加ダイアログを非表示に
                 imageDialog.classList.add('hidden');
+                // オブジェクト追加ダイアログに追加した画像を全て削除
                 Array.from(imageDialog.children).forEach((o) => {
                   o.remove()
                 });
               });
-              imageDialog.appendChild(img);
             });
+
+            // オブジェクト追加ダイアログを表示
             imageDialog.classList.remove('hidden');
           });
+
+          // オブジェクト削除ボタン押下時の処理
           objectDeleteBtn.addEventListener('click', (e) => {
+            // オブジェクト画像と削除ボタンを消す
             objectImg.remove();
             objectDeleteBtn.remove();
           });
-          stageId += 1
+
+          // ステージカードのid
+          stageCardId += 1
+
         } else if (type == 'character') {
+          // キャラクター画像の場合
+
+          // キャラクター画像のリストに各画像を配置する
           imageList.appendChild(img);
         }
       });
@@ -219,6 +249,8 @@ const splitImage = (file, type) => {
 };
 
 const makeStageCard = (id, json) =>{
+  // stage画像を分割したオブジェクトを表示するレイアウト
+  // idと画像の配置、サイズの情報をHTML属性に持たせる
   let card = `
   <div class='object-card' id='${id}'>
     <div class='symbol container'>

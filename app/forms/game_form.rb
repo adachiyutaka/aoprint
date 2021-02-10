@@ -24,7 +24,7 @@ class GameForm
         when 'player'
           game_object.player = true
         when 'enemy'
-          #
+          game_object.enemy = true
       end
       game_object.save
       game_object.parse_base64(object[:object])
