@@ -32,6 +32,7 @@ const sendImage = () => {
     stageLabel.style.backgroundColor = "#1074c5"
     stageClickOrDD.classList.remove('hidden');
     stagePleaseDrop.classList.add('hidden');
+    
   });
 
   stageLabel.addEventListener('dragover', (e) => {

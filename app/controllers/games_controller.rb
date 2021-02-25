@@ -62,6 +62,7 @@ class GamesController < ApplicationController
       # key名がupperCamelなのは、C#クラスとの互換のため
       object[:isObject] = true if obj.object == true
       object[:isPlayer] = true if obj.player == true
+      object[:isEnemy] = true if obj.enemy == true
       objects << object
     end
 
