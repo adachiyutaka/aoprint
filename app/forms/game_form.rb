@@ -28,7 +28,7 @@ class GameForm
       end
       game_object.save
       game_object.parse_base64(object[:object])
-      
+
       # Positionの作成
       positions = object[:position]
       position = Position.create(symbol: object[:symbol], x: positions[:x], y: positions[:y], width: positions[:width],  height: positions[:height], stage_id: stage.id)
