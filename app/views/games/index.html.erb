@@ -80,6 +80,34 @@
             <%= f.file_field :object_input, class: 'hidden'%>
           </label>
         </div>
+
+        <p class='list-title'>symbol position object script</p>
+        <div class='object-list' id='objectList'>
+        </div>
+        <p class='list-title'>image list</p>
+        <div class='image-list' id='imageList'>
+        </div>
+        <%# 画像選択ダイアログの原型 %>
+        <div class='image-dialog hidden' id='imageDialog'>
+        </div>
+        <%# スクリプト編集モーダルの原型 %>
+        <div class='script-modal' id='scriptModal'>
+          <div class='script-wrapper'>
+            <div class='script-header'>
+            <p>script editor</p>
+            <select class='script-select' id='scriptSelect' name="example">
+              <option value="object">未選択</option>
+              <option value="player">プレイヤー</option>
+              <option value="enemy">敵</option>
+            </select>
+            </div>
+            <div class='script-content'>
+              <div class='script-list'></div>
+              <div class='script-field'></div>
+            </div>
+          </div>
+        </div>
+        
         <div id='textContainer'>
           <%= f.text_area :name, class:'name', placeholder:'ゲームのタイトル（40文字まで)', maxlength:'40' %>
           <%= f.text_area :text, class:'text', placeholder:'ゲームの説明' ,rows:'3' ,maxlength:'1000' %>

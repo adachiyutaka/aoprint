@@ -1,0 +1,35 @@
+.script-modal{
+  width: 700px;
+  height: 500px;
+}
+
+.script-wrapper{
+  height: auto;
+  background-color: #999999;
+}
+
+.script-header{
+  height: 50px;
+  background-color: #eeeeee;
+}
+
+.script-content{
+  display: flex;
+  flex-direction: row;
+  height: 400px;
+  background-color: #dddddd;
+}
+
+.script-list{
+  height: 400px;
+  width: 30%;
+  background-color: #ffffff;
+  overflow: auto;
+}
+
+.script-field{
+  height: 400px;
+  width: 70%;
+  background-color: #cccccc;
+  overflow: auto;
+}
