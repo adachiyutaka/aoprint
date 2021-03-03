@@ -15,6 +15,7 @@
   height: 149px;
 
 }
+
 .player-img-container{
   display: flex;
   align-items: flex-end;
@@ -26,11 +27,30 @@
   left: 25px;
 }
 
+.object-img-container{
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  position: absolute;
+  width: 60px;
+  height: 120px;
+  top: 40px;
+  right: 25px;
+}
+
 .game-container{
 
 }
 
 .player-img{
+  width: 100%;
+  -webkit-filter:drop-shadow(0px -2px 1px rgba(0, 0, 0, 0.2));
+  -moz-filter:drop-shadow(0px -2px 1px rgba(0, 0, 0, 0.2));
+  -ms-filter:drop-shadow(0px -2px 1px rgba(0, 0, 0, 0.2));
+  filter:drop-shadow(0px -2px 1px rgba(0, 0, 0, 0.2));
+}
+
+.object-img{
   width: 100%;
   -webkit-filter:drop-shadow(0px -2px 1px rgba(0, 0, 0, 0.2));
   -moz-filter:drop-shadow(0px -2px 1px rgba(0, 0, 0, 0.2));

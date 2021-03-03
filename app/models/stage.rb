@@ -2,8 +2,9 @@ class Stage < ApplicationRecord
   has_one_attached :image
 
   belongs_to :game
-  has_many :lines
+  has_many :positions
 
+  # 画像をbase64形式のファイルに変換
   def parse_base64(image)
     if image.present?
       content_type = 'png'
@@ -18,6 +19,7 @@ class Stage < ApplicationRecord
   end
 
   private
+  # ファイルをGameObjectのimageとしてアタッチ
   def attach_image(filename)
     image.attach(io: File.open("#{Rails.root}/tmp/#{filename}"), filename: filename)
     FileUtils.rm("#{Rails.root}/tmp/#{filename}")

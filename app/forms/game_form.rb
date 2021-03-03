@@ -1,20 +1,41 @@
 class GameForm
   include ActiveModel::Model
-  attr_accessor :stage_img, :player_img, :name, :text, :user_id
+  attr_accessor :name, :text, :objects, :canvas, :user_id
 
   # with_options presence: true do
   # end
 
   def save
+    # Gameの作成
     @game = Game.create(name: name, text: text, user_id: user_id)
-    stage = Stage.new(game_id: @game.id)
-    stage.save
-    stage.parse_base64(stage_img)
-    Line.create(s_x: 0, s_y: 0, e_x: 0, e_y: 0, stage_id: stage.id)
-    gameObject = GameObject.new(game_id: @game.id)
-    gameObject.save
-    gameObject.parse_base64(player_img)
-    Position.create(x: 0, y: 0, game_object_id: gameObject.id)
+
+    # Stageの作成
+    canvas_size = JSON.parse(canvas, symbolize_names: true)
+    stage = Stage.create(width: canvas_size[:width], height: canvas_size[:height], game_id: @game.id)
+
+    # TODO: 1object対多positionに対応する必要あり
+    # 各オブジェクトを作成
+    JSON.parse(objects, symbolize_names: true).each do |object|
+      # GameObjectの作成
+      game_object = GameObject.new(symbol: object[:symbol], game_id: game.id)
+      case object[:script]
+        when 'object'
+          game_object.object = true
+        when 'player'
+          game_object.player = true
+        when 'enemy'
+          game_object.enemy = true
+      end
+      game_object.save
+      game_object.parse_base64(object[:object])
+
+      # Positionの作成
+      positions = object[:position]
+      position = Position.create(symbol: object[:symbol], x: positions[:x], y: positions[:y], width: positions[:width],  height: positions[:height], stage_id: stage.id)
+      
+      # ObjectPositionの作成
+      object_position = ObjectPosition.create(game_object_id: game_object.id, position_id: position.id)
+    end
   end
 
   def game

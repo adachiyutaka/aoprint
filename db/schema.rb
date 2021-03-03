@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_21_093538) do
+ActiveRecord::Schema.define(version: 2021_02_09_073449) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -34,11 +34,15 @@ ActiveRecord::Schema.define(version: 2020_08_21_093538) do
   end
 
   create_table "game_objects", force: :cascade do |t|
+    t.string "symbol", default: ""
     t.string "name", default: ""
     t.string "text", default: ""
+    t.boolean "player", default: false
+    t.boolean "object", default: false
     t.integer "game_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "enemy", default: false
     t.index ["game_id"], name: "index_game_objects_on_game_id"
   end
 
@@ -51,27 +55,40 @@ ActiveRecord::Schema.define(version: 2020_08_21_093538) do
     t.index ["user_id"], name: "index_games_on_user_id"
   end
 
-  create_table "lines", force: :cascade do |t|
-    t.integer "s_x", null: false
-    t.integer "s_y", null: false
-    t.integer "e_x", null: false
-    t.integer "e_y", null: false
-    t.integer "stage_id"
+  create_table "object_positions", force: :cascade do |t|
+    t.integer "game_object_id"
+    t.integer "position_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["stage_id"], name: "index_lines_on_stage_id"
+    t.index ["game_object_id"], name: "index_object_positions_on_game_object_id"
+    t.index ["position_id"], name: "index_object_positions_on_position_id"
   end
 
   create_table "positions", force: :cascade do |t|
+    t.string "symbol", null: false
     t.integer "x", null: false
     t.integer "y", null: false
+    t.integer "width", null: false
+    t.integer "height", null: false
+    t.string "text", default: ""
+    t.integer "stage_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["stage_id"], name: "index_positions_on_stage_id"
+  end
+
+  create_table "scripts", force: :cascade do |t|
+    t.string "name", default: ""
+    t.string "text", default: ""
     t.integer "game_object_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["game_object_id"], name: "index_positions_on_game_object_id"
+    t.index ["game_object_id"], name: "index_scripts_on_game_object_id"
   end
 
   create_table "stages", force: :cascade do |t|
+    t.integer "width", null: false
+    t.integer "height", null: false
     t.integer "game_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
@@ -94,9 +111,7 @@ ActiveRecord::Schema.define(version: 2020_08_21_093538) do
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "game_objects", "games"
   add_foreign_key "games", "users"
-  add_foreign_key "lines", "stages"
-  add_foreign_key "positions", "game_objects"
-  add_foreign_key "stages", "games"
+  add_foreign_key "object_positions", "game_objects"
+  add_foreign_key "object_positions", "positions"
 end

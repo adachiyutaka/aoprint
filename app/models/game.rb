@@ -4,6 +4,6 @@ class Game < ApplicationRecord
   end
   
   belongs_to :user
-  has_many :game_objects, dependent: :destroy
-  has_many :stages, dependent: :destroy
+  has_many :game_objects
+  has_many :stages
 end

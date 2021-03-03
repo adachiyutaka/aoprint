@@ -10,7 +10,9 @@
       <%= render partial: 'shared/games', collection: @games %>
     </div>
     <%# games一覧 %>
-    <div class='gcv'><%= @result %><div>
+    <div id='read-btn'>テストボタン</div>
+    <div id='result'><%= @result %></div>
+      <img style="max-width: 400px;"><input type="file" accept="image/*" />
   </div>
 </div>
 
@@ -27,7 +29,10 @@
     <div class='modal-content'>
 
       <%# Game#newのフォーム %>
-      <%= form_with id: 'game_form', url: games_path, class: 'game-form', local: true do |f| %>
+      <%= form_with model: @gameForm, id: 'game_form', url: games_path, class: 'game-form', local: true do |f| %>
+
+      <%# png画像変換用のcanvas %>
+      <canvas id='canvas' class='hidden'></canvas>
 
       <%#= render 'shared/error_messages', model: @item %>
       <div class='form-list'>
@@ -43,6 +48,14 @@
             <%= f.file_field :stage_input, class: 'hidden'%>
           </label>
         </div>
+        <p class='list-title'>symbol position object script</p>
+        <div class='object-list' id='objectList'>
+        </div>
+        <p class='list-title'>image list</p>
+        <div class='image-list' id='imageList'>
+        </div>
+        <div class='image-dialog hidden' id='imageDialog'>
+        </div>
         <div class='image-container' id='playerImageContainer'>
           <label class='label' id='player_label'>
             <p class='label-plus'>+</p>
@@ -55,11 +68,23 @@
             <%= f.file_field :player_input, class: 'hidden'%>
           </label>
         </div>
+        <div class='image-container' id='objectImageContainer'>
+          <label class='label' id='object_label'>
+            <p class='label-plus'>+</p>
+            <p class='label-text' id='object-click_or_dd'>
+            クリックかドラッグ＆ドロップでオブジェクト用の画像ファイルをアップロード
+            </p>
+            <p class='label-text hidden' id='object-please_drop'>
+            画像ファイルをドロップしてください
+            </p>
+            <%= f.file_field :object_input, class: 'hidden'%>
+          </label>
+        </div>
         <div id='textContainer'>
           <%= f.text_area :name, class:'name', placeholder:'ゲームのタイトル（40文字まで)', maxlength:'40' %>
           <%= f.text_area :text, class:'text', placeholder:'ゲームの説明' ,rows:'3' ,maxlength:'1000' %>
         </div>
-        <%# png画像変換用のcanvas %>
+        <pre></pre>
         <div class='submit-line'>
           <%= f.submit 'これで遊ぶ' ,class:"submit-btn" %>
         </div>
@@ -72,5 +97,3 @@
     </div>
   </div>
 </div>
-<%# png画像変換用のcanvas %>
-<canvas id='canvas' class='hidden'></canvas>

@@ -52,7 +52,7 @@
 .label{
   display: block;
   height: 190px;
-  width: 600px;
+  width: 640px;
   padding-top: 40px;
   background-color: #1074c5;
   line-height: 70px;
@@ -105,9 +105,9 @@
 }
 
 .split-img{
-  height: 100px;
-  width: 100px;
-  margin-bottom: 10px;
+  height: 80px;
+  width: 80px;
+  margin-right: 8px;
   position: relative;
 }
 
@@ -116,10 +116,55 @@
   justify-content: space-between;
   flex-wrap: wrap;
   height: 190px;
-  width: 600px;
+  width: 640px;
   margin-bottom: 10px;
   background-color: #f7f7f7;
   overflow: auto;
+}
+
+.object-list{
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  flex-wrap: wrap;
+  width: 640px;
+  margin-bottom: 10px;
+  background-color: #f7f7f7;
+  overflow: auto;
+}
+
+.object-card{
+  display: flex;
+  flex-wrap: wrap;
+  padding: 8px;
+  border-bottom: 1px solid #dddddd;
+}
+
+.container{
+  display: flex;
+  margin-right: 16px;
+}
+
+.symbol-input{
+  width: 64px;
+}
+
+.select{
+  width: 64px;
+}
+
+.delete-btn{
+  width: 16px;
+  height: 8px;
+}
+
+.new-btn{
+  height: 80px;
+  width: 80px;
+  margin-right: 16px;
+  font-size: 40pt;
+  background-color: white;
+  color: #333333;
 }
 
 .selected{

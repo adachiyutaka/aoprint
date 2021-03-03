@@ -1,7 +1,9 @@
 class CreateStages < ActiveRecord::Migration[6.0]
   def change
     create_table :stages do |t|
-      t.references :game,       foreign_key: true
+      t.integer :width,       null: false
+      t.integer :height,      null: false
+      t.references :game
 
       t.timestamps
     end

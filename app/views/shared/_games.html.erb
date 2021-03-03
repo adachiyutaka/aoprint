@@ -3,12 +3,17 @@
     <div class='game-container'>
       <div class='game-images'>
         <% unless games.stages[0].nil? %>
-          <%= image_tag games.stages[0].image.variant(resize: '200x200'), class: "stage-img" %>
+          <%# <%= image_tag games.stages[0].image.variant(resize: '200x200'), class: "stage-img" %>
         <% end %>
         <% unless games.game_objects[0].nil? %>
-        <div class='player-img-container'>
-          <%= image_tag games.game_objects[0].image.variant(resize: '200x200'), class: "player-img" %>
-        </div>
+          <div class='player-img-container'>
+            <%# <%= image_tag games.game_objects.where(player: true)[0].image.variant(resize: '200x200'), class: "player-img" %> %>
+          </div>
+        <% end %>
+        <% unless games.game_objects[0].nil? %>
+          <div class='object-img-container'>
+            <%# <%= image_tag games.game_objects.where(object: true)[0].image.variant(resize: '200x200'), class: "object-img" %> %>
+          </div>
         <% end %>
       </div>
       <div class='game-info'>
