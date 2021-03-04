@@ -33,3 +33,39 @@
   background-color: #cccccc;
   overflow: auto;
 }
+
+.script-card{
+  padding: 3px; 
+  background-color: #ffffff;
+  border: solid 1px #666666;
+}
+
+.script-container{
+  padding: 1px;
+  background-color: #dddddd;
+}
+
+.function-name{
+}
+
+.script-input{
+  height: 100%;
+  border: none;
+}
+
+.operator{
+  height: 15px;
+}
+
+.value{
+  border: none;
+}
+
+.row{
+  display: flex;
+  flex-direction: row;
+}
+
+.active{
+  background-color: #99ccee;
+}
