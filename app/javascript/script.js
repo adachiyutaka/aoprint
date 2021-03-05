@@ -8,7 +8,8 @@ const script = () => {
 
   // スクリプト一覧を読み込み、scriptCardを作成
   // readScript(scriptObj, scriptList);
-  readScript(scriptObj, scriptList);
+  readScript(testObj, scriptList);
+  scriptList.children.map((child) => child.classList.add("sample"));
   // let scriptCard = document.createElement('div');
   // scriptCard.classList.add('script-card');
   // scriptCard.insertAdjacentHTML('afterbegin', scriptVX);
@@ -27,7 +28,6 @@ const script = () => {
 
   // scriptList.insertAdjacentElement('afterbegin', scriptCard);
 }
-let N = 0;
 
 const readScript = (obj, ...container) => {
   // 与えられたobjが配列かどうかを判定する
@@ -45,37 +45,44 @@ const readScript = (obj, ...container) => {
     // 配列でない場合、cardを生成し配置
     let card = makeScriptCard();
     container[0].insertAdjacentElement('beforeend', card);
-    
+
     // keyの値によってcardの中にパーツを生成する
     Object.keys(obj).map(key => {
       let value = obj[key];
+      card.classList.add(kebabCase(key));
       switch (key) {
         case 'start':
           addName(card, key);
           readScript(value, makeContainer(card));
           break;
         case 'assignment':
-          left = makeContainer(card);
-          operator = makeContainer(card);
-          operator.insertAdjacentText('beforeend', '=');
-          operator.classList.add('operator');
-          right = makeContainer(card);
-          readScript(value, left, right);
+          // Containerを3つ作成する
+          leftContainer = makeContainer(card);
+          operatorContainer = makeContainer(card);
+          rightContainer = makeContainer(card);
+          // 2番目のContainerに"="を表示したカードを配置する
+          operatorCard = makeScriptCard();
+          operatorCard.insertAdjacentText('beforeend', '=');
+          operatorContainer.insertAdjacentElement('beforeend', operatorCard);
+          // 左辺、右辺のContainerを再起処理する
+          readScript(value, leftContainer, rightContainer);
           break;
         case 'left':
         case 'right':
           readScript(value, card);
           break;
-        case 'member_var':
-          card.classList.add('member-var');
+        case 'memberVar':
           card.insertAdjacentText('beforeend', value);
           break;
         case 'value':
-          card.classList.add('value');
           addInput(card, value);
+          break;
+        case 'commentOut':
+          addName(card, `# ${value}`)
           break;
       }
     });
+    return card
   }
 }
 
@@ -109,71 +116,39 @@ const addInput = (card, value) => {
   card.insertAdjacentElement('beforeend', input);
 }
 
-const scriptObj = {
-  start: {
-    assignment:
-    [
-    {
-      left:
-      [
-        {
-        member_var: "v"
-        },
-        {
-        member_var: "x"
-        }
-      ]
-    },
-    {
-      right: {
-        value: "10"
-      }
-    }
-    ]
-  }
-};
-
-const testObj = {
-  assignment: 
-  [
+const scriptObj = [
+  {commentOut: "横向きの速度を10に設定する"},
   {
-    left:
-    // {member_var: "left"}
-    [
+    start: {
+      assignment:
+      [
       {
-        member_var: "left-1"
+        left:
+        [
+          {
+          memberVar: "v"
+          },
+          {
+          memberVar: "x"
+          }
+        ]
       },
       {
-        member_var: "left-2"
+        right: {
+          value: "10"
+        }
       }
-    ]
-  },
-  {
-    right: {member_var: "right"}
+      ]
+    }
   }
-  ]
-}
+];
 
-let scriptVX = `
-<div class='function-name'>
-  <p>START</p>
-</div>
-<div class='script-card row'>
-  <div class='script-left'>
-    <div class='script-card row'>
-      <input type='text' value='V' class='script-input'>
-      <div class='script-card'>
-        <input type='text' value='X' class='script-input'>
-      </div>
-    </div>
-  </div>
-  <div class='script-card'>
-    <p>=</p>
-  </div>
-  <div class='script-right'>
-    <input type='text' value='10' class='script-input'>
-  </div>
-</div>
-`
+const testObj = [scriptObj, scriptObj];
+
+function kebabCase(str){
+  return str.replace(/[A-Z]/g, function(s){
+    return "-" + s.charAt(0).toLowerCase();
+  });
+}
 
 window.addEventListener('load', script);

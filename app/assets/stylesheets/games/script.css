@@ -61,6 +61,11 @@
   border: none;
 }
 
+.comment-out{
+  color: #666666;
+  border: none;
+}
+
 .row{
   display: flex;
   flex-direction: row;
