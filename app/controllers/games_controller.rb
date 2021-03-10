@@ -63,6 +63,8 @@ class GamesController < ApplicationController
       object[:isObject] = true if obj.object == true
       object[:isPlayer] = true if obj.player == true
       object[:isEnemy] = true if obj.enemy == true
+      object[:isItem] = true if obj.item == true
+      object[:isGoal] = true if obj.goal == true
       objects << object
     end
 
