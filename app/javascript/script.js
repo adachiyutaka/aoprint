@@ -9,7 +9,7 @@ const script = () => {
   // スクリプト一覧を読み込み、scriptCardを作成
   // readScript(scriptObj, scriptList);
   readScript(testObj, scriptList);
-  scriptList.children.map((child) => child.classList.add("sample"));
+  // scriptList.children.map((child) => child.classList.add("sample"));
   // let scriptCard = document.createElement('div');
   // scriptCard.classList.add('script-card');
   // scriptCard.insertAdjacentHTML('afterbegin', scriptVX);

@@ -271,6 +271,8 @@ const makeStageCard = (id, json) =>{
         <option value="object">未選択</option>
         <option value="player">プレイヤー</option>
         <option value="enemy">敵</option>
+        <option value="item">アイテム</option>
+        <option value="goal">ゴール</option>
       </select>
       <div class='object new-btn'>+</div>
     </div>
