@@ -6,27 +6,21 @@ const script = () => {
   const scriptList = document.getElementById('scriptList');
   const scriptField = document.getElementById('scriptField');
 
-  // スクリプト一覧を読み込み、scriptCardを作成
-  // readScript(scriptObj, scriptList);
+  // スクリプト一覧からscriptCardを生成し、scriptListに配置する
   readScript(testObj, scriptList);
-  // scriptList.children.map((child) => child.classList.add("sample"));
-  // let scriptCard = document.createElement('div');
-  // scriptCard.classList.add('script-card');
-  // scriptCard.insertAdjacentHTML('afterbegin', scriptVX);
+  let scriptCards = Array.from(scriptList.children)
+  scriptCards.map((card) => {
+    // scriptCardのリストに'snippet'クラスを与える  
+    card.classList.add("snippet");
+    // 各snippetのカードにクリック時の処理を設定する
+    // card.addEventListener('click', (e) => {
+    //   clone = e.currentTarget.cloneNode(true);
+    //   scriptField.insertAdjacentElement('beforeend', clone);
+    // });
+  });
 
-  // scriptCard.addEventListener('click', (eList) => {
-  //   let cloneCard = eList.currentTarget.cloneNode(true);
-  //   cloneCard.addEventListener('click', (eField) => {
-  //     if (activeCard != null){
-  //       activeCard.classList.remove('active');
-  //     }
-  //     activeCard = eField.currentTarget;
-  //     activeCard.classList.add('active');
-  //   })
-  //   scriptField.insertAdjacentElement('afterbegin', cloneCard);
-  // });
-
-  // scriptList.insertAdjacentElement('afterbegin', scriptCard);
+  // 各snippetのカードにクリック時の処理を設定する
+  scriptCards
 }
 
 const readScript = (obj, ...container) => {
@@ -61,12 +55,13 @@ const readScript = (obj, ...container) => {
           operatorContainer = makeContainer(card);
           rightContainer = makeContainer(card);
           // 2番目のContainerに"="を表示したカードを配置する
-          operatorCard = makeScriptCard();
+          operatorCard = makeScriptCard(false); // 引数にfalseを渡して削除ボタンのないcardを作成する
           operatorCard.insertAdjacentText('beforeend', '=');
           operatorContainer.insertAdjacentElement('beforeend', operatorCard);
           // 左辺、右辺のContainerを再起処理する
           readScript(value, leftContainer, rightContainer);
           break;
+        case 'snippet':
         case 'left':
         case 'right':
           readScript(value, card);
@@ -86,9 +81,21 @@ const readScript = (obj, ...container) => {
   }
 }
 
-const makeScriptCard = () => {
+const makeScriptCard = (deletable = true) => {
   let card = document.createElement('div');
   card.classList.add('script-card');
+  // 引数にfalseを渡した場合、削除ボタンを表示しない
+  if (deletable){
+    let deleteButton = document.createElement('div');
+    deleteButton.insertAdjacentText('afterbegin', 'x');
+    deleteButton.classList.add('delete-button');
+    // 削除ボタンクリックでカードを削除するよう設定
+    deleteButton.addEventListener('click', (e) => {
+      console.log("clicked");
+      e.currentTarget.parentNode.remove;
+    });
+    card.insertAdjacentElement('afterbegin', deleteButton);
+  }
   return card;
 }
 
@@ -116,32 +123,35 @@ const addInput = (card, value) => {
   card.insertAdjacentElement('beforeend', input);
 }
 
-const scriptObj = [
-  {commentOut: "横向きの速度を10に設定する"},
-  {
-    start: {
-      assignment:
-      [
-      {
-        left:
+const scriptObj = {
+  snippet: 
+  [
+    {commentOut: "横向きの速度を10に設定する"},
+    {
+      start: {
+        assignment:
         [
-          {
-          memberVar: "v"
-          },
-          {
-          memberVar: "x"
+        {
+          left:
+          [
+            {
+            memberVar: "v"
+            },
+            {
+            memberVar: "x"
+            }
+          ]
+        },
+        {
+          right: {
+            value: "10"
           }
-        ]
-      },
-      {
-        right: {
-          value: "10"
         }
+        ]
       }
-      ]
     }
-  }
-];
+  ]
+};
 
 const testObj = [scriptObj, scriptObj];
 
