@@ -88,7 +88,7 @@ const makeScriptCard = (deletable = true) => {
   if (deletable){
     let deleteButton = document.createElement('div');
     deleteButton.insertAdjacentText('afterbegin', 'x');
-    deleteButton.classList.add('delete-button');
+    deleteButton.classList.add('script-delete-button');
     // 削除ボタンクリックでカードを削除するよう設定
     deleteButton.addEventListener('click', (e) => {
       console.log("clicked");

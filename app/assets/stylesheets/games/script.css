@@ -35,9 +35,24 @@
 }
 
 .script-card{
+  position: relative;
   padding: 3px; 
   background-color: #ffffff;
   border: solid 1px #666666;
+}
+
+.script-delete-button{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+    font-size: 8px;
+    line-height: 6px;
+    text-align: center;
+    color: white;
+    background-color: #cc5555;
 }
 
 .script-container{
