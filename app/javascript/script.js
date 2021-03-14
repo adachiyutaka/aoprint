@@ -7,16 +7,17 @@ const script = () => {
   const scriptField = document.getElementById('scriptField');
 
   // スクリプト一覧からscriptCardを生成し、scriptListに配置する
-  readScript(testObj, scriptList);
+  readScript(scriptObjAry, scriptList);
   let scriptCards = Array.from(scriptList.children)
   scriptCards.map((card) => {
     // scriptCardのリストに'snippet'クラスを与える  
     card.classList.add("snippet");
     // 各snippetのカードにクリック時の処理を設定する
-    // card.addEventListener('click', (e) => {
-    //   clone = e.currentTarget.cloneNode(true);
-    //   scriptField.insertAdjacentElement('beforeend', clone);
-    // });
+    card.addEventListener('click', (e) => {
+      // readScript(scriptObjAry[scriptCards.indexOf(e.currentTarget)], scriptField);
+      clone = e.currentTarget.cloneNode(true);
+      scriptField.insertAdjacentElement('beforeend', clone);
+    });
   });
 
   // 各snippetのカードにクリック時の処理を設定する
@@ -153,7 +154,7 @@ const scriptObj = {
   ]
 };
 
-const testObj = [scriptObj, scriptObj];
+const scriptObjAry = [scriptObj, scriptObj];
 
 function kebabCase(str){
   return str.replace(/[A-Z]/g, function(s){
