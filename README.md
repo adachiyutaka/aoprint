@@ -1,21 +1,103 @@
-# aoprint
+# アプリ名
+aoprint
 # 概要
 手書きイラストでゲームを作ったり、他の人が作ったゲームで遊んだりするWEBアプリ。
-# URL
-# テスト用アカウント
-# 利用方法
 # コンセプト（目指した課題解決）
 - ゲーム作りをデチューンして、誰でも楽しめるようにする。
 - デジタルデバイスがない状態でもできる遊びで、環境によらずプログラミング的なものと親しむ。
-# 要件
-|機能|目的|詳細|ストーリー(ユースケース)|
-|----|----|----|----|
-|ユーザー管理機能|ユーザーとゲームを紐付け、<br>コミュニケーションの発生を促す|- ユーザー新規登録機能<br>- ログイン機能<br>- ユーザー情報を編集機能<br>- ログアウト機能<br>- ユーザーページ表示機能<br>|- ユーザーを新しく登録できる<br>- ユーザー登録後、ログインできる<br>- ユーザー登録後、ユーザー情報を編集できる<br>- ログアウトできる<br>- ヘッダーから自分のユーザーページが見れる|
-|ゲーム作成機能|ゲームを作成する|- ゲーム素材の画像登録機能<br>- ゲーム作成機能<br>- ゲーム作成方法表示機能|- ゲーム素材の画像を登録できる<br>- ゲーム素材登録後、ゲームを作成できる<br>- ゲームの作り方を知る|
-|ゲーム管理機能|作成後に情報を直せるようにする|- ゲーム編集機能<br>- ゲーム削除機能|- 作ったゲームを編集できる<br>- 作ったゲームを削除できる|
-|ゲームプレイ機能|遊ぶ|- ゲームプレイ機能<br>- タグ機能<br>- 作者ページ表示機能|- ゲームをプレイできる<br>- ゲームにタグを付けられる<br>- ゲームを作った人のユーザーページが見れる|
-|ゲーム一覧機能|他の人のゲームを探しやすくする<br>他の人のやり方を学びやすくする|- ゲーム一覧機能<br>- タグ検索機能<br>- ユーザー検索機能|- ゲームを一覧できる<br>- ゲームをタグで検索できる<br>- ゲームをユーザーから検索できる|
-# 実装説明（GIF画像など）
+# 実装説明
+### TOPページ
+![TOPページ]()
+### ゲームプレイ画面
+![ゲームプレイ画面]()
+
+# 使用技術(開発環境)
+### Ruby(Ruby on Rails)
+WEBページ
+### JavaScript
+ゲーム作成機能
+### Python
+画像の輪郭切り取り処理
+### C#(Unity)
+ゲームプレイ機能
 # 実装予定
+- ゲーム作成GUI
+ゲーム画面を再現したGUIでゲームを作成する
+- スクリプト機能
+ユーザーオリジナルの敵キャラクターなどの動きを作成する
 # DB設計
-# ローカルでの動作方法
+## users テーブル
+| Column         | Type      | Options     |
+| -------------- | --------- | ----------- |
+| email          | string    | null: false |
+| name           | string    | null: false |
+| password       | string    | null: false |
+| text           | string    |             |
+| birthday       | date      |             |
+
+### Association
+- has_many :games, dependent: :destroy
+
+## games テーブル
+| Column         | Type      | Options     |
+| -------------- | --------- | ----------- |
+| name           | string    | null: false |
+| text           | string    |             |
+| user_id        | references| foreign_key: true |
+
+### Association
+- has_many :game_objects, dependent: :destroy
+- belongs_to :user
+
+## game_objects テーブル
+| Column         | Type      | Options     |
+| -------------- | --------- | ----------- |
+| symbole        | string    |             |
+| name           | string    |             |
+| text           | string    |             |
+| player         | boolean   |             |
+| object         | boolean   |             |
+| enemy          | boolean   |             |
+| item           | boolean   |             |
+| goal           | boolean   |             |
+| game_id        | references| foreign_key: true |
+
+### Association
+- has_one :object_position
+- belongs_to :game
+
+## stages テーブル
+| Column         | Type      | Options     |
+| -------------- | --------- | ----------- |
+| width          | string    | null: false |
+| height         | string    | null: false |
+| game_id        | references| foreign_key: true |
+
+### Association
+- has_many :positions, dependent: :destroy
+- belongs_to :game
+
+## positions テーブル
+| Column         | Type      | Options     |
+| -------------- | --------- | ----------- |
+| symbole        | string    | null: false |
+| x              | string    | null: false |
+| y              | string    | null: false |
+| width          | string    | null: false |
+| height         | string    | null: false |
+| text           | string    |             |
+| stage_id       | references| foreign_key: true |
+
+### Association
+- has_one :object_position
+- belongs_to :stage
+
+## object_positions テーブル
+| Column         | Type      | Options     |
+| -------------- | --------- | ----------- |
+| game_object_id | references| foreign_key: true |
+| position_id    | references| foreign_key: true |
+
+### Association
+- belongs_to :game_object
+- belongs_to :position
