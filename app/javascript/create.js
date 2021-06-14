@@ -15,7 +15,7 @@ const create = () => {
       let scriptContainer = card.children[3];
 
       // 入力されたsymbolの値を取得
-      let symbolInput = Array.from(symbolContainer.children).find((o) => o.id == 'symbolInput').value;
+      let symbolInput = Array.from(symbolContainer.children).find((o) => o.id == 'symbol_input').value;
 
       // position表示画像と値を取得
       let positionBase64 = getImage(positionContainer).src;
@@ -25,7 +25,7 @@ const create = () => {
       let objectBase64 = getImage(objectContainer).src;
 
       // scriptの値を取得
-      let script = Array.from(scriptContainer.children).find((o) => o.id == 'scriptSelect').value;
+      let script = Array.from(scriptContainer.children).find((o) => o.id == 'roll_select').value;
 
       // JSONとして配列に加える
       const gameObject = {symbol: symbolInput, position: {height: positions.height, width: positions.width, x: positions.x, y: positions.y, image: positionBase64}, object: objectBase64, script: script};

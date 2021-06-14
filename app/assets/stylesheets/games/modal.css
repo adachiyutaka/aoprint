@@ -19,10 +19,13 @@
 
 /* inside-modal */
 
-.modal-content{
+.modal-container{
   height: 100%;
   padding: 25px 15px 0px 15px;
-  overflow: auto; 
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .preview-container{
@@ -132,6 +135,7 @@
   background-color: #f7f7f7;
   overflow: auto;
 }
+/* object-card */
 
 .object-card{
   display: flex;
@@ -140,18 +144,69 @@
   border-bottom: 1px solid #dddddd;
 }
 
+.content-title{
+  margin-left: 8px;
+  margin-bottom: 8px;
+}
+
+.setting-list{
+  margin-right: 16px;
+}
+
+.setting-card{
+  width: 96px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 3px;
+  background-color: white;
+}
+
+.add-setting-btn{
+  margin-left: 8px;
+}
+
+/* 一時的に非常時 */
+.symbol-input{
+  display: none;
+  width: 64px;
+  margin-bottom: 8px;
+}
+
+/* imageカラム */
+
+/* positionカラム */
+
+.positions{
+  list-style: none;
+}
+
+.positions li{
+  margin-top: 2px;
+}
+
+.position-label{
+  display: flex;
+  flex-direction: row;
+}
+
+.position-name{
+  display: inline-block;
+  width: 56px;
+}
+
+.position-input{
+  display: inline-block;
+  width: 100%;
+}
+
 .container{
   display: flex;
   margin-right: 16px;
 }
 
-.symbol-input{
+/* .select{
   width: 64px;
-}
-
-.select{
-  width: 64px;
-}
+} */
 
 .delete-btn{
   width: 16px;
