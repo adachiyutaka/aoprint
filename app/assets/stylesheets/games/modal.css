@@ -114,6 +114,34 @@
   position: relative;
 }
 
+/* ラベルのインライン表示 */
+.inline-label{
+  display: flex;
+  flex-direction: row;
+}
+
+.label-name{
+  display: inline-block;
+  width: 56px;
+}
+
+/* GUIキャンバス */
+.gui-container{
+  margin-bottom: 16px;
+}
+
+/* 開発中につき一時的に非常時 */
+.rayler-container{
+  display: none;
+}
+/* 開発中につき一時的に非常時 */
+
+.canvas-container{
+  width: 700px;
+  height: 495px;
+  background-color: violet;
+}
+
 .image-container{
   display: flex;
   justify-content: space-between;
@@ -135,6 +163,7 @@
   background-color: #f7f7f7;
   overflow: auto;
 }
+
 /* object-card */
 
 .object-card{
@@ -165,12 +194,13 @@
   margin-left: 8px;
 }
 
-/* 一時的に非常時 */
+/* 開発中につき一時的に非常時 */
 .symbol-input{
   display: none;
   width: 64px;
   margin-bottom: 8px;
 }
+/* 開発中につき一時的に非常時 */
 
 /* imageカラム */
 
@@ -184,16 +214,6 @@
   margin-top: 2px;
 }
 
-.position-label{
-  display: flex;
-  flex-direction: row;
-}
-
-.position-name{
-  display: inline-block;
-  width: 56px;
-}
-
 .position-input{
   display: inline-block;
   width: 100%;
@@ -203,10 +223,6 @@
   display: flex;
   margin-right: 16px;
 }
-
-/* .select{
-  width: 64px;
-} */
 
 .delete-btn{
   width: 16px;

@@ -34,6 +34,26 @@
       <%# png画像変換用のcanvas %>
       <canvas id='canvas' class='hidden'></canvas>
 
+      <div class='gui-container' id='gui_container'>
+        <%# レイヤー設定 %>
+        <div class='rayler-container' id='rayler_container'>
+          <select class='rayler-select' id='rayler_select'>
+            <option value="0">0</option>
+          </select>
+          <div class='add-layer-btn' id='add_layer_btn'>
+          + レイヤー追加
+          </div>
+          <label class='inline-label'>
+            <span class='label-name'>
+            深さ : 
+            </span>
+            <input type='text' class='depth-input' id='depth'>
+          </label>
+        </div>
+        <%# GUIキャンバス %>
+        <div class='canvas-container' id='canvas_container'></div>
+      </div>
+
       <%#= render 'shared/error_messages', model: @item %>
       <div class='object-list' id='objectList'>
 
@@ -69,32 +89,32 @@
               <input type='text' class='symbol-input' id='symbol_input'>
               <ul class='positions'>
                 <li>
-                  <label class='position-label'>
-                    <span class='position-name'>
+                  <label class='inline-label'>
+                    <span class='label-name'>
                     X : 
                     </span>
                     <input type='text' class='position-input' id='x'>
                   </label>
                 </li>
                 <li>
-                  <label class='position-label'>
-                    <span class='position-name'>
+                  <label class='inline-label'>
+                    <span class='label-name'>
                     Y :
                     </span>
                     <input type='text' class='position-input' id='y'>
                   </label>
                 </li>
                 <li>
-                  <label class='position-label'>
-                    <span class='position-name'>
-                    幅 :
+                  <label class='inline-label'>
+                    <span class='label-name'>
+                    横幅 :
                     </span>
                     <input type='text' class='position-input' id='width'>
                   </label>
                 </li>
                 <li>
-                  <label class='position-label'>
-                    <span class='position-name'>
+                  <label class='inline-label'>
+                    <span class='label-name'>
                     高さ :
                     </span>
                     <input type='text' class='position-input' id='height'>
