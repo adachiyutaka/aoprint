@@ -1,4 +1,4 @@
-// import ReadText from "./readText.js"
+import GameObject from './game.js';
 
 const sendImage = () => {
 
@@ -143,31 +143,72 @@ const splitImage = (file, type) => {
 
     // レスポンスを受け取った時の処理
     XHR.onload = () => {
+      // クラステスト
+      let gameObjects = [];
+      const previewContainer = document.getElementById('preview_container');
+      const previewWidth = previewContainer.clientWidth;
+      const previewHeight = previewContainer.clientHeight;
+      // クラステスト
+
+
       // ステージ画像から生成したオブジェクトを表示するレイアウトのid
-      let stageCardId = 0;
+      let index = 0;
 
       // 受け取ったデータをJSON形式にパースする
-      const jsons = JSON.parse(XHR.response);
+      const json = JSON.parse(XHR.response);
+      const images = json['images'];
       
+      // 元画像をpreview画面サイズに合わせるための比 （プレビューサイズ / 元画像サイズ）
+      const xRatio = previewWidth /json['width'];
+      const yRatio = previewHeight / json['height'];
+
       // 画像を格納するdivタグ要素を取得
       const objectList = document.getElementById(`objectList`);
       const imageList = document.getElementById(`imageList`);
 
       // 各データに対応するimgタグを生成する
-      jsons.forEach( (json) => {
+      images.forEach( (image) => {
         // 分割した画像をimg要素に設定
         let img = document.createElement('img');
-        img.src = `data:image/png;base64,${json['image']}`;
+        img.src = `data:image/png;base64,${image['image']}`;
+        let previewImg = img.cloneNode();
         img.classList.add('split-img');
 
+
+        // クラステスト
+        let gameObject = new GameObject();
+        // let position = new Position();
+        gameObject.image = `data:image/png;base64,${image['image']}`;
+        let vertices = image['vertices'];
+        gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height']);
+
+        console.log(gameObject);
+
+        // 切り取った画像のサイズと位置を設定
+        previewImg.style.position = "absolute";
+        previewImg.style.left = (vertices['x'] * xRatio).toString() + "px";
+        previewImg.style.top = (vertices['y'] * yRatio).toString() + "px";
+        previewImg.style.width = (vertices['width'] * xRatio).toString() + "px";
+        previewImg.style.height = (vertices['height'] * yRatio).toString() + "px";
+        previewImg.dataset.gameObjectId = index;
+
+        // リスナーを設定
+
+        // 配置
+        previewContainer.appendChild(previewImg);
+        // クラステスト
+
+
+
+
         // 画像がステージかキャラクターかで条件分岐
-        let type = json['type'];
+        let type = image['type'];
         if (type == 'stage') {
           // ステージ画像の場合
 
           // 分割した画像ごとにステージカードのリストを生成し、objectListに挿入
-          objectList.insertAdjacentHTML("beforeend", makeStageCard(stageCardId, json));
-          const card = document.getElementById(`${stageCardId}`);
+          objectList.insertAdjacentHTML("beforeend", makeStageCard(index, json));
+          const card = document.getElementById(`${index}`);
 
           // カード内のシンボル、位置、オブジェクトを配置するコンテナ要素を取得
           let symbolContainer = card.children[0];
@@ -226,7 +267,7 @@ const splitImage = (file, type) => {
           });
 
           // ステージカードのid
-          stageCardId += 1
+          index += 1
 
         } else if (type == 'character') {
           // キャラクター画像の場合
@@ -258,8 +299,10 @@ const makeStageCard = (id, json) =>{
       <input type='text' class='symbol-input' id='symbolInput'>
     </div>
     <div class='position container'>
-      <div id='vertices' ${verticesDataTag(json)}></div>
-      <div class='delete-btn' id='deleteButton'>削除</div>
+
+
+
+    <div class='delete-btn' id='deleteButton'>削除</div>
       <div class='position-indicator'></div>
     </div>
     <div class='object container'>
@@ -281,14 +324,17 @@ const makeStageCard = (id, json) =>{
   return card
 }
 
-const verticesDataTag = (json) => {
-  let dataset = '';
-  vertices = json['vertices']
-  for (key in vertices) {
-    dataset += (`data-${key}=${vertices[key]} `)
-  }
-  return dataset
-}
+// <div id='vertices' ${verticesDataTag(json)}></div>
+
+
+// const verticesDataTag = (json) => {
+//   let dataset = '';
+//   let vertices = json['vertices'];
+//   for (key in vertices) {
+//     dataset += (`data-${key}=${vertices[key]} `);
+//   }
+//   return dataset;
+// }
 
 const makeRadioButton = (img) => {
   // 該当するtypeの"selected"クラスを全てはずし、選択されたimgタグに"selected"classを付ける
@@ -320,6 +366,15 @@ const resetSelect = (img) => {
   splitImages.forEach( (splitImage) => {
     splitImage.classList.remove('selected');
   });
+}
+
+const setPosition = (image, vertices) => {
+  image.style.position = "absolute";
+  image.style.left = (vertices['x'] * xRatio).toString() + "px";
+  image.style.top = (vertices['y'] * yRatio).toString() + "px";
+  image.style.width = (vertices['width'] * xRatio).toString() + "px";
+  image.style.height = (vertices['height'] * yRatio).toString() + "px";
+  return image
 }
 
 const sendAPI = (base64string) => {

@@ -36,8 +36,8 @@
 
       <div class='gui-container' id='gui_container'>
         <%# レイヤー設定 %>
-        <div class='rayler-container' id='rayler_container'>
-          <select class='rayler-select' id='rayler_select'>
+        <div class='layer-container' id='layer_container'>
+          <select class='layer-select' id='layer_select'>
             <option value="0">0</option>
           </select>
           <div class='add-layer-btn' id='add_layer_btn'>
@@ -50,8 +50,12 @@
             <input type='text' class='depth-input' id='depth'>
           </label>
         </div>
-        <%# GUIキャンバス %>
-        <div class='canvas-container' id='canvas_container'></div>
+        <%# GUI %>
+        <div class='preview-container' id='preview_container'>
+          <div class='add-object-btn' id='add_object_btn'>
+            + 追加
+          </div>
+        </div>
       </div>
 
       <%#= render 'shared/error_messages', model: @item %>

@@ -131,15 +131,28 @@
 }
 
 /* 開発中につき一時的に非常時 */
-.rayler-container{
+.layer-container{
   display: none;
 }
 /* 開発中につき一時的に非常時 */
 
-.canvas-container{
+.preview-container{
+  position: relative;
   width: 700px;
   height: 495px;
+  border-radius: 3px;
   background-color: violet;
+}
+
+.add-object-btn{
+  position: absolute;
+  bottom: 50px;
+  left: 100px;
+  z-index: 1;
+  width: 100px;
+  height: 100px;
+  border-radius: 3px;
+  background-color: white;
 }
 
 .image-container{
