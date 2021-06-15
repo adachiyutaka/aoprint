@@ -63,7 +63,7 @@
 
       <%# object card %>
       <%# id要編集 %>
-      <div class='object-card' id='#'>
+      <div class='object-info' id='object_info'>
         <%# imageカラム %>
         <div class='image-cotainer' id='image_cotainer'>
           <p class='content-title'>
@@ -73,7 +73,7 @@
             <div class='setting-card' id='setting_card'>
               <input type='text' class='symbol-input' id='symbol_input'>
               <%# script側から作成するので本来は不要 %>
-              <img src='#' class='split-img'>
+              <img src='#' class='info-image' id='info_image'>
             </div>
           </div>
           <div class='add-setting-btn' id='add_image_btn'>
@@ -91,7 +91,7 @@
           <div class='setting-list' id='setting_list'>
             <div class='setting-card' id='setting_card'>
               <input type='text' class='symbol-input' id='symbol_input'>
-              <ul class='positions'>
+              <ul class='positions' id='positions'>
                 <li>
                   <label class='inline-label'>
                     <span class='label-name'>

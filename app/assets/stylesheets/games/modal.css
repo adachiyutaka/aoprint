@@ -179,11 +179,16 @@
 
 /* object-card */
 
-.object-card{
+.object-info{
   display: flex;
   flex-wrap: wrap;
   padding: 8px;
   border-bottom: 1px solid #dddddd;
+}
+
+.info-image{
+  height: 80px;
+  width: 80px;
 }
 
 .content-title{
@@ -252,7 +257,7 @@
 }
 
 .selected{
-  border: 3px solid #1074c5;
+  outline: 1px solid #1074c5;
 }
 
 .hidden{

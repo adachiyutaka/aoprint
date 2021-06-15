@@ -7,17 +7,38 @@ class GameObject {
     this.script = "";
   }
 
-  setPosition(x, y, width, height) {
-    this.position = new Position(x, y, width, height);
+  setPosition(x, y, width, height, xRatio, yRatio) {
+    this.position = new Position(x, y, width, height, xRatio, yRatio);
   }
 }
 
 class Position {
-  constructor(x, y, width, height) {
+  constructor(x, y, width, height, xRatio, yRatio) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
+    this.xRatio = xRatio;
+    this.yRatio = yRatio;
+  }
+
+  modifyScale(memberName){
+    let result;
+    switch(memberName){
+      case 'x':
+        result = this.x * this.xRatio;
+        break
+      case 'y':
+        result = this.y * this.yRatio;
+        break
+      case 'width':
+        result = this.width * this.xRatio;
+        break
+      case 'height':
+        result = this.height * this.yRatio;
+        break
+    }
+    return result;
   }
 }
 

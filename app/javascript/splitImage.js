@@ -148,6 +148,16 @@ const splitImage = (file, type) => {
       const previewContainer = document.getElementById('preview_container');
       const previewWidth = previewContainer.clientWidth;
       const previewHeight = previewContainer.clientHeight;
+
+      document.getElementById('x').addEventListener('input', (e) => {imageMover(e, gameObjects)});
+      document.getElementById('y').addEventListener('input', (e) => {imageMover(e, gameObjects)});
+      document.getElementById('width').addEventListener('input', (e) => {imageMover(e, gameObjects)});
+      document.getElementById('height').addEventListener('input', (e) => {imageMover(e, gameObjects)});
+
+      // document.getElementById('y').value = gameObject.position.y;
+      // document.getElementById('width').value = gameObject.position.width;
+      // document.getElementById('height').value = gameObject.position.height;
+
       // クラステスト
 
 
@@ -159,8 +169,8 @@ const splitImage = (file, type) => {
       const images = json['images'];
       
       // 元画像をpreview画面サイズに合わせるための比 （プレビューサイズ / 元画像サイズ）
-      const xRatio = previewWidth /json['width'];
-      const yRatio = previewHeight / json['height'];
+      let xRatio = previewWidth / json['width'];
+      let yRatio = previewHeight / json['height'];
 
       // 画像を格納するdivタグ要素を取得
       const objectList = document.getElementById(`objectList`);
@@ -180,19 +190,33 @@ const splitImage = (file, type) => {
         // let position = new Position();
         gameObject.image = `data:image/png;base64,${image['image']}`;
         let vertices = image['vertices'];
-        gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height']);
-
-        console.log(gameObject);
+        gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height'], xRatio, yRatio);
+        gameObjects.push(gameObject);
 
         // 切り取った画像のサイズと位置を設定
         previewImg.style.position = "absolute";
-        previewImg.style.left = (vertices['x'] * xRatio).toString() + "px";
-        previewImg.style.top = (vertices['y'] * yRatio).toString() + "px";
-        previewImg.style.width = (vertices['width'] * xRatio).toString() + "px";
-        previewImg.style.height = (vertices['height'] * yRatio).toString() + "px";
+        previewImg.classList.add('previewImage');
+        previewImg.dataset.gameObjectId = index;
+        let position = gameObject.position;
+        previewImg.style.left = position.modifyScale('x').toString() + "px";
+        previewImg.style.top = position.modifyScale('y').toString() + "px";
+        previewImg.style.width = position.modifyScale('width').toString() + "px";
+        previewImg.style.height = position.modifyScale('height').toString() + "px";
         previewImg.dataset.gameObjectId = index;
 
-        // リスナーを設定
+        // preview内のgameObjectにリスナーを設定
+        previewImg.addEventListener('click', (e) => {
+          // オブジェクトリストの該当gameObjectを選択する処理
+          
+          makeRadioButton(e.currentTarget);
+          let gameObject = gameObjects[previewImg.dataset.gameObjectId];
+          document.getElementById('info_image').src = gameObject.image;
+          document.getElementById('x').value = gameObject.position.x;
+          document.getElementById('y').value = gameObject.position.y;
+          document.getElementById('width').value = gameObject.position.width;
+          document.getElementById('height').value = gameObject.position.height;
+        });
+
 
         // 配置
         previewContainer.appendChild(previewImg);
@@ -336,45 +360,62 @@ const makeStageCard = (id, json) =>{
 //   return dataset;
 // }
 
-const makeRadioButton = (img) => {
-  // 該当するtypeの"selected"クラスを全てはずし、選択されたimgタグに"selected"classを付ける
-  resetSelect(img);
-  addSelect(img);
+const makeRadioButton = (element) => {
+  // 同じクラス名を持つ全ての要素の"selected"クラスを外し、選択されたimg要素に"selected"classを付ける
+  resetSelect(element);
+  addSelect(element);
 }
 
-const addCheckBox = (img) => {
-  img.addEventListener('click', (e) => {
-    if (img.classList.contains('selected') == true) {
-      removeSelect(img);
+const addCheckBox = (element) => {
+  element.addEventListener('click', (e) => {
+    if (element.classList.contains('selected') == true) {
+      removeSelect(element);
     } else {
-      addSelect(img);
+      addSelect(element);
     }
   });
 }
 
-const addSelect = (img) => {
-  img.classList.add('selected');
+const addSelect = (element) => {
+  element.classList.add('selected');
 }
 
-const removeSelect = (img) => {
-  img.classList.remove('selected');
+const removeSelect = (element) => {
+  element.classList.remove('selected');
 }
 
-const resetSelect = (img) => {
-  const type = img.classList[1];
-  let splitImages = Array.from(document.getElementsByClassName(`split-img ${type} selected`));
-  splitImages.forEach( (splitImage) => {
-    splitImage.classList.remove('selected');
+const resetSelect = (element) => {
+  const className = element.classList[0];
+  let Images = Array.from(document.querySelectorAll('.selected'));
+  Images.forEach( (image) => {
+    image.classList.remove('selected');
   });
 }
 
-const setPosition = (image, vertices) => {
-  image.style.position = "absolute";
-  image.style.left = (vertices['x'] * xRatio).toString() + "px";
-  image.style.top = (vertices['y'] * yRatio).toString() + "px";
-  image.style.width = (vertices['width'] * xRatio).toString() + "px";
-  image.style.height = (vertices['height'] * yRatio).toString() + "px";
-  return image
+const imageMover = (e, gameObjects) => {
+  let image = document.querySelector('.selected');
+  let gameObject = gameObjects[image.dataset.gameObjectId];
+  let position = gameObject.position;
+  let value = e.currentTarget.value;
+  
+  switch(e.currentTarget.id){
+    case 'x':
+      gameObject.position.x = value;
+      image.style.left = position.modifyScale('x').toString() + 'px';
+      break
+    case 'y':
+      gameObject.position.y = value;
+      image.style.top = position.modifyScale('y').toString() + 'px';
+      break
+    case 'width':
+      gameObject.position.width = value;
+      image.style.width = position.modifyScale('width').toString() + 'px';
+      break
+    case 'height':
+      gameObject.position.height = value;
+      image.style.height = position.modifyScale('height').toString() + 'px';
+      break
+  }
 }
 
 const sendAPI = (base64string) => {
