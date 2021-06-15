@@ -256,6 +256,16 @@
   color: #333333;
 }
 
+.drag-and-drop {
+  cursor: move;
+  position: absolute;
+  z-index: 1000;
+}
+
+.drag {
+  z-index: 1001;
+}
+
 .selected{
   outline: 1px solid #1074c5;
 }
