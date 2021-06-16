@@ -114,7 +114,7 @@ const splitImage = (file, type) => {
     // XHR.setRequestHeader("X-CSRF-Token", token);  // リクエストヘッダーを追加（セキュリティトークンの追加）
 
     // // sendでリクエストを送信する
-    // var data = {};
+    // game data = {};
     // data.url = imgURL;
     // var json = JSON.stringify(data);
     // XHR.send(json);
@@ -143,23 +143,21 @@ const splitImage = (file, type) => {
 
     // レスポンスを受け取った時の処理
     XHR.onload = () => {
-      // クラステスト
       let gameObjects = [];
       const previewContainer = document.getElementById('preview_container');
       const previewWidth = previewContainer.clientWidth;
       const previewHeight = previewContainer.clientHeight;
 
-      document.getElementById('x').addEventListener('input', (e) => {imageMover(e, gameObjects)});
-      document.getElementById('y').addEventListener('input', (e) => {imageMover(e, gameObjects)});
-      document.getElementById('width').addEventListener('input', (e) => {imageMover(e, gameObjects)});
-      document.getElementById('height').addEventListener('input', (e) => {imageMover(e, gameObjects)});
-
-      // document.getElementById('y').value = gameObject.position.y;
-      // document.getElementById('width').value = gameObject.position.width;
-      // document.getElementById('height').value = gameObject.position.height;
-
-      // クラステスト
-
+      // info欄のエレメントを取得
+      const infoX = document.getElementById('x');
+      const infoY = document.getElementById('y')
+      const infoWidth = document.getElementById('width');
+      const infoHeight = document.getElementById('height');
+      // info欄のエレメントが変更された際に、GUIを更新するリスナーを設定
+      infoX.addEventListener('input', (e) => {imageMover(e, gameObjects)});
+      infoY.addEventListener('input', (e) => {imageMover(e, gameObjects)});
+      infoWidth.addEventListener('input', (e) => {imageMover(e, gameObjects)});
+      infoHeight.addEventListener('input', (e) => {imageMover(e, gameObjects)});
 
       // ステージ画像から生成したオブジェクトを表示するレイアウトのid
       let index = 0;
@@ -169,8 +167,8 @@ const splitImage = (file, type) => {
       const images = json['images'];
       
       // 元画像をpreview画面サイズに合わせるための比 （プレビューサイズ / 元画像サイズ）
-      let xRatio = previewWidth / json['width'];
-      let yRatio = previewHeight / json['height'];
+      const xRatio = previewWidth / json['width'];
+      const yRatio = previewHeight / json['height'];
 
       // 画像を格納するdivタグ要素を取得
       const objectList = document.getElementById(`objectList`);
@@ -184,8 +182,6 @@ const splitImage = (file, type) => {
         let previewImg = img.cloneNode();
         img.classList.add('split-img');
 
-
-        // クラステスト
         let gameObject = new GameObject();
         // let position = new Position();
         gameObject.image = `data:image/png;base64,${image['image']}`;
@@ -206,9 +202,10 @@ const splitImage = (file, type) => {
         previewImg.dataset.gameObjectId = index;
 
         // preview内のgameObjectにリスナーを設定
-        previewImg.addEventListener('click', (e) => {
-          // オブジェクトリストの該当gameObjectを選択する処理
-          
+        previewImg.addEventListener('mousedown', selectGameObject);
+
+        // info欄の表示切り替えとgameObjectの枠線表示
+        function selectGameObject(e){
           makeRadioButton(e.currentTarget);
           let gameObject = gameObjects[previewImg.dataset.gameObjectId];
           document.getElementById('info_image').src = gameObject.image;
@@ -216,15 +213,10 @@ const splitImage = (file, type) => {
           document.getElementById('y').value = gameObject.position.y;
           document.getElementById('width').value = gameObject.position.width;
           document.getElementById('height').value = gameObject.position.height;
-        });
-
+        }
 
         // 配置
         previewContainer.appendChild(previewImg);
-        // クラステスト
-
-
-
 
         // 画像がステージかキャラクターかで条件分岐
         let type = image['type'];
@@ -303,14 +295,14 @@ const splitImage = (file, type) => {
       });
 
       // D&Dの設定
-      var elements = document.getElementsByClassName("drag-and-drop");
+      let elements = document.getElementsByClassName("drag-and-drop");
 
       //要素内のクリックされた位置を取得するグローバル（のような）変数
-      var x;
-      var y;
+      let x;
+      let y;
   
       //マウスが要素内で押されたとき、又はタッチされたとき発火
-      for(var i = 0; i < elements.length; i++) {
+      for(let i = 0; i < elements.length; i++) {
           elements[i].addEventListener("mousedown", mdown, false);
           elements[i].addEventListener("touchstart", mdown, false);
       }
@@ -319,12 +311,13 @@ const splitImage = (file, type) => {
       function mdown(e) {
         //クラス名に .drag を追加
         this.classList.add("drag");
+        let event;
 
         //タッチデイベントとマウスのイベントの差異を吸収
         if(e.type === "mousedown") {
-            var event = e;
+            event = e;
         } else {
-            var event = e.changedTouches[0];
+            event = e.changedTouches[0];
         }
 
         //要素内の相対座標を取得
@@ -334,38 +327,51 @@ const splitImage = (file, type) => {
         //ムーブイベントにコールバック
         document.body.addEventListener("mousemove", mmove, false);
         document.body.addEventListener("touchmove", mmove, false);
+
+        //マウスボタンが離されたとき、またはカーソルが外れたとき発火
+        this.addEventListener("mouseup", mup, false);
+        document.body.addEventListener("mouseleave", mup, false);
+        this.addEventListener("touchend", mup, false);
+        document.body.addEventListener("touchleave", mup, false);
       }
 
       //マウスカーソルが動いたときに発火
       function mmove(e) {
 
         //ドラッグしている要素を取得
-        var drag = document.querySelector(".drag");
+        let drag = document.querySelector(".drag");
+        let event;
 
         //同様にマウスとタッチの差異を吸収
         if(e.type === "mousemove") {
-            var event = e;
+            event = e;
         } else {
-            var event = e.changedTouches[0];
+            event = e.changedTouches[0];
         }
 
         //フリックしたときに画面を動かさないようにデフォルト動作を抑制
         e.preventDefault();
 
+        let previewX = e.pageX - x;
+        let previewY = e.pageY - y;
+        let originalX = Math.round(previewX / xRatio);
+        let originalY = Math.round(previewY / yRatio);
         //マウスが動いた場所に要素を動かす
-        drag.style.top = event.pageY - y + "px";
-        drag.style.left = event.pageX - x + "px";
+        drag.style.left = previewX + "px";
+        drag.style.top = previewY + "px";
 
-        //マウスボタンが離されたとき、またはカーソルが外れたとき発火
-        drag.addEventListener("mouseup", mup, false);
-        document.body.addEventListener("mouseleave", mup, false);
-        drag.addEventListener("touchend", mup, false);
-        document.body.addEventListener("touchleave", mup, false);
+        // info欄の値を更新する
+        infoX.value = originalX;
+        infoY.value = originalY;
+        // gameObjectの値を更新する
+        let gameObject = gameObjects[drag.dataset.gameObjectId];
+        gameObject.position.x = originalX;
+        gameObject.position.y = originalY;
       }
 
       //マウスボタンが上がったら発火
       function mup(e) {
-        var drag = document.querySelector(".drag");
+        let drag = document.querySelector(".drag");
 
         //ムーブベントハンドラの消去
         document.body.removeEventListener("mousemove", mmove, false);
