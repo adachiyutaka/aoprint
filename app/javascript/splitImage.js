@@ -341,7 +341,6 @@ const splitImage = (file, type) => {
 
         //ドラッグしている要素を取得
         var drag = document.querySelector(".drag");
-        console.log(drag);
 
         //同様にマウスとタッチの差異を吸収
         if(e.type === "mousemove") {
@@ -370,12 +369,13 @@ const splitImage = (file, type) => {
 
         //ムーブベントハンドラの消去
         document.body.removeEventListener("mousemove", mmove, false);
-        drag.removeEventListener("mouseup", mup, false);
         document.body.removeEventListener("touchmove", mmove, false);
-        drag.removeEventListener("touchend", mup, false);
-
-        //クラス名 .drag も消す
-        drag.classList.remove("drag");
+        if (drag) {
+          drag.removeEventListener("mouseup", mup, false);
+          drag.removeEventListener("touchend", mup, false);
+          //クラス名 .drag も消す
+          drag.classList.remove("drag");
+        }
       }
       // D&Dの設定
 
