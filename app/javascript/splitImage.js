@@ -153,12 +153,14 @@ const splitImage = (file, type) => {
       const infoY = document.getElementById('y')
       const infoWidth = document.getElementById('width');
       const infoHeight = document.getElementById('height');
+      const infoScript = document.getElementById('role_select');
       // info欄のエレメントが変更された際に、GUIを更新するリスナーを設定
       infoX.addEventListener('input', (e) => {imageMover(e, gameObjects)});
       infoY.addEventListener('input', (e) => {imageMover(e, gameObjects)});
       infoWidth.addEventListener('input', (e) => {imageMover(e, gameObjects)});
       infoHeight.addEventListener('input', (e) => {imageMover(e, gameObjects)});
-
+      infoHeight.addEventListener('input', (e) => {imageMover(e, gameObjects)});
+      infoScript.addEventListener('change', (e) => {imageMover(e, gameObjects)});
       // ステージ画像から生成したオブジェクトを表示するレイアウトのid
       let index = 0;
 
@@ -208,11 +210,15 @@ const splitImage = (file, type) => {
         function selectGameObject(e){
           makeRadioButton(e.currentTarget);
           let gameObject = gameObjects[previewImg.dataset.gameObjectId];
+          let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
+          
           document.getElementById('info_image').src = gameObject.image;
           document.getElementById('x').value = gameObject.position.x;
           document.getElementById('y').value = gameObject.position.y;
           document.getElementById('width').value = gameObject.position.width;
           document.getElementById('height').value = gameObject.position.height;
+          document.getElementById('role_select').selectedIndex = roleIndex[gameObject.script];     
+          console.log(gameObject);   
         }
 
         // 配置
@@ -500,6 +506,9 @@ const imageMover = (e, gameObjects) => {
     case 'height':
       gameObject.position.height = value;
       image.style.height = position.modifyScale('height').toString() + 'px';
+      break
+    case 'role_select':
+      gameObject.script = value;
       break
   }
 }
