@@ -1,5 +1,9 @@
 import GameObject from './game.js';
 
+// ゲーム作成画面の編集内容を一時保存するオブジェクト
+window.gameObjects = [];
+window.gameImages = [];
+
 const sendImage = () => {
 
   // リスナーをセットするステージフォーム要素を取得
@@ -143,24 +147,23 @@ const splitImage = (file, type) => {
 
     // レスポンスを受け取った時の処理
     XHR.onload = () => {
-      let gameObjects = [];
       const previewContainer = document.getElementById('preview_container');
       const previewWidth = previewContainer.clientWidth;
       const previewHeight = previewContainer.clientHeight;
 
       // info欄のエレメントを取得
       const infoX = document.getElementById('x');
-      const infoY = document.getElementById('y')
+      const infoY = document.getElementById('y');
       const infoWidth = document.getElementById('width');
       const infoHeight = document.getElementById('height');
       const infoScript = document.getElementById('role_select');
       // info欄のエレメントが変更された際に、GUIを更新するリスナーを設定
-      infoX.addEventListener('input', (e) => {imageMover(e, gameObjects)});
-      infoY.addEventListener('input', (e) => {imageMover(e, gameObjects)});
-      infoWidth.addEventListener('input', (e) => {imageMover(e, gameObjects)});
-      infoHeight.addEventListener('input', (e) => {imageMover(e, gameObjects)});
-      infoHeight.addEventListener('input', (e) => {imageMover(e, gameObjects)});
-      infoScript.addEventListener('change', (e) => {imageMover(e, gameObjects)});
+      infoX.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+      infoY.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+      infoWidth.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+      infoHeight.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+      infoHeight.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+      infoScript.addEventListener('change', (e) => {imageMover(e, window.gameObjects)});
       // ステージ画像から生成したオブジェクトを表示するレイアウトのid
       let index = 0;
 
@@ -189,7 +192,7 @@ const splitImage = (file, type) => {
         gameObject.image = `data:image/png;base64,${image['image']}`;
         let vertices = image['vertices'];
         gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height'], xRatio, yRatio);
-        gameObjects.push(gameObject);
+        window.gameObjects.push(gameObject);
 
         // 切り取った画像のサイズと位置を設定
         previewImg.style.position = "absolute";
@@ -209,7 +212,7 @@ const splitImage = (file, type) => {
         // info欄の表示切り替えとgameObjectの枠線表示
         function selectGameObject(e){
           makeRadioButton(e.currentTarget);
-          let gameObject = gameObjects[previewImg.dataset.gameObjectId];
+          let gameObject = window.gameObjects[previewImg.dataset.gameObjectId];
           let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
           
           document.getElementById('info_image').src = gameObject.image;
@@ -370,7 +373,7 @@ const splitImage = (file, type) => {
         infoX.value = originalX;
         infoY.value = originalY;
         // gameObjectの値を更新する
-        let gameObject = gameObjects[drag.dataset.gameObjectId];
+        let gameObject = window.gameObjects[drag.dataset.gameObjectId];
         gameObject.position.x = originalX;
         gameObject.position.y = originalY;
       }
@@ -484,6 +487,7 @@ const resetSelect = (element) => {
   });
 }
 
+// info欄が更新された際にGUI内の該当するオブジェクトの描画位置を更新する
 const imageMover = (e, gameObjects) => {
   let image = document.querySelector('.selected');
   let gameObject = gameObjects[image.dataset.gameObjectId];

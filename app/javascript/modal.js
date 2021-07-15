@@ -1,15 +1,15 @@
 const modal = () => {
-  const button = document.getElementById('create-btn');
-  const modalBackground = document.getElementById('modal-background');
-  const exit = document.getElementById('exit-btn');
+  const gameButton = document.getElementById('create_btn');
+  const modalBackground = document.getElementById('modal_background');
+  const modalParent = document.getElementById('modal_parent');
+  const gameExit = document.getElementById('exit_btn');
 
-  
-  button.addEventListener('click', () => {
-    modalBackground.style.display = 'block';
+  gameButton.addEventListener('click', () => {
+    modalParent.style.display = 'block';
   });
   
-  exit.addEventListener('click', () => {
-    modalBackground.style.display = 'none';
+  gameExit.addEventListener('click', () => {
+    modalParent.style.display = 'none';
   });
 }
 

@@ -18,14 +18,16 @@
 
 <%# games#new ボタン %>
 <% if user_signed_in? %>
-  <div class='create-btn' id='create-btn'>
+  <div class='create-btn' id='create_btn'>
     <span class='create-btn-text'>作る</span>
   </div>
 <% end %>
 
 <%# games#new モーダル %>
-<div class='modal-background' id='modal-background'>
-  <div class='modal' id='modal'>
+<div class='modal-parent' id='modal_parent'>
+  <div class='modal-background' id='modal_background'></div>
+  <div class='image-modal'  id='image_modal'>M</div>
+  <div class='game-modal' id='game_modal'>
     <div class='modal-container'>
 
       <%# Game#newのフォーム %>
@@ -34,6 +36,7 @@
       <%# png画像変換用のcanvas %>
       <canvas id='canvas' class='hidden'></canvas>
 
+      <%# gui %>
       <div class='gui-container' id='gui_container'>
         <%# レイヤー設定 %>
         <div class='layer-container' id='layer_container'>
@@ -243,7 +246,7 @@
       <% end %>
       <%# Game#newのフォーム %>
 
-      <div class='exit-btn' id='exit-btn'>×</div>
+      <div class='exit-btn' id='exit_btn'>×</div>
 
     </div>
   </div>
