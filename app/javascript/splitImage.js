@@ -175,6 +175,8 @@ const splitImage = (file, type) => {
       const xRatio = previewWidth / json['width'];
       const yRatio = previewHeight / json['height'];
 
+      console.log(`xRatio: ${xRatio} / yRatio: ${yRatio}`);
+
       // 画像を格納するdivタグ要素を取得
       const objectList = document.getElementById(`objectList`);
       const imageList = document.getElementById(`imageList`);
