@@ -1,18 +1,19 @@
+import CreateController from './create-controller';
+
 const zoom = () => {
   const number = document.getElementById('zoom_number');
   const range = document.getElementById('zoom_range');
-  
+  const create_controller = new CreateController();
+
   range.addEventListener('input', (e) => {
     number.value = range.value;
-    console.log(`range value: ${range.vale}`);
+    create_controller.setZoom(range.value);
   });
 
   number.addEventListener('input', (e) => {
     range.value = number.value;
-
-    console.log(`number value: ${number.vale}`);
+    create_controller.setZoom(number.value);
   });
-  console.log("here");
 }
 
 window.addEventListener('load', zoom);

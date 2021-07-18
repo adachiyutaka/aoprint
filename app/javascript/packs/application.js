@@ -15,6 +15,8 @@ require("../create")
 require("../script")
 require("../game")
 require("../zoom")
+require("../move")
+require("../create-controller")
 
 
 // Uncomment to copy all static images under ../images to the output folder and reference

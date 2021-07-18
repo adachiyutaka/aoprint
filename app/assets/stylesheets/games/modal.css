@@ -299,3 +299,7 @@
 .hidden{
   display: none;
 }
+
+.cursor_hand{
+  position: fixed;
+}
