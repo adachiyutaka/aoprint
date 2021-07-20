@@ -156,6 +156,7 @@
   margin-bottom: 16px;
 }
 
+
 /* 開発中につき一時的に非常時 */
 .layer-container{
   display: none;
@@ -167,7 +168,7 @@
   width: 700px;
   height: 495px;
   border-radius: 3px;
-  background-color: violet;
+  background-color: #f7f7f7;
 }
 
 .add-object-btn{

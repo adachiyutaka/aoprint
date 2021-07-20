@@ -15,7 +15,7 @@ require("../create")
 require("../script")
 require("../game")
 require("../zoom")
-require("../move")
+require("../hand-move")
 require("../create-controller")
 
 

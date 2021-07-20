@@ -323,6 +323,8 @@ const splitImage = (file, type) => {
         //クラス名に .drag を追加
         this.classList.add("drag");
         let event;
+        
+        console.log(`mdown target: ${e.currentTarget.dataset.gameObjectId}`);
 
         //タッチデイベントとマウスのイベントの差異を吸収
         if(e.type === "mousedown") {
@@ -331,6 +333,9 @@ const splitImage = (file, type) => {
             event = e.changedTouches[0];
         }
 
+        // 重なった他の要素を動かさないように指定
+        e.stopPropagation();
+        
         //要素内の相対座標を取得
         x = event.pageX - this.offsetLeft;
         y = event.pageY - this.offsetTop;
