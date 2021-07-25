@@ -14,15 +14,21 @@ class CreateController {
     // inputの値からズーム倍率を設定
     this.zoomRatio = zoomValue / 100;
     // preview画面の中央（縦横pixelの半分）を中心にズーム
-    this.zoomPositionX = - ((1 - this.zoomRatio) * (700 / 2));
-    this.zoomPositionY = - ((1 - this.zoomRatio) * (495 / 2));
+    // this.zoomPositionX = - ((1 - this.zoomRatio) * (700 / 2));
+    // this.zoomPositionY = - ((1 - this.zoomRatio) * (495 / 2));
+
+    this.zoomPositionX = 0;
+    this.zoomPositionY = 0;
+
+    // this.zoomPositionX = - ((1 - this.zoomRatio) * (this.viewPositionX + this.handMoveX + (700 / 2)));
+    // this.zoomPositionY = - ((1 - this.zoomRatio) * (this.viewPositionY + this.handMoveY + (495 / 2)));
     // preview画面を更新する
     this.updatePreview();
   }
 
   setHandMove(x, y) {
-    this.handMoveX = -x;
-    this.handMoveY = -y;
+    this.handMoveX = -x / this.zoomRatio;
+    this.handMoveY = -y / this.zoomRatio;
     this.updatePreview();
   }
 
@@ -47,8 +53,13 @@ class CreateController {
         let position = gameObjects[image.dataset.gameObjectId].position;
 
         // 位置、サイズを更新する
-        image.style.left = ((position.modifyScale('x') * this.zoomRatio) - this.handMoveX - this.viewPositionX - this.zoomPositionX).toString() + "px";
-        image.style.top = ((position.modifyScale('y') * this.zoomRatio) - this.handMoveY - this.viewPositionY - this.zoomPositionY).toString() + "px";
+        let posX = position.modifyScale('x') - (this.viewPositionX + this.handMoveX);
+        let posY = position.modifyScale('y') - (this.viewPositionY + this.handMoveY);
+        
+        image.style.left = ((posX - (700 / 2)) * this.zoomRatio + (700 / 2)).toString() + "px";
+        image.style.top = ((posY - (495 / 2)) * this.zoomRatio + (495 / 2)).toString() + "px";
+        // image.style.left = ((position.modifyScale('x') * this.zoomRatio) - this.handMoveX - this.viewPositionX - this.zoomPositionX).toString() + "px";
+        // image.style.top = ((position.modifyScale('y') * this.zoomRatio) - this.handMoveY - this.viewPositionY - this.zoomPositionY).toString() + "px";
         image.style.width = (position.modifyScale('width') * this.zoomRatio).toString() + "px";
         image.style.height = (position.modifyScale('height') * this.zoomRatio).toString() + "px";
       });
