@@ -324,7 +324,7 @@ const splitImage = (file, type) => {
         this.classList.add("drag");
         let event;
         
-        console.log(`mdown target: ${e.currentTarget.dataset.gameObjectId}`);
+        // console.log(`mdown target: ${e.currentTarget.dataset.gameObjectId}`);
 
         //タッチデイベントとマウスのイベントの差異を吸収
         if(e.type === "mousedown") {

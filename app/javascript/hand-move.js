@@ -35,6 +35,8 @@ const handMove = () => {
     let movePosX = e.clientX - downPosX;
     let movePosY = e.clientY - downPosY;
     CreateController.setHandMove(movePosX, movePosY);
+
+    console.log(e.currentTarget);
   }
 
   function mouseUp(e){
