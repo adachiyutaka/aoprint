@@ -13,7 +13,7 @@ const modal = () => {
   // イメージ選択モーダルと表示/非表示する要素
   const imageButton = document.getElementById('add_object_btn');
   const imageModal = document.getElementById('image_modal');
-  const imageExitButton = document.getElementById('image_exit');
+  const imageExitButton = document.getElementById('image_exit_btn');
   const imageBackground = document.getElementById('image_modal_background');
 
 
@@ -29,7 +29,7 @@ const modal = () => {
 
   // イメージ選択モーダルの非表示  
   imageBackground.addEventListener('click', imageExit);
-  // imageExitButton.addEventListener('click', imageExit);
+  imageExitButton.addEventListener('click', imageExit);
 
 
   // ゲーム作成モーダルを表示する

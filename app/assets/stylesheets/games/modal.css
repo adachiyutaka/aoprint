@@ -51,7 +51,7 @@
   right: 0;
   margin: auto;
   width: 1000px;
-  height: 300px;
+  height: 240px;
   border-radius: 3px;
   background-color: white;
 }
@@ -128,12 +128,19 @@
 }
 
 .submit-btn{
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
   height: 46px;
   width: 120px;
   border-radius: 3px 3px 0px 0px/3px 3px 0px 0px;
   background-color: #1074c5;
   border: none;
   float: right;
+  color: white;
+}
+
+.submit-text{
   color: white;
 }
 
@@ -200,7 +207,7 @@
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  height: 190px;
+  height: 160px;
   width: 640px;
   margin-bottom: 10px;
   background-color: #f7f7f7;
@@ -317,4 +324,27 @@
 
 .cursor_hand{
   position: fixed;
+}
+
+/* image選択モーダル */
+.object-image{
+  height: 160px;
+  width: 160px;
+  margin-right: 8px;
+  background-color: turquoise;
+}
+
+.image-modal-container{
+  display: flex;
+  flex-direction: row;
+  padding: 15px;
+}
+
+.image-container{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  height: 160px;
+  width: 640px;
+  background-color: #f7f7f7;
 }
