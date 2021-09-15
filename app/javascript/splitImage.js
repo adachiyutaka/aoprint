@@ -89,6 +89,14 @@ const splitImage = (file, type) => {
     let imgURL = canvas.toDataURL('image/png');
     const png = imgURL.match(/,(.*)$/)[0].slice(1);
 
+    // openCVテスト
+    let src = cv.imread(img);
+    // let dst = new cv.Mat();
+    // cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
+    cv.imshow('output',src)
+
+    // openCVテスト
+
     // 画像のテキストを読み取り
     // const readText = new ReadText();
     // readText.readText(imgURL);
