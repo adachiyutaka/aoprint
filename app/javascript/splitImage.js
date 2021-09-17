@@ -5,7 +5,6 @@ window.gameObjects = [];
 window.gameImages = [];
 
 const sendImage = () => {
-
   // リスナーをセットするステージフォーム要素を取得
   const stageForm = document.getElementById('game_form_stage_input');
   const stageLabel = document.getElementById('stage_label');
