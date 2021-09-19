@@ -92,44 +92,44 @@ const splitImage = (file, type) => {
     const kernel = cv.getStructuringElement(cv.MORPH_RECT,new cv.Size(5,5));
 
     let src = cv.imread(img);
-    cv.imshow('output', src);
+    // cv.imshow('output', src);
 
     // グレースケールに変換
     const imgGray = new cv.Mat();
     cv.cvtColor(src, imgGray, cv.COLOR_RGBA2GRAY);
-    cv.imshow('output', imgGray);
+    // cv.imshow('output', imgGray);
 
     // 白い部分を膨張させる
     const imgDilated = new cv.Mat();
     cv.dilate(imgGray, imgDilated, kernel, new cv.Point(-1, 1), 1);
-    cv.imshow('output', imgDilated);
+    // cv.imshow('output', imgDilated);
 
     // 差を取って輪郭線を強調
     const imgDiff = new cv.Mat();
     cv.absdiff(imgDilated, imgGray, imgDiff);
-    cv.imshow('output', imgDiff);
+    // cv.imshow('output', imgDiff);
 
     // 2値化
     const imgBin = new cv.Mat();
     cv.threshold(imgDiff, imgBin, 10, 255, cv.THRESH_BINARY);
-    cv.imshow('output', imgBin);
+    // cv.imshow('output', imgBin);
 
     // クロージング処理で弱い輪郭線を補強
     const imgClosed = new cv.Mat();
     let M = cv.Mat.ones(5, 5, cv.CV_8U);
     cv.morphologyEx(imgBin, imgClosed, cv.MORPH_CLOSE, M);
-    cv.imshow('output', imgClosed);
+    // cv.imshow('output', imgClosed);
 
     // オープニング処理で弱い輪郭線を補強
     const imgOpened = new cv.Mat();
     let anchor = new cv.Point(-1, -1);
     cv.morphologyEx(imgClosed, imgOpened, cv.MORPH_OPEN, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-    cv.imshow('output', imgOpened);
+    // cv.imshow('output', imgOpened);
 
     // 中央値フィルタでゴミ取り
     const imgFiltered = new cv.Mat();
     cv.medianBlur(imgOpened, imgFiltered, 9);
-    cv.imshow('output', imgFiltered);
+    // cv.imshow('output', imgFiltered);
 
     // 輪郭線を取得
     const imgContours = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
@@ -138,20 +138,39 @@ const splitImage = (file, type) => {
     cv.findContours(imgFiltered, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
     let contoursColor = new cv.Scalar(255, 0, 0);
     cv.drawContours(imgContours, contours, -1, contoursColor, 1, cv.LINE_8);
-    cv.imshow('output', imgContours);
+    // cv.imshow('output', imgContours);
 
     // 大きな輪郭のみ取得
     const imgContLarge = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+    let contLarge = new cv.MatVector();
     for (let i = 0; i < contours.size(); ++i){
-      const min = 1000000;
+      const min = 100000;
       let contour = contours.get(i); 
-      if (cv.contourArea(contour) >= min)
-      {
-        console.log(cv.contourArea(contour));
-        cv.drawContours(imgContLarge, contours, i, contoursColor, 1, cv.LINE_8, hierarchy, 100);
+      if (cv.contourArea(contour) >= min){
+        contLarge.push_back(contour);
+        // cv.drawContours(imgContLarge, contours, i, contoursColor, 1, cv.LINE_8);
       }
     }
-    // cv.drawContours(imgContours, contLarge, -1, contLarge, 1, cv.LINE_8);
+    cv.drawContours(imgContLarge, contLarge, -1 , contoursColor, 1, cv.LINE_8);
+    // cv.imshow('output', imgContLarge);
+
+    // 輪郭を太く描画
+    const imgContBold = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+    cv.drawContours(imgContBold, contLarge, -1, new cv.Scalar(255, 0, 0), 20, cv.LINE_8);
+    cv.imshow('output', imgContBold);
+
+    // 2値化
+    const imgContBoldBin = new cv.Mat();
+    cv.threshold(imgContBold, imgContBoldBin, 10, 255, cv.THRESH_BINARY);
+    cv.imshow('output', imgContBoldBin);
+
+    // 太くした分大きく取った輪郭線を再取得
+    const imgContMargin = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+    let contourMargin = new cv.MatVector();
+    let hierarchyMargin = new cv.Mat();
+    cv.findContours(imgContBoldBin, contourMargin, hierarchyMargin, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+    // cv.drawContours(imgContMargin, contMargin, -1, contoursColor, 1, cv.LINE_8);
+    // cv.imshow('output', imgContMargin);
 
     
     // openCVテスト
