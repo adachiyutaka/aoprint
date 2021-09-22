@@ -129,7 +129,7 @@ const splitImage = (file, type) => {
     // 中央値フィルタでゴミ取り
     const imgFiltered = new cv.Mat();
     cv.medianBlur(imgOpened, imgFiltered, 9);
-    cv.imshow('output', imgFiltered);
+    // cv.imshow('output', imgFiltered);
 
     // 輪郭線を取得
     const imgContours = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
@@ -141,7 +141,6 @@ const splitImage = (file, type) => {
     // cv.imshow('output', imgContours);
 
     // 大きな輪郭のみ取得し小さいゴミの輪郭を削除
-    const imgContLarge = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
     let contLarge = new cv.MatVector();
     for (let i = 0; i < contours.size(); ++i){
       const min = 100000;
@@ -151,7 +150,8 @@ const splitImage = (file, type) => {
         // cv.drawContours(imgContLarge, contours, i, contoursColor, 1, cv.LINE_8);
       }
     }
-    cv.drawContours(imgContLarge, contLarge, -1 , contoursColor, 1, cv.LINE_8);
+    // const imgContLarge = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+    // cv.drawContours(imgContLarge, contLarge, -1 , contoursColor, 1, cv.LINE_8);
     // cv.imshow('output', imgContLarge);
 
     // 輪郭を太く描画し切り取り時の余白を作る
@@ -172,9 +172,23 @@ const splitImage = (file, type) => {
     let hierarchyMargin = new cv.Mat();
     cv.findContours(imgContBoldBin, contourMargin, hierarchyMargin, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
     cv.drawContours(imgContMargin, contourMargin, -1, contoursColor, 1, cv.LINE_8);
-    cv.imshow('output', imgContMargin);
+    // cv.imshow('output', imgContMargin);
 
-    
+    // 頂点数を減らした輪郭を取得
+    const imgContApprox = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+    let contApprox = new cv.MatVector();
+    for(let i = 0; i < contourMargin.size(); ++i) {
+      let contour = contourMargin.get(i);
+      let approx = new cv.Mat();
+      const epsilon = 0.001 * cv.arcLength(contour, true)
+      cv.approxPolyDP(contour, approx, epsilon, true)
+      contApprox.push_back(approx);
+    }
+    cv.drawContours(imgContApprox, contApprox, -1, contoursColor, 1, cv.LINE_8);
+    cv.imshow('output', imgContApprox);
+
+
+
     // openCVテスト
     
     // 画像のテキストを読み取り
