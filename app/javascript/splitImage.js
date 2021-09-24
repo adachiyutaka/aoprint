@@ -90,6 +90,8 @@ const splitImage = (file, type) => {
 
     // openCVテスト
     const kernel = cv.getStructuringElement(cv.MORPH_RECT,new cv.Size(5,5));
+    // 輪郭線の色指定（赤）
+    let contoursColor = new cv.Scalar(255, 0, 0);
 
     let src = cv.imread(img);
     // cv.imshow('output', src);
@@ -132,18 +134,17 @@ const splitImage = (file, type) => {
     // cv.imshow('output', imgFiltered);
 
     // 輪郭線を取得
-    const imgContours = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
     let contours = new cv.MatVector();
     let hierarchy = new cv.Mat();
     cv.findContours(imgFiltered, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-    let contoursColor = new cv.Scalar(255, 0, 0);
-    cv.drawContours(imgContours, contours, -1, contoursColor, 1, cv.LINE_8);
+    // const imgContours = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+    // cv.drawContours(imgContours, contours, -1, contoursColor, 1, cv.LINE_8);
     // cv.imshow('output', imgContours);
 
     // 大きな輪郭のみ取得し小さいゴミの輪郭を削除
     let contLarge = new cv.MatVector();
     for (let i = 0; i < contours.size(); ++i){
-      const min = 100000;
+      const min = 10000;
       let contour = contours.get(i); 
       if (cv.contourArea(contour) >= min){
         contLarge.push_back(contour);
@@ -167,27 +168,69 @@ const splitImage = (file, type) => {
     // cv.imshow('output', imgContBoldBin);
 
     // 余白のある輪郭線を再取得
-    const imgContMargin = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
-    let contourMargin = new cv.MatVector();
+    let contMargin = new cv.MatVector();
     let hierarchyMargin = new cv.Mat();
-    cv.findContours(imgContBoldBin, contourMargin, hierarchyMargin, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-    cv.drawContours(imgContMargin, contourMargin, -1, contoursColor, 1, cv.LINE_8);
+    cv.findContours(imgContBoldBin, contMargin, hierarchyMargin, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+    // const imgContMargin = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+    // cv.drawContours(imgContMargin, contourMargin, -1, contoursColor, 1, cv.LINE_8);
     // cv.imshow('output', imgContMargin);
 
     // 頂点数を減らした輪郭を取得
-    const imgContApprox = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
     let contApprox = new cv.MatVector();
-    for(let i = 0; i < contourMargin.size(); ++i) {
-      let contour = contourMargin.get(i);
+    for(let i = 0; i < contMargin.size(); ++i) {
+      let contour = contMargin.get(i);
       let approx = new cv.Mat();
       const epsilon = 0.001 * cv.arcLength(contour, true)
       cv.approxPolyDP(contour, approx, epsilon, true)
       contApprox.push_back(approx);
     }
-    cv.drawContours(imgContApprox, contApprox, -1, contoursColor, 1, cv.LINE_8);
-    cv.imshow('output', imgContApprox);
+    // const imgContApprox = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+    // cv.drawContours(imgContApprox, contApprox, -1, contoursColor, 1, cv.LINE_8);
+    // cv.imshow('output', imgContApprox);
 
+    // ステージの内側をくり抜く処理
+    let contStage = new cv.MatVector();
+    const imgStage = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC4);
+    
+    for(let i = 0; i < contApprox.size(); ++i) {
+      console.log("0, ", i, ": ", hierarchyMargin.intPtr(0, i));      
+    }
+    let mask = cv.Mat.ones(src.cols, src.rows, cv.CV_8UC3);
+    let color = new cv.Scalar(255, 255, 255);
 
+    for(let i = 0; i < contApprox.size(); ++i) {
+      // 最外部（第4要素（親のID）が-1）の階層を指定
+      if(hierarchyMargin.intPtr(0, i)[3] == -1) {
+        // 最外部より一つ内側の階層（第3要素（子のID））を指定し、白で塗りつぶし
+        let firstChildIndex = hierarchyMargin.intPtr(0, i)[2];
+        cv.drawContours(mask, contApprox, firstChildIndex, color, cv.FILLED);
+      }
+    }
+    // マスクの白い部分だけ残して切り抜き
+    for (var i = 0; i < src.rows; i++)
+    {
+        for (var j = 0; j < src.cols; j++)
+        {
+            // マスクの白い部分は元画像の情報をそのままコピーする
+            if (maskBlack.ucharPtr(i, j)[0] == 255)
+            {
+              imgStage.ucharPtr(i, j)[0] = src.ucharPtr(i, j)[0];
+              imgStage.ucharPtr(i, j)[1] = src.ucharPtr(i, j)[1];
+              imgStage.ucharPtr(i, j)[2] = src.ucharPtr(i, j)[2];
+              imgStage.ucharPtr(i, j)[3] = src.ucharPtr(i, j)[3];
+            }
+            else
+            // マスクの白くない部分は透明にする
+            {
+              imgStage.ucharPtr(i, j)[0] = 0;
+              imgStage.ucharPtr(i, j)[1] = 0;
+              imgStage.ucharPtr(i, j)[2] = 0;
+              imgStage.ucharPtr(i, j)[4] = 0;
+            }
+        }
+    }
+    // cv.drawContours(imgStage, contStage, -1, contoursColor, 1, cv.LINE_8);
+    cv.imshow('output', imgStage);
 
     // openCVテスト
     
