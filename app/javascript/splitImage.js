@@ -89,6 +89,9 @@ const splitImage = (file, type) => {
     const png = imgURL.match(/,(.*)$/)[0].slice(1);
 
     // openCVテスト
+    // const output = document.getElementById('output');
+    // output.setAttribute('width', img.naturalWidth);
+    // output.setAttribute('height', img.naturalHeight);
     const kernel = cv.getStructuringElement(cv.MORPH_RECT,new cv.Size(5,5));
     // 輪郭線の色指定（赤）
     let contoursColor = new cv.Scalar(255, 0, 0);
@@ -195,7 +198,8 @@ const splitImage = (file, type) => {
     for(let i = 0; i < contApprox.size(); ++i) {
       console.log("0, ", i, ": ", hierarchyMargin.intPtr(0, i));      
     }
-    let mask = cv.Mat.ones(src.cols, src.rows, cv.CV_8UC3);
+
+    let outerMask = cv.Mat.ones(src.cols, src.rows, cv.CV_8UC3);
     let color = new cv.Scalar(255, 255, 255);
 
     for(let i = 0; i < contApprox.size(); ++i) {
@@ -203,31 +207,34 @@ const splitImage = (file, type) => {
       if(hierarchyMargin.intPtr(0, i)[3] == -1) {
         // 最外部より一つ内側の階層（第3要素（子のID））を指定し、白で塗りつぶし
         let firstChildIndex = hierarchyMargin.intPtr(0, i)[2];
-        cv.drawContours(mask, contApprox, firstChildIndex, color, cv.FILLED);
-      }
-    }
-    // マスクの白い部分だけ残して切り抜き
-    for (var i = 0; i < src.rows; i++)
-    {
-        for (var j = 0; j < src.cols; j++)
-        {
-            // マスクの白い部分は元画像の情報をそのままコピーする
-            if (maskBlack.ucharPtr(i, j)[0] == 255)
-            {
-              imgStage.ucharPtr(i, j)[0] = src.ucharPtr(i, j)[0];
-              imgStage.ucharPtr(i, j)[1] = src.ucharPtr(i, j)[1];
-              imgStage.ucharPtr(i, j)[2] = src.ucharPtr(i, j)[2];
-              imgStage.ucharPtr(i, j)[3] = src.ucharPtr(i, j)[3];
-            }
-            else
-            // マスクの白くない部分は透明にする
-            {
-              imgStage.ucharPtr(i, j)[0] = 0;
-              imgStage.ucharPtr(i, j)[1] = 0;
-              imgStage.ucharPtr(i, j)[2] = 0;
-              imgStage.ucharPtr(i, j)[4] = 0;
-            }
+        cv.drawContours(outerMask, contApprox, firstChildIndex, color, cv.FILLED);
+        // clippingOut(src, outerMask, imgStage);
+        // オブジェクトを切り出す処理
+        // 最外部より二つ内側の階層（第4引数（親要素）が first_child_index）の階層を指定
+        for(let j = 0; j < contApprox.size(); ++j) {
+          if(hierarchyMargin.intPtr(0, j)[3] == firstChildIndex) {
+            // 最外部より二つ内側の階層（第3要素（子のID））を指定し、白で塗りつぶし
+            let mask = cv.Mat.ones(src.cols, src.rows, cv.CV_8UC3);
+            cv.drawContours(mask, contApprox, j, color, cv.FILLED);
+            // マスクの白い部分だけ残して切り抜き
+            clipping(src, mask, imgStage);
+          }
         }
+        // if hierarchy[0][j][3] == first_child_index:
+        //     # 最外部より二つ内側の階層（第3引数（最初の子要素））を指定し、白で塗りつぶし
+        //     second_child_con = approx_con[j]
+        //     mask_black = np.full_like(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), 0)
+        //     cv2.drawContours(mask_black, [second_child_con], 0, color=255, thickness=-1)
+        //     trim_img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
+        //     trim_img[..., 3] = mask_black
+        //     # 外接矩形で切り出し
+        //     # 外接矩形の左上の位置をx,y、横と縦のサイズをw,hとする
+        //     x, y, w, h = cv2.boundingRect(second_child_con)
+        //     object_img = trim_img[y:y+h, x:x+w]
+        //     images.append({'type': 'stage', 'image': make_base64(object_img), 'vertices': {'x': x, 'y': y, 'width': w, 'height': h}})
+        //     cv2.imwrite(f'images/trim_{j}.png', object_img)
+
+      }
     }
     // cv.drawContours(imgStage, contStage, -1, contoursColor, 1, cv.LINE_8);
     cv.imshow('output', imgStage);
@@ -368,7 +375,7 @@ const splitImage = (file, type) => {
           document.getElementById('width').value = gameObject.position.width;
           document.getElementById('height').value = gameObject.position.height;
           document.getElementById('role_select').selectedIndex = roleIndex[gameObject.script];     
-          console.log(gameObject);   
+          console.log(gameObject);
         }
 
         // 配置
@@ -667,6 +674,39 @@ const imageMover = (e, gameObjects) => {
       gameObject.script = value;
       break
   }
+}
+
+const clipping = (src, mask, dst, inside = true) => {
+  for (var i = 0; i < src.rows; i++)
+  {
+      for (var j = 0; j < src.cols; j++)
+      {
+          // insideがfalseの場合はクリッピングする部分を反転させる
+          let clippingArea = mask.ucharPtr(i, j)[0] == 255
+          if (!inside) clippingArea =! clippingArea;
+
+          // クリッピングする部分は元画像の情報をそのままコピーする
+          if (mask.ucharPtr(i, j)[0] == 255)
+          {
+            dst.ucharPtr(i, j)[0] = src.ucharPtr(i, j)[0];
+            dst.ucharPtr(i, j)[1] = src.ucharPtr(i, j)[1];
+            dst.ucharPtr(i, j)[2] = src.ucharPtr(i, j)[2];
+            dst.ucharPtr(i, j)[3] = src.ucharPtr(i, j)[3];
+          }
+          else
+          // クリッピングする部分以外は透明にする
+          {
+            dst.ucharPtr(i, j)[0] = 0;
+            dst.ucharPtr(i, j)[1] = 0;
+            dst.ucharPtr(i, j)[2] = 0;
+            dst.ucharPtr(i, j)[3] = 0;
+          }
+      }
+  }
+}
+
+const clippingOut = (src, mask, dst) => {
+  clipping(src, mask, dst, false);
 }
 
 const sendAPI = (base64string) => {
