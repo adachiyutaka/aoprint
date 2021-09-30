@@ -121,45 +121,46 @@ const splitImage = (file, type) => {
 
     // クロージング処理で弱い輪郭線を補強
     const imgClosed = new cv.Mat();
-    let M = cv.Mat.ones(5, 5, cv.CV_8U);
-    cv.morphologyEx(imgBin, imgClosed, cv.MORPH_CLOSE, M);
+    let MClose = cv.Mat.ones(5, 5, cv.CV_8U);
+    cv.morphologyEx(imgBin, imgClosed, cv.MORPH_CLOSE, MClose);
     // cv.imshow('output', imgClosed);
 
     // オープニング処理で小さいゴミを消去
     const imgOpened = new cv.Mat();
     let anchor = new cv.Point(-1, -1);
-    cv.morphologyEx(imgClosed, imgOpened, cv.MORPH_OPEN, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    let MOpen = cv.Mat.ones(3, 3, cv.CV_8U);
+    cv.morphologyEx(imgClosed, imgOpened, cv.MORPH_OPEN, MOpen, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
     // cv.imshow('output', imgOpened);
 
     // 中央値フィルタでゴミ取り
     const imgFiltered = new cv.Mat();
-    cv.medianBlur(imgOpened, imgFiltered, 9);
+    cv.medianBlur(imgOpened, imgFiltered, 5);
     // cv.imshow('output', imgFiltered);
 
     // 輪郭線を取得
     let contours = new cv.MatVector();
     let hierarchy = new cv.Mat();
     cv.findContours(imgFiltered, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-    // const imgContours = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+    console.log("src.cols, src.rows:", src.cols, src.rows);
+    // const imgContours = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
     // cv.drawContours(imgContours, contours, -1, contoursColor, 1, cv.LINE_8);
     // cv.imshow('output', imgContours);
 
     // 大きな輪郭のみ取得し小さいゴミの輪郭を削除
     let contLarge = new cv.MatVector();
     for (let i = 0; i < contours.size(); ++i){
-      const min = 10000;
+      const min = 5000;
       let contour = contours.get(i); 
       if (cv.contourArea(contour) >= min){
         contLarge.push_back(contour);
-        // cv.drawContours(imgContLarge, contours, i, contoursColor, 1, cv.LINE_8);
       }
     }
-    // const imgContLarge = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+    // const imgContLarge = new cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC3);
     // cv.drawContours(imgContLarge, contLarge, -1 , contoursColor, 1, cv.LINE_8);
     // cv.imshow('output', imgContLarge);
 
     // 輪郭を太く描画し切り取り時の余白を作る
-    const imgContBold = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+    const imgContBold = new cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC3);
     cv.drawContours(imgContBold, contLarge, -1, new cv.Scalar(255, 255, 255), 20, cv.LINE_8);
     // cv.imshow('output', imgContBold);
 
@@ -173,10 +174,20 @@ const splitImage = (file, type) => {
     // 余白のある輪郭線を再取得
     let contMargin = new cv.MatVector();
     let hierarchyMargin = new cv.Mat();
-    cv.findContours(imgContBoldBin, contMargin, hierarchyMargin, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-    // const imgContMargin = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
-    // cv.drawContours(imgContMargin, contourMargin, -1, contoursColor, 1, cv.LINE_8);
+    cv.findContours(imgContBoldBin, contMargin, hierarchyMargin, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE);
+    // const imgContMargin = new cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC3);
+    // cv.drawContours(imgContMargin, contMargin, -1, contoursColor, 1, cv.LINE_8);
     // cv.imshow('output', imgContMargin);
+
+    // 大きな輪郭のみ取得し小さいゴミの輪郭を削除
+    // let contMarginLarge = new cv.MatVector();
+    // for (let i = 0; i < contMargin.size(); ++i){
+    //   const min = 5000;
+    //   let contour = contMargin.get(i); 
+    //   if (cv.contourArea(contour) >= min){
+    //     contMarginLarge.push_back(contour);
+    //   }
+    // }
 
     // 頂点数を減らした輪郭を取得
     let contApprox = new cv.MatVector();
@@ -187,23 +198,22 @@ const splitImage = (file, type) => {
       cv.approxPolyDP(contour, approx, epsilon, true)
       contApprox.push_back(approx);
     }
-    // const imgContApprox = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
-    // cv.drawContours(imgContApprox, contApprox, -1, contoursColor, 1, cv.LINE_8);
+    // const imgContApprox = new cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC3);
+    // cv.drawContours(imgContApprox, contApprox, -1, contoursColor, 1, cv.LINE_8);    
     // cv.imshow('output', imgContApprox);
 
     // ステージの内側をくり抜く処理
-    let contStage = new cv.MatVector();
-    
+
     // オブジェクトのヒエラルキーを表示
     for(let i = 0; i < contApprox.size(); ++i) {
       console.log("0, ", i, ": ", hierarchyMargin.intPtr(0, i));      
     }
     // オブジェクトのヒエラルキーを表示
 
-    let objects = [];
-    let outerMask = cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
-    let imgStageOuter = cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC4);
-    // let dst = cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+    let images = new Array();
+    let outerMask = cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC3);
+    let imgStageOuter = cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC4);
+    // let dst = cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC3);
 
     let color = new cv.Scalar(255, 255, 255);
 
@@ -213,35 +223,28 @@ const splitImage = (file, type) => {
         // 最外部より一つ内側の階層（第3要素（子のID））を指定し、白で塗りつぶし
         let firstChildIndex = hierarchyMargin.intPtr(0, i)[2];
         cv.drawContours(outerMask, contApprox, firstChildIndex, color, cv.FILLED);
-        // imgStageOuter = clippingOut(src, outerMask, imgStageOuter);
-        cv.imshow('output', clippingOut(src, outerMask, imgStageOuter));
+        // 輪郭の内側を透明化し、配列に加える
+        let m = clipInside(src, outerMask)
+        images.push(m);
+
         // オブジェクトを切り出す処理
-        // 最外部より二つ内側の階層（第4引数（親要素）が first_child_index）の階層を指定
+        // 最外部より二つ内側の階層（第4引数（親要素）が firstChildIndex）の階層を指定
         for(let j = 0; j < contApprox.size(); ++j) {
           if(hierarchyMargin.intPtr(0, j)[3] == firstChildIndex) {
             // 最外部より二つ内側の階層（第3要素（子のID））を指定し、白で塗りつぶし
-            let mask = cv.Mat.ones(src.cols, src.rows, cv.CV_8UC3);
+            let mask = cv.Mat.ones(src.rows, src.cols,cv.CV_8UC3);
             cv.drawContours(mask, contApprox, j, color, cv.FILLED);
-            // マスクの白い部分だけ残して切り抜き
-            let imgStageInner = new cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC4);
+            // 輪郭の外側を透明化し、切り抜き、配列に加える
+            // images.push(clipOutside(src, mask));
+            let a = clipOutside(src, mask)
+            images.push(a);
           }
         }
-        // if hierarchy[0][j][3] == first_child_index:
-        //     # 最外部より二つ内側の階層（第3引数（最初の子要素））を指定し、白で塗りつぶし
-        //     second_child_con = approx_con[j]
-        //     mask_black = np.full_like(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), 0)
-        //     cv2.drawContours(mask_black, [second_child_con], 0, color=255, thickness=-1)
-        //     trim_img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
-        //     trim_img[..., 3] = mask_black
-        //     # 外接矩形で切り出し
-        //     # 外接矩形の左上の位置をx,y、横と縦のサイズをw,hとする
-        //     x, y, w, h = cv2.boundingRect(second_child_con)
-        //     object_img = trim_img[y:y+h, x:x+w]
-        //     images.append({'type': 'stage', 'image': make_base64(object_img), 'vertices': {'x': x, 'y': y, 'width': w, 'height': h}})
-        //     cv2.imwrite(f'images/trim_{j}.png', object_img)
-
       }
     }
+    images.forEach(function(item, i, array) {
+      console.log(item, i);
+    })
     // cv.imshow('output', imgStageOuter);
 
     // cv.drawContours(imgStage, contStage, -1, contoursColor, 1, cv.LINE_8);
@@ -683,7 +686,8 @@ const imageMover = (e, gameObjects) => {
   }
 }
 
-function clipping(src, mask, dst, inside = true){
+function clipOutside(src, mask, inside = true){
+  let dst = cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC4);
   // マスク範囲に従って画像を透明にする
   for (var i = 0; i < src.rows; i++) {
       for (var j = 0; j < src.cols; j++) {
@@ -705,16 +709,21 @@ function clipping(src, mask, dst, inside = true){
       }
   }
   // 不要な部分をトリミングする
+  let rect;
   if (inside)
   {
     cv.cvtColor(mask, mask, cv.COLOR_RGBA2GRAY);
-    dst = dst.roi(cv.boundingRect(mask));
+    rect = cv.boundingRect(mask);
+    dst = dst.roi(rect);
   }
-  return dst
+  else {
+    rect = new cv.Rect(0, 0, src.rows, src.cols);
+  }
+  return {'image': dst, 'vertices': {'x': rect.x, 'y': rect.y, 'width': rect.width, 'height': rect.height}};
 }
 
-const clippingOut = (src, mask, dst) => {
-  return clipping(src, mask, dst, false);
+const clipInside = (src, mask) => {
+  return clipOutside(src, mask, false);
 }
 
 const sendAPI = (base64string) => {
