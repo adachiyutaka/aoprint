@@ -245,10 +245,269 @@ const splitImage = (file, type) => {
     images.forEach(function(item, i, array) {
       console.log(item, i);
     })
-    // cv.imshow('output', imgStageOuter);
 
-    // cv.drawContours(imgStage, contStage, -1, contoursColor, 1, cv.LINE_8);
+    const previewContainer = document.getElementById('preview_container');
+    const previewWidth = previewContainer.clientWidth;
+    const previewHeight = previewContainer.clientHeight;
 
+    // info欄のエレメントを取得
+    const infoX = document.getElementById('x');
+    const infoY = document.getElementById('y');
+    const infoWidth = document.getElementById('width');
+    const infoHeight = document.getElementById('height');
+    const infoScript = document.getElementById('role_select');
+    // info欄のエレメントが変更された際に、GUIを更新するリスナーを設定
+    infoX.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+    infoY.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+    infoWidth.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+    infoHeight.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+    infoHeight.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+    infoScript.addEventListener('change', (e) => {imageMover(e, window.gameObjects)});
+    // ステージ画像から生成したオブジェクトを表示するレイアウトのid
+    let index = 0;
+
+    // 受け取ったデータをJSON形式にパースする
+    // const json = JSON.parse(XHR.response);
+    // const images = json['images'];
+    
+    // 元画像をpreview画面サイズに合わせるための比 （プレビューサイズ / 元画像サイズ）
+    // const xRatio = previewWidth / json['width'];
+    // const yRatio = previewHeight / json['height'];
+    const xRatio = previewWidth / src.rows;
+    const yRatio = previewHeight / src.cols;
+
+    console.log(`xRatio: ${xRatio} / yRatio: ${yRatio}`);
+
+    // 画像を格納するdivタグ要素を取得
+    const objectList = document.getElementById(`objectList`);
+    const imageList = document.getElementById(`imageList`);
+
+    let output = document.getElementById('output');
+
+    // 各データに対応するimgタグを生成する
+    images.forEach( (image) => {
+      // 分割した画像をimg要素に設定
+      let img = document.createElement('img');
+      cv.imshow(canvas, image['image']);
+      let imgBase64 = canvas.toDataURL();
+      img.src = imgBase64;
+      
+      // img.src = `data:image/png;base64,${image['image']}`;
+      let previewImg = img.cloneNode();
+      img.classList.add('split-img');
+
+      let gameObject = new GameObject();
+      // let position = new Position();
+      // gameObject.image = `data:image/png;base64,${image['image']}`;
+      gameObject.image = imgBase64;
+      let vertices = image['vertices'];
+      gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height'], xRatio, yRatio);
+      window.gameObjects.push(gameObject);
+
+      // 切り取った画像のサイズと位置を設定
+      previewImg.style.position = "absolute";
+      previewImg.classList.add('preview-image');
+      previewImg.classList.add('drag-and-drop');
+      previewImg.dataset.gameObjectId = index;
+      let position = gameObject.position;
+      previewImg.style.left = position.modifyScale('x').toString() + "px";
+      previewImg.style.top = position.modifyScale('y').toString() + "px";
+      previewImg.style.width = position.modifyScale('width').toString() + "px";
+      previewImg.style.height = position.modifyScale('height').toString() + "px";
+      previewImg.dataset.gameObjectId = index;
+
+      // preview内のgameObjectにリスナーを設定
+      previewImg.addEventListener('mousedown', selectGameObject);
+
+      // info欄の表示切り替えとgameObjectの枠線表示
+      function selectGameObject(e){
+        makeRadioButton(e.currentTarget);
+        let gameObject = window.gameObjects[previewImg.dataset.gameObjectId];
+        let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
+        
+        document.getElementById('info_image').src = gameObject.image;
+        document.getElementById('x').value = gameObject.position.x;
+        document.getElementById('y').value = gameObject.position.y;
+        document.getElementById('width').value = gameObject.position.width;
+        document.getElementById('height').value = gameObject.position.height;
+        document.getElementById('role_select').selectedIndex = roleIndex[gameObject.script];     
+        console.log(gameObject);
+      }
+
+      // 配置
+      previewContainer.appendChild(previewImg);
+
+      // 画像がステージかキャラクターかで条件分岐
+      let type = image['type'];
+      if (true) {
+        // ステージ画像の場合
+
+        // 分割した画像ごとにステージカードのリストを生成し、objectListに挿入
+        objectList.insertAdjacentHTML("beforeend", makeStageCard(index, json));
+        const card = document.getElementById(`${index}`);
+
+        // カード内のシンボル、位置、オブジェクトを配置するコンテナ要素を取得
+        let symbolContainer = card.children[0];
+        let positionContainer = card.children[1];
+        let objectContainer = card.children[2];
+
+        // 位置、オブジェクトのコンテナに画像を配置する
+        positionContainer.insertBefore(img.cloneNode(), positionContainer.children[0]);
+        objectContainer.insertBefore(img.cloneNode(), objectContainer.children[0]);
+
+        // オブジェクト画像、オブジェクトの削除・追加ボタンの要素を取得
+        let symbolDeleteBtn = Array.from(symbolContainer.children).find((o) => o.classList.contains('delete-btn'));
+        let objectDeleteBtn = Array.from(objectContainer.children).find((o) => o.classList.contains('delete-btn'));
+        let objectNewBtn = Array.from(objectContainer.children).find((o) => o.classList.contains('new-btn'));
+        let objectImg = Array.from(objectContainer.children).find((o) => o.classList.contains('split-img'));
+
+        // オブジェクト追加ボタンに押下時の処理
+        objectNewBtn.addEventListener('click', (e) => {
+          // dialogImageListを空にする
+          dialogImageList = [];
+
+          // 各ステージカードのオブジェクト画像と、キャラクター画像をdialogImageListに格納
+          Array.from(objectList.children).forEach((card) => {
+            dialogImageList.push(Array.from(card.children[2].children).find((o) => o.classList.contains('split-img')).cloneNode());
+          });
+          Array.from(imageList.children).forEach((img) => {
+            dialogImageList.push(img.cloneNode());
+          });
+
+          // オブジェクト追加ダイアログにdialogImageListの各画像を配置
+          dialogImageList.forEach((img) => {
+            imageDialog.appendChild(img);
+
+            // dialogImageList内の各画像にボタン押下時の処理
+            img.addEventListener('click', (e) => {
+              // オブジェクトを新規作成するオブジェクトコンテナにクリックした画像を追加
+              objectContainer.insertBefore(e.target.cloneNode(), objectContainer.children[0]);
+              // オブジェクト追加ダイアログを非表示に
+              imageDialog.classList.add('hidden');
+              // オブジェクト追加ダイアログに追加した画像を全て削除
+              Array.from(imageDialog.children).forEach((o) => {
+                o.remove()
+              });
+            });
+          });
+
+          // オブジェクト追加ダイアログを表示
+          imageDialog.classList.remove('hidden');
+        });
+
+        // オブジェクト削除ボタン押下時の処理
+        objectDeleteBtn.addEventListener('click', (e) => {
+          // オブジェクト画像と削除ボタンを消す
+          objectImg.remove();
+          objectDeleteBtn.remove();
+        });
+
+        // ステージカードのid
+        index += 1
+
+      } else if (type == 'character') {
+        // キャラクター画像の場合
+
+        // キャラクター画像のリストに各画像を配置する
+        imageList.appendChild(img);
+      }
+    });
+
+    // D&Dの設定
+    let elements = document.getElementsByClassName("drag-and-drop");
+
+    //要素内のクリックされた位置を取得するグローバル（のような）変数
+    let x;
+    let y;
+
+    //マウスが要素内で押されたとき、又はタッチされたとき発火
+    for(let i = 0; i < elements.length; i++) {
+        elements[i].addEventListener("mousedown", mdown, false);
+        elements[i].addEventListener("touchstart", mdown, false);
+    }
+
+    //マウスが押された際の関数
+    function mdown(e) {
+      //クラス名に .drag を追加
+      this.classList.add("drag");
+      let event;
+      
+      // console.log(`mdown target: ${e.currentTarget.dataset.gameObjectId}`);
+
+      //タッチデイベントとマウスのイベントの差異を吸収
+      if(e.type === "mousedown") {
+          event = e;
+      } else {
+          event = e.changedTouches[0];
+      }
+
+      // 重なった他の要素を動かさないように指定
+      e.stopPropagation();
+      
+      //要素内の相対座標を取得
+      x = event.pageX - this.offsetLeft;
+      y = event.pageY - this.offsetTop;
+
+      //ムーブイベントにコールバック
+      document.body.addEventListener("mousemove", mmove, false);
+      document.body.addEventListener("touchmove", mmove, false);
+
+      //マウスボタンが離されたとき、またはカーソルが外れたとき発火
+      this.addEventListener("mouseup", mup, false);
+      document.body.addEventListener("mouseleave", mup, false);
+      this.addEventListener("touchend", mup, false);
+      document.body.addEventListener("touchleave", mup, false);
+    }
+
+    //マウスカーソルが動いたときに発火
+    function mmove(e) {
+
+      //ドラッグしている要素を取得
+      let drag = document.querySelector(".drag");
+      let event;
+
+      //同様にマウスとタッチの差異を吸収
+      if(e.type === "mousemove") {
+          event = e;
+      } else {
+          event = e.changedTouches[0];
+      }
+
+      //フリックしたときに画面を動かさないようにデフォルト動作を抑制
+      e.preventDefault();
+
+      let previewX = e.pageX - x;
+      let previewY = e.pageY - y;
+      let originalX = Math.round(previewX / xRatio);
+      let originalY = Math.round(previewY / yRatio);
+      //マウスが動いた場所に要素を動かす
+      drag.style.left = previewX + "px";
+      drag.style.top = previewY + "px";
+
+      // info欄の値を更新する
+      infoX.value = originalX;
+      infoY.value = originalY;
+      // gameObjectの値を更新する
+      let gameObject = window.gameObjects[drag.dataset.gameObjectId];
+      gameObject.position.x = originalX;
+      gameObject.position.y = originalY;
+    }
+
+    //マウスボタンが上がったら発火
+    function mup(e) {
+      let drag = document.querySelector(".drag");
+
+      //ムーブベントハンドラの消去
+      document.body.removeEventListener("mousemove", mmove, false);
+      document.body.removeEventListener("touchmove", mmove, false);
+      if (drag) {
+        drag.removeEventListener("mouseup", mup, false);
+        drag.removeEventListener("touchend", mup, false);
+        //クラス名 .drag も消す
+        drag.classList.remove("drag");
+      }
+    }
+    
     // openCVテスト
     
     // 画像のテキストを読み取り
@@ -309,259 +568,259 @@ const splitImage = (file, type) => {
 
     // レスポンスを受け取った時の処理
     XHR.onload = () => {
-      const previewContainer = document.getElementById('preview_container');
-      const previewWidth = previewContainer.clientWidth;
-      const previewHeight = previewContainer.clientHeight;
+      // const previewContainer = document.getElementById('preview_container');
+      // const previewWidth = previewContainer.clientWidth;
+      // const previewHeight = previewContainer.clientHeight;
 
-      // info欄のエレメントを取得
-      const infoX = document.getElementById('x');
-      const infoY = document.getElementById('y');
-      const infoWidth = document.getElementById('width');
-      const infoHeight = document.getElementById('height');
-      const infoScript = document.getElementById('role_select');
-      // info欄のエレメントが変更された際に、GUIを更新するリスナーを設定
-      infoX.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
-      infoY.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
-      infoWidth.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
-      infoHeight.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
-      infoHeight.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
-      infoScript.addEventListener('change', (e) => {imageMover(e, window.gameObjects)});
-      // ステージ画像から生成したオブジェクトを表示するレイアウトのid
-      let index = 0;
+      // // info欄のエレメントを取得
+      // const infoX = document.getElementById('x');
+      // const infoY = document.getElementById('y');
+      // const infoWidth = document.getElementById('width');
+      // const infoHeight = document.getElementById('height');
+      // const infoScript = document.getElementById('role_select');
+      // // info欄のエレメントが変更された際に、GUIを更新するリスナーを設定
+      // infoX.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+      // infoY.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+      // infoWidth.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+      // infoHeight.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+      // infoHeight.addEventListener('input', (e) => {imageMover(e, window.gameObjects)});
+      // infoScript.addEventListener('change', (e) => {imageMover(e, window.gameObjects)});
+      // // ステージ画像から生成したオブジェクトを表示するレイアウトのid
+      // let index = 0;
 
-      // 受け取ったデータをJSON形式にパースする
-      const json = JSON.parse(XHR.response);
-      const images = json['images'];
+      // // 受け取ったデータをJSON形式にパースする
+      // const json = JSON.parse(XHR.response);
+      // const images = json['images'];
       
-      // 元画像をpreview画面サイズに合わせるための比 （プレビューサイズ / 元画像サイズ）
-      const xRatio = previewWidth / json['width'];
-      const yRatio = previewHeight / json['height'];
+      // // 元画像をpreview画面サイズに合わせるための比 （プレビューサイズ / 元画像サイズ）
+      // const xRatio = previewWidth / json['width'];
+      // const yRatio = previewHeight / json['height'];
 
-      console.log(`xRatio: ${xRatio} / yRatio: ${yRatio}`);
+      // console.log(`xRatio: ${xRatio} / yRatio: ${yRatio}`);
 
-      // 画像を格納するdivタグ要素を取得
-      const objectList = document.getElementById(`objectList`);
-      const imageList = document.getElementById(`imageList`);
+      // // 画像を格納するdivタグ要素を取得
+      // const objectList = document.getElementById(`objectList`);
+      // const imageList = document.getElementById(`imageList`);
 
-      // 各データに対応するimgタグを生成する
-      images.forEach( (image) => {
-        // 分割した画像をimg要素に設定
-        let img = document.createElement('img');
-        img.src = `data:image/png;base64,${image['image']}`;
-        let previewImg = img.cloneNode();
-        img.classList.add('split-img');
+      // // 各データに対応するimgタグを生成する
+      // images.forEach( (image) => {
+      //   // 分割した画像をimg要素に設定
+      //   let img = document.createElement('img');
+      //   img.src = `data:image/png;base64,${image['image']}`;
+      //   let previewImg = img.cloneNode();
+      //   img.classList.add('split-img');
 
-        let gameObject = new GameObject();
-        // let position = new Position();
-        gameObject.image = `data:image/png;base64,${image['image']}`;
-        let vertices = image['vertices'];
-        gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height'], xRatio, yRatio);
-        window.gameObjects.push(gameObject);
+      //   let gameObject = new GameObject();
+      //   // let position = new Position();
+      //   gameObject.image = `data:image/png;base64,${image['image']}`;
+      //   let vertices = image['vertices'];
+      //   gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height'], xRatio, yRatio);
+      //   window.gameObjects.push(gameObject);
 
-        // 切り取った画像のサイズと位置を設定
-        previewImg.style.position = "absolute";
-        previewImg.classList.add('preview-image');
-        previewImg.classList.add('drag-and-drop');
-        previewImg.dataset.gameObjectId = index;
-        let position = gameObject.position;
-        previewImg.style.left = position.modifyScale('x').toString() + "px";
-        previewImg.style.top = position.modifyScale('y').toString() + "px";
-        previewImg.style.width = position.modifyScale('width').toString() + "px";
-        previewImg.style.height = position.modifyScale('height').toString() + "px";
-        previewImg.dataset.gameObjectId = index;
+      //   // 切り取った画像のサイズと位置を設定
+      //   previewImg.style.position = "absolute";
+      //   previewImg.classList.add('preview-image');
+      //   previewImg.classList.add('drag-and-drop');
+      //   previewImg.dataset.gameObjectId = index;
+      //   let position = gameObject.position;
+      //   previewImg.style.left = position.modifyScale('x').toString() + "px";
+      //   previewImg.style.top = position.modifyScale('y').toString() + "px";
+      //   previewImg.style.width = position.modifyScale('width').toString() + "px";
+      //   previewImg.style.height = position.modifyScale('height').toString() + "px";
+      //   previewImg.dataset.gameObjectId = index;
 
-        // preview内のgameObjectにリスナーを設定
-        previewImg.addEventListener('mousedown', selectGameObject);
+      //   // preview内のgameObjectにリスナーを設定
+      //   previewImg.addEventListener('mousedown', selectGameObject);
 
-        // info欄の表示切り替えとgameObjectの枠線表示
-        function selectGameObject(e){
-          makeRadioButton(e.currentTarget);
-          let gameObject = window.gameObjects[previewImg.dataset.gameObjectId];
-          let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
+      //   // info欄の表示切り替えとgameObjectの枠線表示
+      //   function selectGameObject(e){
+      //     makeRadioButton(e.currentTarget);
+      //     let gameObject = window.gameObjects[previewImg.dataset.gameObjectId];
+      //     let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
           
-          document.getElementById('info_image').src = gameObject.image;
-          document.getElementById('x').value = gameObject.position.x;
-          document.getElementById('y').value = gameObject.position.y;
-          document.getElementById('width').value = gameObject.position.width;
-          document.getElementById('height').value = gameObject.position.height;
-          document.getElementById('role_select').selectedIndex = roleIndex[gameObject.script];     
-          console.log(gameObject);
-        }
+      //     document.getElementById('info_image').src = gameObject.image;
+      //     document.getElementById('x').value = gameObject.position.x;
+      //     document.getElementById('y').value = gameObject.position.y;
+      //     document.getElementById('width').value = gameObject.position.width;
+      //     document.getElementById('height').value = gameObject.position.height;
+      //     document.getElementById('role_select').selectedIndex = roleIndex[gameObject.script];     
+      //     console.log(gameObject);
+      //   }
 
-        // 配置
-        previewContainer.appendChild(previewImg);
+      //   // 配置
+      //   previewContainer.appendChild(previewImg);
 
-        // 画像がステージかキャラクターかで条件分岐
-        let type = image['type'];
-        if (type == 'stage') {
-          // ステージ画像の場合
+      //   // 画像がステージかキャラクターかで条件分岐
+      //   let type = image['type'];
+      //   if (type == 'stage') {
+      //     // ステージ画像の場合
 
-          // 分割した画像ごとにステージカードのリストを生成し、objectListに挿入
-          objectList.insertAdjacentHTML("beforeend", makeStageCard(index, json));
-          const card = document.getElementById(`${index}`);
+      //     // 分割した画像ごとにステージカードのリストを生成し、objectListに挿入
+      //     objectList.insertAdjacentHTML("beforeend", makeStageCard(index, json));
+      //     const card = document.getElementById(`${index}`);
 
-          // カード内のシンボル、位置、オブジェクトを配置するコンテナ要素を取得
-          let symbolContainer = card.children[0];
-          let positionContainer = card.children[1];
-          let objectContainer = card.children[2];
+      //     // カード内のシンボル、位置、オブジェクトを配置するコンテナ要素を取得
+      //     let symbolContainer = card.children[0];
+      //     let positionContainer = card.children[1];
+      //     let objectContainer = card.children[2];
 
-          // 位置、オブジェクトのコンテナに画像を配置する
-          positionContainer.insertBefore(img.cloneNode(), positionContainer.children[0]);
-          objectContainer.insertBefore(img.cloneNode(), objectContainer.children[0]);
+      //     // 位置、オブジェクトのコンテナに画像を配置する
+      //     positionContainer.insertBefore(img.cloneNode(), positionContainer.children[0]);
+      //     objectContainer.insertBefore(img.cloneNode(), objectContainer.children[0]);
 
-          // オブジェクト画像、オブジェクトの削除・追加ボタンの要素を取得
-          let symbolDeleteBtn = Array.from(symbolContainer.children).find((o) => o.classList.contains('delete-btn'));
-          let objectDeleteBtn = Array.from(objectContainer.children).find((o) => o.classList.contains('delete-btn'));
-          let objectNewBtn = Array.from(objectContainer.children).find((o) => o.classList.contains('new-btn'));
-          let objectImg = Array.from(objectContainer.children).find((o) => o.classList.contains('split-img'));
+      //     // オブジェクト画像、オブジェクトの削除・追加ボタンの要素を取得
+      //     let symbolDeleteBtn = Array.from(symbolContainer.children).find((o) => o.classList.contains('delete-btn'));
+      //     let objectDeleteBtn = Array.from(objectContainer.children).find((o) => o.classList.contains('delete-btn'));
+      //     let objectNewBtn = Array.from(objectContainer.children).find((o) => o.classList.contains('new-btn'));
+      //     let objectImg = Array.from(objectContainer.children).find((o) => o.classList.contains('split-img'));
 
-          // オブジェクト追加ボタンに押下時の処理
-          objectNewBtn.addEventListener('click', (e) => {
-            // dialogImageListを空にする
-            dialogImageList = [];
+      //     // オブジェクト追加ボタンに押下時の処理
+      //     objectNewBtn.addEventListener('click', (e) => {
+      //       // dialogImageListを空にする
+      //       dialogImageList = [];
 
-            // 各ステージカードのオブジェクト画像と、キャラクター画像をdialogImageListに格納
-            Array.from(objectList.children).forEach((card) => {
-              dialogImageList.push(Array.from(card.children[2].children).find((o) => o.classList.contains('split-img')).cloneNode());
-            });
-            Array.from(imageList.children).forEach((img) => {
-              dialogImageList.push(img.cloneNode());
-            });
+      //       // 各ステージカードのオブジェクト画像と、キャラクター画像をdialogImageListに格納
+      //       Array.from(objectList.children).forEach((card) => {
+      //         dialogImageList.push(Array.from(card.children[2].children).find((o) => o.classList.contains('split-img')).cloneNode());
+      //       });
+      //       Array.from(imageList.children).forEach((img) => {
+      //         dialogImageList.push(img.cloneNode());
+      //       });
 
-            // オブジェクト追加ダイアログにdialogImageListの各画像を配置
-            dialogImageList.forEach((img) => {
-              imageDialog.appendChild(img);
+      //       // オブジェクト追加ダイアログにdialogImageListの各画像を配置
+      //       dialogImageList.forEach((img) => {
+      //         imageDialog.appendChild(img);
 
-              // dialogImageList内の各画像にボタン押下時の処理
-              img.addEventListener('click', (e) => {
-                // オブジェクトを新規作成するオブジェクトコンテナにクリックした画像を追加
-                objectContainer.insertBefore(e.target.cloneNode(), objectContainer.children[0]);
-                // オブジェクト追加ダイアログを非表示に
-                imageDialog.classList.add('hidden');
-                // オブジェクト追加ダイアログに追加した画像を全て削除
-                Array.from(imageDialog.children).forEach((o) => {
-                  o.remove()
-                });
-              });
-            });
+      //         // dialogImageList内の各画像にボタン押下時の処理
+      //         img.addEventListener('click', (e) => {
+      //           // オブジェクトを新規作成するオブジェクトコンテナにクリックした画像を追加
+      //           objectContainer.insertBefore(e.target.cloneNode(), objectContainer.children[0]);
+      //           // オブジェクト追加ダイアログを非表示に
+      //           imageDialog.classList.add('hidden');
+      //           // オブジェクト追加ダイアログに追加した画像を全て削除
+      //           Array.from(imageDialog.children).forEach((o) => {
+      //             o.remove()
+      //           });
+      //         });
+      //       });
 
-            // オブジェクト追加ダイアログを表示
-            imageDialog.classList.remove('hidden');
-          });
+      //       // オブジェクト追加ダイアログを表示
+      //       imageDialog.classList.remove('hidden');
+      //     });
 
-          // オブジェクト削除ボタン押下時の処理
-          objectDeleteBtn.addEventListener('click', (e) => {
-            // オブジェクト画像と削除ボタンを消す
-            objectImg.remove();
-            objectDeleteBtn.remove();
-          });
+      //     // オブジェクト削除ボタン押下時の処理
+      //     objectDeleteBtn.addEventListener('click', (e) => {
+      //       // オブジェクト画像と削除ボタンを消す
+      //       objectImg.remove();
+      //       objectDeleteBtn.remove();
+      //     });
 
-          // ステージカードのid
-          index += 1
+      //     // ステージカードのid
+      //     index += 1
 
-        } else if (type == 'character') {
-          // キャラクター画像の場合
+      //   } else if (type == 'character') {
+      //     // キャラクター画像の場合
 
-          // キャラクター画像のリストに各画像を配置する
-          imageList.appendChild(img);
-        }
-      });
+      //     // キャラクター画像のリストに各画像を配置する
+      //     imageList.appendChild(img);
+      //   }
+      // });
 
-      // D&Dの設定
-      let elements = document.getElementsByClassName("drag-and-drop");
+      // // D&Dの設定
+      // let elements = document.getElementsByClassName("drag-and-drop");
 
-      //要素内のクリックされた位置を取得するグローバル（のような）変数
-      let x;
-      let y;
+      // //要素内のクリックされた位置を取得するグローバル（のような）変数
+      // let x;
+      // let y;
   
-      //マウスが要素内で押されたとき、又はタッチされたとき発火
-      for(let i = 0; i < elements.length; i++) {
-          elements[i].addEventListener("mousedown", mdown, false);
-          elements[i].addEventListener("touchstart", mdown, false);
-      }
+      // //マウスが要素内で押されたとき、又はタッチされたとき発火
+      // for(let i = 0; i < elements.length; i++) {
+      //     elements[i].addEventListener("mousedown", mdown, false);
+      //     elements[i].addEventListener("touchstart", mdown, false);
+      // }
 
-      //マウスが押された際の関数
-      function mdown(e) {
-        //クラス名に .drag を追加
-        this.classList.add("drag");
-        let event;
+      // //マウスが押された際の関数
+      // function mdown(e) {
+      //   //クラス名に .drag を追加
+      //   this.classList.add("drag");
+      //   let event;
         
-        // console.log(`mdown target: ${e.currentTarget.dataset.gameObjectId}`);
+      //   // console.log(`mdown target: ${e.currentTarget.dataset.gameObjectId}`);
 
-        //タッチデイベントとマウスのイベントの差異を吸収
-        if(e.type === "mousedown") {
-            event = e;
-        } else {
-            event = e.changedTouches[0];
-        }
+      //   //タッチデイベントとマウスのイベントの差異を吸収
+      //   if(e.type === "mousedown") {
+      //       event = e;
+      //   } else {
+      //       event = e.changedTouches[0];
+      //   }
 
-        // 重なった他の要素を動かさないように指定
-        e.stopPropagation();
+      //   // 重なった他の要素を動かさないように指定
+      //   e.stopPropagation();
         
-        //要素内の相対座標を取得
-        x = event.pageX - this.offsetLeft;
-        y = event.pageY - this.offsetTop;
+      //   //要素内の相対座標を取得
+      //   x = event.pageX - this.offsetLeft;
+      //   y = event.pageY - this.offsetTop;
 
-        //ムーブイベントにコールバック
-        document.body.addEventListener("mousemove", mmove, false);
-        document.body.addEventListener("touchmove", mmove, false);
+      //   //ムーブイベントにコールバック
+      //   document.body.addEventListener("mousemove", mmove, false);
+      //   document.body.addEventListener("touchmove", mmove, false);
 
-        //マウスボタンが離されたとき、またはカーソルが外れたとき発火
-        this.addEventListener("mouseup", mup, false);
-        document.body.addEventListener("mouseleave", mup, false);
-        this.addEventListener("touchend", mup, false);
-        document.body.addEventListener("touchleave", mup, false);
-      }
+      //   //マウスボタンが離されたとき、またはカーソルが外れたとき発火
+      //   this.addEventListener("mouseup", mup, false);
+      //   document.body.addEventListener("mouseleave", mup, false);
+      //   this.addEventListener("touchend", mup, false);
+      //   document.body.addEventListener("touchleave", mup, false);
+      // }
 
-      //マウスカーソルが動いたときに発火
-      function mmove(e) {
+      // //マウスカーソルが動いたときに発火
+      // function mmove(e) {
 
-        //ドラッグしている要素を取得
-        let drag = document.querySelector(".drag");
-        let event;
+      //   //ドラッグしている要素を取得
+      //   let drag = document.querySelector(".drag");
+      //   let event;
 
-        //同様にマウスとタッチの差異を吸収
-        if(e.type === "mousemove") {
-            event = e;
-        } else {
-            event = e.changedTouches[0];
-        }
+      //   //同様にマウスとタッチの差異を吸収
+      //   if(e.type === "mousemove") {
+      //       event = e;
+      //   } else {
+      //       event = e.changedTouches[0];
+      //   }
 
-        //フリックしたときに画面を動かさないようにデフォルト動作を抑制
-        e.preventDefault();
+      //   //フリックしたときに画面を動かさないようにデフォルト動作を抑制
+      //   e.preventDefault();
 
-        let previewX = e.pageX - x;
-        let previewY = e.pageY - y;
-        let originalX = Math.round(previewX / xRatio);
-        let originalY = Math.round(previewY / yRatio);
-        //マウスが動いた場所に要素を動かす
-        drag.style.left = previewX + "px";
-        drag.style.top = previewY + "px";
+      //   let previewX = e.pageX - x;
+      //   let previewY = e.pageY - y;
+      //   let originalX = Math.round(previewX / xRatio);
+      //   let originalY = Math.round(previewY / yRatio);
+      //   //マウスが動いた場所に要素を動かす
+      //   drag.style.left = previewX + "px";
+      //   drag.style.top = previewY + "px";
 
-        // info欄の値を更新する
-        infoX.value = originalX;
-        infoY.value = originalY;
-        // gameObjectの値を更新する
-        let gameObject = window.gameObjects[drag.dataset.gameObjectId];
-        gameObject.position.x = originalX;
-        gameObject.position.y = originalY;
-      }
+      //   // info欄の値を更新する
+      //   infoX.value = originalX;
+      //   infoY.value = originalY;
+      //   // gameObjectの値を更新する
+      //   let gameObject = window.gameObjects[drag.dataset.gameObjectId];
+      //   gameObject.position.x = originalX;
+      //   gameObject.position.y = originalY;
+      // }
 
-      //マウスボタンが上がったら発火
-      function mup(e) {
-        let drag = document.querySelector(".drag");
+      // //マウスボタンが上がったら発火
+      // function mup(e) {
+      //   let drag = document.querySelector(".drag");
 
-        //ムーブベントハンドラの消去
-        document.body.removeEventListener("mousemove", mmove, false);
-        document.body.removeEventListener("touchmove", mmove, false);
-        if (drag) {
-          drag.removeEventListener("mouseup", mup, false);
-          drag.removeEventListener("touchend", mup, false);
-          //クラス名 .drag も消す
-          drag.classList.remove("drag");
-        }
-      }
-      // D&Dの設定
+      //   //ムーブベントハンドラの消去
+      //   document.body.removeEventListener("mousemove", mmove, false);
+      //   document.body.removeEventListener("touchmove", mmove, false);
+      //   if (drag) {
+      //     drag.removeEventListener("mouseup", mup, false);
+      //     drag.removeEventListener("touchend", mup, false);
+      //     //クラス名 .drag も消す
+      //     drag.classList.remove("drag");
+      //   }
+      // }
+      // // D&Dの設定
 
 
       if (XHR.status != 200) {
