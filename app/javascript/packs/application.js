@@ -13,10 +13,8 @@ require("../readTextTest")
 require("../splitImage")
 require("../create")
 require("../script")
-require("../game")
 require("../zoom")
-require("../hand-move")
-require("../create-controller")
+require("../createController")
 cv = require("../opencv")
 
 // Uncomment to copy all static images under ../images to the output folder and reference
