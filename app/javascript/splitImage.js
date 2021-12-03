@@ -252,8 +252,6 @@ const splitImage = (file, type) => {
     })
 
     const previewContainer = document.getElementById('preview_container');
-    const previewWidth = previewContainer.clientWidth;
-    const previewHeight = previewContainer.clientHeight;
 
     // info欄のエレメントを取得
     const infoX = document.getElementById('x');
@@ -275,11 +273,11 @@ const splitImage = (file, type) => {
     // const json = JSON.parse(XHR.response);
     // const images = json['images'];
     
-    // 元画像をpreview画面サイズに合わせるための比 （プレビューサイズ / 元画像サイズ）
-    // const xRatio = previewWidth / json['width'];
-    // const yRatio = previewHeight / json['height'];
-    const xRatio = previewWidth / src.rows;
-    const yRatio = previewHeight / src.cols;
+    // 元画像をpreview画面サイズに合わせるための比 （プレビュー画面サイズ / 元画像サイズ）
+    // 一回の画像読み取りで複数のimg要素を得た場合も全てこの比でサイズを調整する
+    const xRatio = previewContainer.clientWidth / src.rows;
+    const yRatio = previewContainer.clientHeight / src.cols;
+    
 
     console.log(`xRatio: ${xRatio} / yRatio: ${yRatio}`);
 
@@ -317,10 +315,14 @@ const splitImage = (file, type) => {
       previewImg.classList.add('drag-and-drop');
       previewImg.dataset.gameObjectId = index;
       let position = gameObject.position;
-      previewImg.style.left = position.modifyScale('x').toString() + "px";
-      previewImg.style.top = position.modifyScale('y').toString() + "px";
-      previewImg.style.width = position.modifyScale('width').toString() + "px";
-      previewImg.style.height = position.modifyScale('height').toString() + "px";
+      // previewImg.style.left = position.previewSize('x').toString() + "px";
+      // previewImg.style.top = position.previewSize('y').toString() + "px";
+      // previewImg.style.width = position.previewSize('width').toString() + "px";
+      // previewImg.style.height = position.previewSize('height').toString() + "px";
+      previewImg.style.left = position.x.toString() + "px";
+      previewImg.style.top = position.y.toString() + "px";
+      previewImg.style.width = position.width.toString() + "px";
+      previewImg.style.height = position.height.toString() + "px";
       previewImg.dataset.gameObjectId = index;
 
       // preview内のgameObjectにリスナーを設定
@@ -329,7 +331,7 @@ const splitImage = (file, type) => {
       // info欄の表示切り替えとgameObjectの枠線表示
       function selectGameObject(e){
         makeRadioButton(e.currentTarget);
-        let gameObject = CreateController.gameObjects[previewImg.dataset.gameObjectId];
+        let gameObject = createController.gameObjects[previewImg.dataset.gameObjectId];
         let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
         
         document.getElementById('info_image').src = gameObject.image;
@@ -649,19 +651,23 @@ const imageMover = (e, gameObjects) => {
   switch(e.currentTarget.id){
     case 'x':
       gameObject.position.x = value;
-      image.style.left = position.modifyScale('x').toString() + 'px';
+      // image.style.left = position.previewSize('x').toString() + 'px';
+      image.style.left = position.x.toString() + 'px';
       break
     case 'y':
       gameObject.position.y = value;
-      image.style.top = position.modifyScale('y').toString() + 'px';
+      // image.style.top = position.previewSize('y').toString() + 'px';
+      image.style.top = position.y.toString() + 'px';
       break
     case 'width':
       gameObject.position.width = value;
-      image.style.width = position.modifyScale('width').toString() + 'px';
+      // image.style.width = position.previewSize('width').toString() + 'px';
+      image.style.width = position.width.toString() + 'px';
       break
     case 'height':
       gameObject.position.height = value;
-      image.style.height = position.modifyScale('height').toString() + 'px';
+      // image.style.height = position.previewSize('height').toString() + 'px';
+      image.style.height = position.height.toString() + 'px';
       break
     case 'role_select':
       gameObject.script = value;

@@ -22,24 +22,24 @@ class Position {
     this.yRatio = yRatio;
   }
 
-  modifyScale(memberName){
-    let result;
-    switch(memberName){
-      case 'x':
-        result = this.x * this.xRatio;
-        break
-      case 'y':
-        result = this.y * this.yRatio;
-        break
-      case 'width':
-        result = this.width * this.xRatio;
-        break
-      case 'height':
-        result = this.height * this.yRatio;
-        break
-    }
-    return result;
-  }
+  // previewSize(memberName){
+  //   let result;
+  //   switch(memberName){
+  //     case 'x':
+  //       result = this.x * this.xRatio;
+  //       break
+  //     case 'y':
+  //       result = this.y * this.yRatio;
+  //       break
+  //     case 'width':
+  //       result = this.width * this.xRatio;
+  //       break
+  //     case 'height':
+  //       result = this.height * this.yRatio;
+  //       break
+  //   }
+  //   return result;
+  // }
 }
 
 

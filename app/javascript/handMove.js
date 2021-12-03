@@ -1,8 +1,8 @@
 import createController from './createController.js';
 
 const handMove = () => {
-  let downPosX = null;
-  let downPosY = null;
+  let oldPosX = null;
+  let oldPosY = null;
   let movePosX = null;
   let movePosY = null;
 
@@ -38,8 +38,8 @@ const handMove = () => {
     // 重なった他の要素を動かさないように指定
     event.stopPropagation();
 
-    downPosX = event.pageX;
-    downPosY = event.pageY;
+    oldPosX = event.pageX;
+    oldPosY = event.pageY;
 
     //要素内の相対座標を取得(ページ内の絶対位置 - クリックした要素の親との相対位置)
     // x = event.pageX - this.offsetLeft;
@@ -59,10 +59,6 @@ const handMove = () => {
   function mouseMove(e){
     console.log("mouseMove");
     console.log("handMove", createController);
-
-    // info欄のエレメントを取得
-    const infoX = document.getElementById('x');
-    const infoY = document.getElementById('y');
 
     //ドラッグしている要素を取得
     let drag = document.querySelector(".drag");
@@ -85,23 +81,29 @@ const handMove = () => {
     event.stopPropagation();
 
     // ドラッグで移動中の値を設定する
-    let movePosX = event.pageX - downPosX;
-    let movePosY = event.pageY - downPosY;
-    console.log("downPosX:", downPosX, "event.pageX:", event.pageX, "movePosX:", movePosX);
+    let movePosX = event.pageX - oldPosX;
+    let movePosY = event.pageY - oldPosY;
+    oldPosX = event.pageX;
+    oldPosY = event.pageY;
+    console.log("downPosX:", oldPosX, "event.pageX:", event.pageX, "movePosX:", movePosX);
     createController.setHandMove(movePosX, movePosY, id);
 
-    let previewX = movePosX + this.offsetLeft;
-    let previewY = movePosY + this.offsetTop;
-    let originalX = previewX / position.xRatio;
-    let originalY = previewY / position.yRatio;
+    // // info欄のエレメントを取得
+    // const infoX = document.getElementById('x');
+    // const infoY = document.getElementById('y');
+    
+    // let previewX = movePosX + this.offsetLeft;
+    // let previewY = movePosY + this.offsetTop;
+    // let originalX = previewX / position.xRatio;
+    // let originalY = previewY / position.yRatio;
 
-    //マウスが動いた場所に要素を動かす
-    // drag.style.left = previewX + "px";
-    // drag.style.top = previewY + "px";
+    // //マウスが動いた場所に要素を動かす
+    // // drag.style.left = previewX + "px";
+    // // drag.style.top = previewY + "px";
 
-    // info欄の値を更新する
-    infoX.value = originalX;
-    infoY.value = originalY;
+    // // info欄の値を更新する
+    // infoX.value = originalX;
+    // infoY.value = originalY;
   }
 
   function mouseUp(e){
@@ -110,11 +112,11 @@ const handMove = () => {
     let drag = document.querySelector(".drag");
 
     // handツールで移動し終わった値を設定する
-    createController.setViewPosition(movePosX, movePosY);
+    // createController.setViewPosition(movePosX, movePosY);
 
     // handツールの位置情報を初期化する
-    downPosX = null;
-    downPosY = null;
+    oldPosX = null;
+    oldPosY = null;
     movePosX = null;
     movePosY = null;
 
