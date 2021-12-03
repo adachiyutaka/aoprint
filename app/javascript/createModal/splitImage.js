@@ -253,19 +253,20 @@ const splitImage = (file, type) => {
 
     const previewContainer = document.getElementById('preview_container');
 
-    // info欄のエレメントを取得
-    const infoX = document.getElementById('x');
-    const infoY = document.getElementById('y');
-    const infoWidth = document.getElementById('width');
-    const infoHeight = document.getElementById('height');
-    const infoScript = document.getElementById('role_select');
-    // info欄のエレメントが変更された際に、GUIを更新するリスナーを設定
-    infoX.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
-    infoY.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
-    infoWidth.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
-    infoHeight.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
-    infoHeight.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
-    infoScript.addEventListener('change', (e) => {imageMover(e, createController.gameObjects)});
+    // // info欄のエレメントを取得
+    // const infoX = document.getElementById('x');
+    // const infoY = document.getElementById('y');
+    // const infoWidth = document.getElementById('width');
+    // const infoHeight = document.getElementById('height');
+    // const infoScript = document.getElementById('role_select');
+    // // info欄のエレメントが変更された際に、GUIを更新するリスナーを設定
+    // infoX.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
+    // infoY.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
+    // infoWidth.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
+    // infoHeight.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
+    // infoHeight.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
+    // infoScript.addEventListener('change', (e) => {imageMover(e, createController.gameObjects)});
+
     // ステージ画像から生成したオブジェクトを表示するレイアウトのid
     let index = 0;
 
@@ -278,7 +279,6 @@ const splitImage = (file, type) => {
     const xRatio = previewContainer.clientWidth / src.rows;
     const yRatio = previewContainer.clientHeight / src.cols;
     
-
     console.log(`xRatio: ${xRatio} / yRatio: ${yRatio}`);
 
     // 画像を格納するdivタグ要素を取得
@@ -330,17 +330,14 @@ const splitImage = (file, type) => {
 
       // info欄の表示切り替えとgameObjectの枠線表示
       function selectGameObject(e){
-        makeRadioButton(e.currentTarget);
-        let gameObject = createController.gameObjects[previewImg.dataset.gameObjectId];
-        let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
-        
-        document.getElementById('info_image').src = gameObject.image;
-        document.getElementById('x').value = gameObject.position.x;
-        document.getElementById('y').value = gameObject.position.y;
-        document.getElementById('width').value = gameObject.position.width;
-        document.getElementById('height').value = gameObject.position.height;
-        document.getElementById('role_select').selectedIndex = roleIndex[gameObject.script];     
-        console.log(gameObject);
+        // 指定した要素にのみ"selected"クラスをつける
+        addSelected(e.currentTarget);
+
+        // 指定した要素のgameObjectIdを更新する
+        createController.selectedGameObject = createController.gameObjects[previewImg.dataset.gameObjectId];
+
+        // info欄を更新する
+        createController.updateInfo();
       }
 
       // 配置
@@ -609,71 +606,49 @@ const makeStageCard = (id, json) =>{
 //   return dataset;
 // }
 
-const makeRadioButton = (element) => {
-  // 同じクラス名を持つ全ての要素の"selected"クラスを外し、選択されたimg要素に"selected"classを付ける
-  resetSelect(element);
-  addSelect(element);
-}
-
-const addCheckBox = (element) => {
-  element.addEventListener('click', (e) => {
-    if (element.classList.contains('selected') == true) {
-      removeSelect(element);
-    } else {
-      addSelect(element);
-    }
-  });
-}
-
-const addSelect = (element) => {
-  element.classList.add('selected');
-}
-
-const removeSelect = (element) => {
-  element.classList.remove('selected');
-}
-
-const resetSelect = (element) => {
-  const className = element.classList[0];
+const addSelected = (element) => {
+  // 全ての要素の"selected"クラスを外す
   let Images = Array.from(document.querySelectorAll('.selected'));
   Images.forEach( (image) => {
     image.classList.remove('selected');
   });
+  // 選択された要素に"selected"クラスを付ける
+  element.classList.add('selected');
 }
 
-// info欄が更新された際にGUI内の該当するオブジェクトの描画位置を更新する
-const imageMover = (e, gameObjects) => {
-  let image = document.querySelector('.selected');
-  let gameObject = gameObjects[image.dataset.gameObjectId];
-  let position = gameObject.position;
-  let value = e.currentTarget.value;
+// // info欄が更新された際にGUI内の該当するオブジェクトの描画位置を更新する
+// const imageMover = (e, gameObjects) => {
+//   let image = document.querySelector('.selected');
+//   let gameObject = gameObjects[image.dataset.gameObjectId];
+//   let position = gameObject.position;
+//   let value = e.currentTarget.value;
   
-  switch(e.currentTarget.id){
-    case 'x':
-      gameObject.position.x = value;
-      // image.style.left = position.previewSize('x').toString() + 'px';
-      image.style.left = position.x.toString() + 'px';
-      break
-    case 'y':
-      gameObject.position.y = value;
-      // image.style.top = position.previewSize('y').toString() + 'px';
-      image.style.top = position.y.toString() + 'px';
-      break
-    case 'width':
-      gameObject.position.width = value;
-      // image.style.width = position.previewSize('width').toString() + 'px';
-      image.style.width = position.width.toString() + 'px';
-      break
-    case 'height':
-      gameObject.position.height = value;
-      // image.style.height = position.previewSize('height').toString() + 'px';
-      image.style.height = position.height.toString() + 'px';
-      break
-    case 'role_select':
-      gameObject.script = value;
-      break
-  }
-}
+//   switch(e.currentTarget.id){
+//     case 'x':
+//       gameObject.position.x = value;
+//       // image.style.left = position.previewSize('x').toString() + 'px';
+//       image.style.left = position.x.toString() + 'px';
+//       break
+//     case 'y':
+//       gameObject.position.y = value;
+//       // image.style.top = position.previewSize('y').toString() + 'px';
+//       image.style.top = position.y.toString() + 'px';
+//       break
+//     case 'width':
+//       gameObject.position.width = value;
+//       // image.style.width = position.previewSize('width').toString() + 'px';
+//       image.style.width = position.width.toString() + 'px';
+//       break
+//     case 'height':
+//       gameObject.position.height = value;
+//       // image.style.height = position.previewSize('height').toString() + 'px';
+//       image.style.height = position.height.toString() + 'px';
+//       break
+//     case 'role_select':
+//       gameObject.script = value;
+//       break
+//   }
+// }
 
 function clipOutside(src, mask, inside = true){
   let dst = cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC4);

@@ -58,13 +58,11 @@ const handMove = () => {
 
   function mouseMove(e){
     console.log("mouseMove");
-    console.log("handMove", createController);
+
 
     //ドラッグしている要素を取得
     let drag = document.querySelector(".drag");
     let id = drag.dataset.gameObjectId;
-    let gameObject = createController.gameObjects[id];
-    let position = gameObject.position;
 
     //同様にマウスとタッチの差異を吸収
     let event;

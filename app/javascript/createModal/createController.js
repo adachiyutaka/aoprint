@@ -1,7 +1,8 @@
 class CreateController {
   constructor() {
     this.gameObjects = [];
-    this.zoomRatio = null;
+    this.selectedGameObject = null;
+    this.zoomRatio = 1;
     this.handMoveX = null;
     this.handMoveY = null;
     this.viewPositionX = null;
@@ -27,9 +28,6 @@ class CreateController {
     // gameObjectのpositionを更新する
     // x, yはズーム倍率、プレビュー画面/元画像比率を除いた値に変換する
     let position = this.gameObjects[id].position;
-
-    console.log("position x: ", position.x, "y: ", position.y);
-    console.log("this.setHandMove x: ", x, "y: ", y);
     // position.x = Math.round(position.x + (x / position.xRatio * this.zoomRatio));
     // position.y = Math.round(position.y + (y / position.yRatio * this.zoomRatio));
     // position.x = Math.round(position.x + (x / (this.zoomRatio * position.xRatio)));
@@ -37,14 +35,11 @@ class CreateController {
     position.x = Math.round(position.x + (x / this.zoomRatio));
     position.y = Math.round(position.y + (y / this.zoomRatio));
 
-    console.log("position x: ", position.x, "y: ", position.y);
-
-
     // preview画面を更新する
     this.updatePreview();
 
     // info欄を更新する
-    this.updateInfo(id);
+    this.updateInfo();
   }
 
   // setViewPosition(x, y) {
@@ -94,15 +89,17 @@ class CreateController {
     // infoY.value = originalY;
   }
 
-  updateInfo(id) {
-      // info欄のエレメントを取得
-      const infoX = document.getElementById('x');
-      const infoY = document.getElementById('y');
+  updateInfo() {
+      let gameObject = this.selectedGameObject;
+      let position = gameObject.position;
+      let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
 
-      let position = this.gameObjects[id].position;
-
-      infoX.value = position.x;
-      infoY.value = position.y;
+      document.getElementById('info_image').src = gameObject.image;
+      document.getElementById('x').value = position.x;
+      document.getElementById('y').value = position.y;
+      document.getElementById('width').value = position.width;
+      document.getElementById('height').value = position.height;
+      document.getElementById('role_select').selectedIndex = roleIndex[gameObject.script]; 
   }
 }
 
