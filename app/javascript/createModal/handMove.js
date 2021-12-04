@@ -6,20 +6,9 @@ const handMove = (element) => {
   let movePosX = null;
   let movePosY = null;
 
-  console.log("hand move set element :", element)
-  // const preview = document.getElementById('preview_container');
-  // preview.addEventListener('mousedown', mouseDown, false);
-
-  // let elements = document.getElementsByClassName("drag-and-drop");
-
   //マウスが要素内で押されたとき、又はタッチされたとき発火
   element.addEventListener("mousedown", mouseDown, false);
   element.addEventListener("touchstart", mouseDown, false);
-  //マウスが要素内で押されたとき、又はタッチされたとき発火
-  // for(let i = 0; i < elements.length; i++) {
-  //   elements[i].addEventListener("mousedown", mouseDown, false);
-  //   elements[i].addEventListener("touchstart", mouseDown, false);
-  // }
 
   function mouseDown(e) {
     console.log("mouseDown");
@@ -45,20 +34,20 @@ const handMove = (element) => {
     // x = event.pageX - this.offsetLeft;
     // y = event.pageY - this.offsetTop;
     
-    //ムーブイベントにコールバック
+    // ドラッグ中の要素の動きを設定
     document.body.addEventListener("mousemove", mouseMove, false);
     document.body.addEventListener("touchmove", mouseMove, false);
 
-    //マウスボタンが離されたとき、またはカーソルが外れたとき発火
-    this.addEventListener("mouseup", mouseUp, false);
-    document.body.addEventListener("mouseleave", mouseUp, false);
-    this.addEventListener("touchend", mouseUp, false);
-    document.body.addEventListener("touchleave", mouseUp, false);
+    // マウスボタンが離されたとき、またはカーソルが外れたときの設定
+    document.body.addEventListener("mouseup", mouseUp, false);
+    this.addEventListener("mouseleave", mouseUp, false);
+    document.body.addEventListener("touchend", mouseUp, false);
+    this.addEventListener("touchleave", mouseUp, false);
   } 
 
+  // マウスの動きに合わせてドラッグした要素を移動させる
   function mouseMove(e){
     console.log("mouseMove");
-
 
     //ドラッグしている要素を取得
     let drag = document.querySelector(".drag");
@@ -72,36 +61,19 @@ const handMove = (element) => {
         event = e.changedTouches[0];
     }
 
-    //フリックしたときに画面を動かさないようにデフォルト動作を抑制
+    // フリックしたときに画面を動かさないようにデフォルト動作を抑制
     event.preventDefault();
     
     // 重なった他の要素を動かさないように指定
     event.stopPropagation();
 
-    // ドラッグで移動中の値を設定する
+    // ドラッグで移動した値をCreateControllerから設定する
     let movePosX = event.pageX - oldPosX;
     let movePosY = event.pageY - oldPosY;
     oldPosX = event.pageX;
     oldPosY = event.pageY;
     console.log("id", id, "downPosX:", oldPosX, "event.pageX:", event.pageX, "movePosX:", movePosX);
-    CreateController.setHandMove(movePosX, movePosY, id);
-
-    // // info欄のエレメントを取得
-    // const infoX = document.getElementById('x');
-    // const infoY = document.getElementById('y');
-    
-    // let previewX = movePosX + this.offsetLeft;
-    // let previewY = movePosY + this.offsetTop;
-    // let originalX = previewX / position.xRatio;
-    // let originalY = previewY / position.yRatio;
-
-    // //マウスが動いた場所に要素を動かす
-    // // drag.style.left = previewX + "px";
-    // // drag.style.top = previewY + "px";
-
-    // // info欄の値を更新する
-    // infoX.value = originalX;
-    // infoY.value = originalY;
+    CreateController.setHandMove(movePosX, movePosY);
   }
 
   function mouseUp(e){

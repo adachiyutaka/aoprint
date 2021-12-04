@@ -1,3 +1,4 @@
+import createController from './createController.js';
 import CreateController from './createController.js';
 // import CreateController from './createController';
 import GameObject from './gameObject.js';
@@ -267,8 +268,6 @@ const splitImage = (file, type) => {
     // infoHeight.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
     // infoScript.addEventListener('change', (e) => {imageMover(e, createController.gameObjects)});
 
-    // ステージ画像から生成したオブジェクトを表示するレイアウトのid
-    let index = 0;
 
     // 受け取ったデータをJSON形式にパースする
     // const json = JSON.parse(XHR.response);
@@ -313,10 +312,10 @@ const splitImage = (file, type) => {
       previewImg.classList.add('preview-image');
       previewImg.classList.add('drag-and-drop');
       previewImg.dataset.gameObjectId = CreateController.gameObjects.length - 1;
-      previewImg.style.left = position.x.toString() + "px";
-      previewImg.style.top = position.y.toString() + "px";
-      previewImg.style.width = position.width.toString() + "px";
-      previewImg.style.height = position.height.toString() + "px";
+      // previewImg.style.left = position.x.toString() + "px";
+      // previewImg.style.top = position.y.toString() + "px";
+      // previewImg.style.width = position.width.toString() + "px";
+      // previewImg.style.height = position.height.toString() + "px";
 
       // preview内のgameObjectにリスナーを設定
       previewImg.addEventListener('mousedown', selectGameObject);
@@ -339,6 +338,8 @@ const splitImage = (file, type) => {
       // プレビュー画面内にimg要素を配置
       previewContainer.appendChild(previewImg);
 
+      CreateController.updatePreview();
+      // create
       // 画像がステージかキャラクターかで条件分岐
       // let type = image['type'];
       // if (true) {

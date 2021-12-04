@@ -9,10 +9,12 @@ class CreateController {
     this.viewPositionY = null;
   }
 
+  // GameObjectを追加する
   addGameObject(gameObject) {
     this.gameObjects.push(gameObject);
   }
 
+  // ズーム倍率を設定する
   setZoom(zoomValue) {
     // inputの値からズーム倍率を設定
     this.zoomRatio = zoomValue / 100;
@@ -21,19 +23,43 @@ class CreateController {
     this.updatePreview();
   }
 
-  setHandMove(x, y, id) {
-    // this.handMoveX = -x / this.zoomRatio;
-    // this.handMoveY = -y / this.zoomRatio;
+  // info欄に入力された値を更新する
+  setInfo(e) {
+    let value = e.currentTarget.value;
+    let gameObject = this.selectedGameObject;
+    let position = gameObject.position;
 
+    // どの要素が更新されたかidで判定する
+    // 更新された要素に合わせてgameObjectの値を更新する
+    switch(e.currentTarget.id){
+      case 'x':
+        position.x = value;
+        break
+      case 'y':
+        position.y = value;
+        break
+      case 'width':
+        position.width = value;
+        break
+      case 'height':
+        position.height = value;
+        break
+      case 'role_select':
+        gameObject.script = value;
+        break
+    }
+
+    // preview画面を更新する
+    this.updatePreview();
+  }
+
+  // HandMoveの移動量を設定する
+  setHandMove(x, y) {
     // gameObjectのpositionを更新する
-    // x, yはズーム倍率、プレビュー画面/元画像比率を除いた値に変換する
-    let position = this.gameObjects[id].position;
-    // position.x = Math.round(position.x + (x / position.xRatio * this.zoomRatio));
-    // position.y = Math.round(position.y + (y / position.yRatio * this.zoomRatio));
-    // position.x = Math.round(position.x + (x / (this.zoomRatio * position.xRatio)));
-    // position.y = Math.round(position.y + (y / (this.zoomRatio * position.yRatio)));
-    position.x = Math.round(position.x + (x / this.zoomRatio));
-    position.y = Math.round(position.y + (y / this.zoomRatio));
+    // x, yはズーム倍率を除いた値に変換する
+    let position = this.selectedGameObject.position;
+    position.x = position.x + (x / this.zoomRatio);
+    position.y = position.y + (y / this.zoomRatio);
 
     // preview画面を更新する
     this.updatePreview();
@@ -42,19 +68,8 @@ class CreateController {
     this.updateInfo();
   }
 
-  // setViewPosition(x, y) {
-    // this.viewPositionX += this.handMoveX;
-    // this.viewPositionY += this.handMoveY;
-    // this.handMoveX = 0;
-    // this.handMoveY = 0;
-
-    // // preview画面を更新する
-    // this.updatePreview();
-  // }
-
   // preview画面の画像の位置、サイズを更新する
   updatePreview() {
-
     // preview画面の画像要素を取得
     let images = document.querySelectorAll('.preview-image');
     console.log(`hand: ${this.handMoveX}, ${this.handMoveY}, view: ${this.viewPositionX}, ${this.viewPositionY}, zoom: ${this.zoomRatio}`);
@@ -66,29 +81,15 @@ class CreateController {
         let position = this.gameObjects[image.dataset.gameObjectId].position;
 
         // 位置、サイズを更新する
-        // let posX = position.previewSize('x');
-        // let posX = position.previewSize('x') - (this.viewPositionX + this.handMoveX);
-        // let posY = position.previewSize('y');
-        // let posY = position.previewSize('y') - (this.viewPositionY + this.handMoveY);
-        
         image.style.left = ((position.x - (700 / 2)) * this.zoomRatio + (700 / 2)).toString() + "px";
         image.style.top = ((position.y - (495 / 2)) * this.zoomRatio + (495 / 2)).toString() + "px";
         image.style.width = (position.width * this.zoomRatio).toString() + "px";
         image.style.height = (position.height * this.zoomRatio).toString() + "px";
-        // image.style.left = (position.x * this.zoomRatio + (700 / 2)).toString() + "px";
-        // image.style.top = (position.y * this.zoomRatio + (495 / 2)).toString() + "px";
-        // image.style.left = (position.x * this.zoomRatio).toString() + "px";
-        // image.style.top = (position.y * this.zoomRatio).toString() + "px";
-        // image.style.width = (position.width * this.zoomRatio).toString() + "px";
-        // image.style.height = (position.height * this.zoomRatio).toString() + "px";
       });
     }
-
-    // // info欄の値を更新する
-    // infoX.value = originalX;
-    // infoY.value = originalY;
   }
 
+  // Info欄を更新する
   updateInfo() {
       let gameObject = this.selectedGameObject;
       let position = gameObject.position;
