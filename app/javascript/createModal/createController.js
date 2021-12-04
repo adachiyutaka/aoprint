@@ -25,7 +25,7 @@ class CreateController {
 
   // info欄に入力された値を更新する
   setInfo(e) {
-    let value = e.currentTarget.value;
+    let value = parseFloat(e.currentTarget.value);
     let gameObject = this.selectedGameObject;
     let position = gameObject.position;
 
@@ -50,7 +50,12 @@ class CreateController {
     }
 
     // preview画面を更新する
+
+    console.log("setInfo gameObject", gameObject);
+
     this.updatePreview();
+    console.log("setInfo updatePreview gameObject", gameObject);
+
   }
 
   // HandMoveの移動量を設定する
@@ -58,14 +63,23 @@ class CreateController {
     // gameObjectのpositionを更新する
     // x, yはズーム倍率を除いた値に変換する
     let position = this.selectedGameObject.position;
+
+    console.log("start setHandMove position.x + (x / this.zoomRatio):", position.x + (x / this.zoomRatio), ", x;", x, ", y:", y, ", position.x:", position.x, ", position.y:", position.y, ", zoomRatio:", this.zoomRatio, ", gameObject:", this.selectedGameObject);
+
     position.x = position.x + (x / this.zoomRatio);
     position.y = position.y + (y / this.zoomRatio);
+
+    console.log("setHandMove gameObject", this.selectedGameObject);
 
     // preview画面を更新する
     this.updatePreview();
 
+    console.log("setHandMove updatePreview gameObject", this.selectedGameObject);
+
     // info欄を更新する
     this.updateInfo();
+
+    console.log("setHandMove updateInfo gameObject", this.selectedGameObject);
   }
 
   // preview画面の画像の位置、サイズを更新する
@@ -91,6 +105,7 @@ class CreateController {
 
   // Info欄を更新する
   updateInfo() {
+      console.log("start updateInfo");
       let gameObject = this.selectedGameObject;
       let position = gameObject.position;
       let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
@@ -101,6 +116,7 @@ class CreateController {
       document.getElementById('width').value = position.width;
       document.getElementById('height').value = position.height;
       document.getElementById('role_select').selectedIndex = roleIndex[gameObject.script]; 
+      console.log("finish updateInfo");
   }
 }
 

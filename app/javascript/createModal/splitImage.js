@@ -1,6 +1,4 @@
-import createController from './createController.js';
 import CreateController from './createController.js';
-// import CreateController from './createController';
 import GameObject from './gameObject.js';
 import handMove from './handMove.js';
 
@@ -254,21 +252,6 @@ const splitImage = (file, type) => {
 
     const previewContainer = document.getElementById('preview_container');
 
-    // // info欄のエレメントを取得
-    // const infoX = document.getElementById('x');
-    // const infoY = document.getElementById('y');
-    // const infoWidth = document.getElementById('width');
-    // const infoHeight = document.getElementById('height');
-    // const infoScript = document.getElementById('role_select');
-    // // info欄のエレメントが変更された際に、GUIを更新するリスナーを設定
-    // infoX.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
-    // infoY.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
-    // infoWidth.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
-    // infoHeight.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
-    // infoHeight.addEventListener('input', (e) => {imageMover(e, createController.gameObjects)});
-    // infoScript.addEventListener('change', (e) => {imageMover(e, createController.gameObjects)});
-
-
     // 受け取ったデータをJSON形式にパースする
     // const json = JSON.parse(XHR.response);
     // const images = json['images'];
@@ -339,7 +322,7 @@ const splitImage = (file, type) => {
       previewContainer.appendChild(previewImg);
 
       CreateController.updatePreview();
-      // create
+
       // 画像がステージかキャラクターかで条件分岐
       // let type = image['type'];
       // if (true) {
