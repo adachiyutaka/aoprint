@@ -1,25 +1,25 @@
 import createController from './createController.js';
 
-const handMove = () => {
+const handMove = (element) => {
   let oldPosX = null;
   let oldPosY = null;
   let movePosX = null;
   let movePosY = null;
 
+  console.log("hand move set element :", element)
   // const preview = document.getElementById('preview_container');
   // preview.addEventListener('mousedown', mouseDown, false);
 
-  let elements = document.getElementsByClassName("drag-and-drop");
-
-  //要素内のクリックされた位置を取得するグローバル（のような）変数
-  let x;
-  let y;
+  // let elements = document.getElementsByClassName("drag-and-drop");
 
   //マウスが要素内で押されたとき、又はタッチされたとき発火
-  for(let i = 0; i < elements.length; i++) {
-      elements[i].addEventListener("mousedown", mouseDown, false);
-      elements[i].addEventListener("touchstart", mouseDown, false);
-  }
+  element.addEventListener("mousedown", mouseDown, false);
+  element.addEventListener("touchstart", mouseDown, false);
+  //マウスが要素内で押されたとき、又はタッチされたとき発火
+  // for(let i = 0; i < elements.length; i++) {
+  //   elements[i].addEventListener("mousedown", mouseDown, false);
+  //   elements[i].addEventListener("touchstart", mouseDown, false);
+  // }
 
   function mouseDown(e) {
     console.log("mouseDown");
@@ -83,7 +83,7 @@ const handMove = () => {
     let movePosY = event.pageY - oldPosY;
     oldPosX = event.pageX;
     oldPosY = event.pageY;
-    console.log("downPosX:", oldPosX, "event.pageX:", event.pageX, "movePosX:", movePosX);
+    console.log("id", id, "downPosX:", oldPosX, "event.pageX:", event.pageX, "movePosX:", movePosX);
     createController.setHandMove(movePosX, movePosY, id);
 
     // // info欄のエレメントを取得

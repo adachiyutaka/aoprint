@@ -288,9 +288,9 @@ const splitImage = (file, type) => {
     let output = document.getElementById('output');
     // let createController = CreateController;
 
-    // 各データに対応するimgタグを生成する
+    // 各データに対応するimg要素とGameObjectを生成する
     images.forEach( (image) => {
-      // 分割した画像をimg要素に設定
+      // img要素を生成し、分割した画像を設定
       let img = document.createElement('img');
       cv.imshow(canvas, image['image']);
       let imgBase64 = canvas.toDataURL();
@@ -300,47 +300,43 @@ const splitImage = (file, type) => {
       let previewImg = img.cloneNode();
       img.classList.add('split-img');
 
+      // GameObjectを生成し、画像、サイズ、位置データを設定、CreateControllerのGameObjectsに格納
       let gameObject = new GameObject();
-      // let position = new Position();
-      // gameObject.image = `data:image/png;base64,${image['image']}`;
       gameObject.image = imgBase64;
       let vertices = image['vertices'];
       gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height'], xRatio, yRatio);
       createController.addGameObject(gameObject);
-      console.log(createController);
 
-      // 切り取った画像のサイズと位置を設定
+      // 生成したimg要素のサイズ、位置、idを設定
+      let position = gameObject.position;
       previewImg.style.position = "absolute";
       previewImg.classList.add('preview-image');
       previewImg.classList.add('drag-and-drop');
-      previewImg.dataset.gameObjectId = index;
-      let position = gameObject.position;
-      // previewImg.style.left = position.previewSize('x').toString() + "px";
-      // previewImg.style.top = position.previewSize('y').toString() + "px";
-      // previewImg.style.width = position.previewSize('width').toString() + "px";
-      // previewImg.style.height = position.previewSize('height').toString() + "px";
+      previewImg.dataset.gameObjectId = createController.gameObjects.length - 1;
       previewImg.style.left = position.x.toString() + "px";
       previewImg.style.top = position.y.toString() + "px";
       previewImg.style.width = position.width.toString() + "px";
       previewImg.style.height = position.height.toString() + "px";
-      previewImg.dataset.gameObjectId = index;
 
       // preview内のgameObjectにリスナーを設定
       previewImg.addEventListener('mousedown', selectGameObject);
 
-      // info欄の表示切り替えとgameObjectの枠線表示
+      // info欄の表示切り替えとimg要素の枠線表示
       function selectGameObject(e){
-        // 指定した要素にのみ"selected"クラスをつける
+        // 選択したimg要素の輪郭を表示するために、指定した要素にのみ"selected"クラスをつける
         addSelected(e.currentTarget);
 
-        // 指定した要素のgameObjectIdを更新する
+        // CreateControllerのSelectedGameObjectを更新する
         createController.selectedGameObject = createController.gameObjects[previewImg.dataset.gameObjectId];
 
         // info欄を更新する
         createController.updateInfo();
       }
 
-      // 配置
+      // D&Dの設定
+      HandMove(previewImg);
+      
+      // プレビュー画面内にimg要素を配置
       previewContainer.appendChild(previewImg);
 
       // 画像がステージかキャラクターかで条件分岐
@@ -418,8 +414,7 @@ const splitImage = (file, type) => {
       //   imageList.appendChild(img);
       // }
     });
-    // D&Dの設定
-    HandMove();
+
     // let elements = document.getElementsByClassName("drag-and-drop");
 
     // //要素内のクリックされた位置を取得するグローバル（のような）変数
