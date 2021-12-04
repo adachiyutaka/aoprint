@@ -1,4 +1,4 @@
-import createController from './createController.js';
+import CreateController from './createController.js';
 
 const handMove = (element) => {
   let oldPosX = null;
@@ -84,7 +84,7 @@ const handMove = (element) => {
     oldPosX = event.pageX;
     oldPosY = event.pageY;
     console.log("id", id, "downPosX:", oldPosX, "event.pageX:", event.pageX, "movePosX:", movePosX);
-    createController.setHandMove(movePosX, movePosY, id);
+    CreateController.setHandMove(movePosX, movePosY, id);
 
     // // info欄のエレメントを取得
     // const infoX = document.getElementById('x');
@@ -110,7 +110,7 @@ const handMove = (element) => {
     let drag = document.querySelector(".drag");
 
     // handツールで移動し終わった値を設定する
-    // createController.setViewPosition(movePosX, movePosY);
+    // CreateController.setViewPosition(movePosX, movePosY);
 
     // handツールの位置情報を初期化する
     oldPosX = null;

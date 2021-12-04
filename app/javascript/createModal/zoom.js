@@ -1,4 +1,4 @@
-import createController from './createController';
+import CreateController from './createController';
 
 const zoom = () => {
   // 数値input要素、スライダーinput要素を取得
@@ -8,13 +8,13 @@ const zoom = () => {
   // 数値input要素が更新された時、ズーム率とpreview画面を更新する
   range.addEventListener('input', (e) => {
     number.value = range.value;
-    createController.setZoom(range.value);
+    CreateController.setZoom(range.value);
   });
 
   // スライダーinput要素が更新された時、ズーム率とpreview画面を更新する
   number.addEventListener('input', (e) => {
     range.value = number.value;
-    createController.setZoom(number.value);
+    CreateController.setZoom(number.value);
   });
 }
 

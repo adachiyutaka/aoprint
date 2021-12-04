@@ -1,13 +1,13 @@
-import createController from './createController.js';
+import CreateController from './createController.js';
 // import CreateController from './createController';
 import GameObject from './gameObject.js';
-import HandMove from './handMove.js';
+import handMove from './handMove.js';
 
 // ゲーム作成画面の編集内容を一時保存するオブジェクト
 window.gameObjects = [];
 window.gameImages = [];
 
-console.log(createController);
+console.log(CreateController);
 
 const sendImage = () => {
   // リスナーをセットするステージフォーム要素を取得
@@ -305,14 +305,14 @@ const splitImage = (file, type) => {
       gameObject.image = imgBase64;
       let vertices = image['vertices'];
       gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height'], xRatio, yRatio);
-      createController.addGameObject(gameObject);
+      CreateController.addGameObject(gameObject);
 
       // 生成したimg要素のサイズ、位置、idを設定
       let position = gameObject.position;
       previewImg.style.position = "absolute";
       previewImg.classList.add('preview-image');
       previewImg.classList.add('drag-and-drop');
-      previewImg.dataset.gameObjectId = createController.gameObjects.length - 1;
+      previewImg.dataset.gameObjectId = CreateController.gameObjects.length - 1;
       previewImg.style.left = position.x.toString() + "px";
       previewImg.style.top = position.y.toString() + "px";
       previewImg.style.width = position.width.toString() + "px";
@@ -327,14 +327,14 @@ const splitImage = (file, type) => {
         addSelected(e.currentTarget);
 
         // CreateControllerのSelectedGameObjectを更新する
-        createController.selectedGameObject = createController.gameObjects[previewImg.dataset.gameObjectId];
+        CreateController.selectedGameObject = CreateController.gameObjects[previewImg.dataset.gameObjectId];
 
         // info欄を更新する
-        createController.updateInfo();
+        CreateController.updateInfo();
       }
 
       // D&Dの設定
-      HandMove(previewImg);
+      handMove(previewImg);
       
       // プレビュー画面内にimg要素を配置
       previewContainer.appendChild(previewImg);

@@ -1,4 +1,4 @@
-import createController from './createController';
+import CreateController from './createController';
 
 const info = () => {
   
@@ -54,7 +54,7 @@ const info = () => {
     }
 
     // preview画面を更新する
-    createController.updatePreview();
+    CreateController.updatePreview();
   }
 }
 
