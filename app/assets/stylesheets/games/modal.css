@@ -213,16 +213,16 @@
   background-color: #f7f7f7;
 }
 
-.object-list{
+/* .object-list{
   display: flex;
   justify-content: flex-start;
   flex-direction: column;
   flex-wrap: wrap;
   width: 640px;
   margin-bottom: 10px;
-  background-color: #f7f7f7;
+  background-color: #1bce0a;
   overflow: auto;
-}
+} */
 
 /* object-card */
 
@@ -230,7 +230,8 @@
   display: flex;
   flex-wrap: wrap;
   padding: 8px;
-  border-bottom: 1px solid #dddddd;
+  background-color: #f7f7f7;
+  /* border-bottom: 1px solid #dddddd; */
 }
 
 .info-image{
@@ -349,4 +350,65 @@
   height: 160px;
   width: auto;
   background-color: #f7f7f7;
+}
+
+/* image list*/
+
+.image-list-container{
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #dddddd;
+}
+
+.image-index{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: auto;
+  list-style: none;
+}
+
+.index-card{
+  padding: 8px;
+  height: auto;
+  background-color: gold;
+}
+
+.image-list{
+  height: 300px;
+  padding: 8px;
+  overflow: auto;
+  list-style: none;
+  background-color: green;
+}
+
+.image-groupe{
+  margin-bottom: 8px;
+  background-color: greenyellow;
+}
+
+.image-card-container{
+  display: flex;
+  flex-direction: row;
+  width: 300px;
+  background-color: khaki;
+}
+
+.image-card-container{
+  display: inline-block;
+  position: relative;
+}
+
+.image{
+  width: 104px;
+  height: 104px;
+}
+
+.image-delete-button{
+  position: absolute;
+  top: 10px;
+  left: 10px;
 }

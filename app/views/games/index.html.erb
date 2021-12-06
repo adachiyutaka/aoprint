@@ -87,7 +87,7 @@
 
       <%#= render 'shared/error_messages', model: @item %>
       <div class='object-list' id='objectList'>
-
+      
       <%# object card %>
       <%# id要編集 %>
       <div class='object-info' id='object_info'>
@@ -183,6 +183,82 @@
             </p>
           </div>
         </div>
+      </div>
+
+      <%# image list %>
+      <div class='image-list-container' id='image_list_contaner'>
+          <ul class='image-index' id='image_index'>
+            <li class='index-card' id='uploaded'>
+            アップロード
+            </li>
+            <li class='index-card' id='character_index'>
+            キャラクター
+            </li>
+            <li class='index-card' id='stage_index'>
+            ステージ
+            </li>
+            <li class='index-card' id='gimmick_index'>
+            ギミック
+            </li>
+            <li class='index-card' id='back_ground_index'>
+            背景
+            </li>
+            <li class='index-card' id='etc_index'>
+            その他
+            </li>
+          </ul>
+        <ul class='image-list' id='image_list'>
+          <li class='image-groupe' id='uploaded_images'>
+            <div class='groupe-name'>
+              アップロードした画像
+            </div>
+            <div class='image-card-container' id='image_card_container'>
+              <div class='image-card' id='image_card'>
+                <img src='https://1.bp.blogspot.com/-l4fWuSze_MI/YHDkJRsVYzI/AAAAAAABdlM/4lid3iHq_aMFybNb9PYCOpNIEtOwgwRFwCNcBGAsYHQ/s755/hengao_mabuta_uragaesu.png' class='image' id='image'>
+                <div class='image-delete-button' id='image_delete_button'>x<div>
+              </div>
+              <div class='image-card' id='image_card'>
+                <img src='https://1.bp.blogspot.com/-l4fWuSze_MI/YHDkJRsVYzI/AAAAAAABdlM/4lid3iHq_aMFybNb9PYCOpNIEtOwgwRFwCNcBGAsYHQ/s755/hengao_mabuta_uragaesu.png' class='image' id='image'>
+                <div class='image-delete-button' id='image_delete_button'>x<div>
+              </div>
+           </div>
+          </li>
+          <li class='image-groupe' id='character_groupe'>
+            <div class='groupe-name'>
+              キャラクター
+            </div>
+            <div class='image-card-container' id='image_card_container'>
+              <div class='image-card' id='image_card'>
+                <img src='https://1.bp.blogspot.com/-l4fWuSze_MI/YHDkJRsVYzI/AAAAAAABdlM/4lid3iHq_aMFybNb9PYCOpNIEtOwgwRFwCNcBGAsYHQ/s755/hengao_mabuta_uragaesu.png' class='image' id='image'>
+                <div class='image-delete-button' id='image_delete_button'>x<div>
+              </div>
+              <div class='image-card' id='image_card'>
+                <img src='https://1.bp.blogspot.com/-l4fWuSze_MI/YHDkJRsVYzI/AAAAAAABdlM/4lid3iHq_aMFybNb9PYCOpNIEtOwgwRFwCNcBGAsYHQ/s755/hengao_mabuta_uragaesu.png' class='image' id='image'>
+                <div class='image-delete-button' id='image_delete_button'>x<div>
+              </div>
+           </div>
+          </li>
+          <li class='image-groupe' id='stage_groupe'>
+            <div class='groupe-name'>
+              ステージ
+            </div>
+          </li>
+          <li class='image-groupe' id='gimmick_groupe'>
+            <div class='groupe-name'>
+              仕掛けのあるオブジェクト
+            </div>
+          </li>
+          <li class='image-groupe' id='back_ground_groupe'>
+            <div class='groupe-name'>
+              背景
+            </div>
+          </li>
+          <li class='image-groupe' id='etc_groupe'>
+            <div class='groupe-name'>
+              その他
+            </div>
+          </li>
+        </ul>
       </div>
 
         <%# stage読み込みボタン %>
