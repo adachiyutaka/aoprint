@@ -164,7 +164,7 @@ const splitImage = (file, type) => {
     // cv.imshow('output', imgContLarge);
 
     // 輪郭を太く描画し切り取り時の余白を作る
-    const imgContBold = new cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC3);
+    const imgContBold = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
     cv.drawContours(imgContBold, contLarge, -1, new cv.Scalar(255, 255, 255), 20, cv.LINE_8);
     // cv.imshow('output', imgContBold);
 
@@ -246,9 +246,12 @@ const splitImage = (file, type) => {
         }
       }
     }
+
+
     images.forEach(function(item, i, array) {
       console.log(item, i);
     })
+
 
     const previewContainer = document.getElementById('preview_container');
 
@@ -290,7 +293,6 @@ const splitImage = (file, type) => {
       CreateController.addGameObject(gameObject);
 
       // 生成したimg要素のサイズ、位置、idを設定
-      let position = gameObject.position;
       previewImg.style.position = "absolute";
       previewImg.classList.add('preview-image');
       previewImg.classList.add('drag-and-drop');
@@ -315,12 +317,13 @@ const splitImage = (file, type) => {
         CreateController.updateInfo();
       }
 
-      // D&Dの設定
+      // preview内のGameObjectにD&Dを設定
       handMove(previewImg);
       
       // プレビュー画面内にimg要素を配置
       previewContainer.appendChild(previewImg);
 
+      // プレビュー画面を更新する
       CreateController.updatePreview();
 
       // 画像がステージかキャラクターかで条件分岐
@@ -660,7 +663,7 @@ function clipOutside(src, mask, inside = true){
     dst = dst.roi(rect);
   }
   else {
-    rect = new cv.Rect(0, 0, src.rows, src.cols);
+    rect = new cv.Rect(0, 0, src.cols, src.rows);
   }
   return {'image': dst, 'vertices': {'x': rect.x, 'y': rect.y, 'width': rect.width, 'height': rect.height}};
 }
