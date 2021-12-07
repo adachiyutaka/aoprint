@@ -374,7 +374,6 @@
 .index-card{
   padding: 8px;
   height: auto;
-  background-color: gold;
 }
 
 .image-list{
@@ -382,33 +381,63 @@
   padding: 8px;
   overflow: auto;
   list-style: none;
-  background-color: green;
+  background-color: #f7f7f7;
 }
 
 .image-groupe{
   margin-bottom: 8px;
-  background-color: greenyellow;
 }
 
-.image-card-container{
+.image-cards{
   display: flex;
-  flex-direction: row;
-  width: 300px;
-  background-color: khaki;
+  padding: 8px 0px;
+  margin-bottom: 40px;
 }
 
-.image-card-container{
-  display: inline-block;
+.image-card{
   position: relative;
+  width: 80px;
+  margin-right: 8px;
+  height: 80px;
 }
 
 .image{
-  width: 104px;
-  height: 104px;
+  width: 80px;
+  height: 80px;
+  border-radius: 3px;
+  background-color: #ffffff;
+}
+
+.image-name{
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  font-size: 8px;
+}
+
+.image-delete-button-wrapper{
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 16px;
+  height: 16px;
+}
+
+.image-delete-button-wrapper:hover .image-delete-button{
+  visibility: visible;
 }
 
 .image-delete-button{
-  position: absolute;
-  top: 10px;
-  left: 10px;
+  visibility: hidden;
+  width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 100;
+  line-height: 14px;
+  text-align: center;
+  color: white;
+  background-color: #444444;
 }
