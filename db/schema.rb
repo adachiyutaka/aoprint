@@ -12,17 +12,17 @@
 
 ActiveRecord::Schema.define(version: 2021_03_10_045944) do
 
-  create_table "active_storage_attachments", force: :cascade do |t|
+  create_table "active_storage_attachments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
-    t.integer "record_id", null: false
-    t.integer "blob_id", null: false
+    t.bigint "record_id", null: false
+    t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
   end
 
-  create_table "active_storage_blobs", force: :cascade do |t|
+  create_table "active_storage_blobs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "key", null: false
     t.string "filename", null: false
     t.string "content_type"
@@ -33,13 +33,13 @@ ActiveRecord::Schema.define(version: 2021_03_10_045944) do
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
   end
 
-  create_table "game_objects", force: :cascade do |t|
+  create_table "game_objects", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "symbol", default: ""
     t.string "name", default: ""
     t.string "text", default: ""
     t.boolean "player", default: false
     t.boolean "object", default: false
-    t.integer "game_id"
+    t.bigint "game_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "enemy", default: false
@@ -48,56 +48,56 @@ ActiveRecord::Schema.define(version: 2021_03_10_045944) do
     t.index ["game_id"], name: "index_game_objects_on_game_id"
   end
 
-  create_table "games", force: :cascade do |t|
+  create_table "games", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", default: "", null: false
     t.string "text", default: ""
-    t.integer "user_id"
+    t.bigint "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["user_id"], name: "index_games_on_user_id"
   end
 
-  create_table "object_positions", force: :cascade do |t|
-    t.integer "game_object_id"
-    t.integer "position_id"
+  create_table "object_positions", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "game_object_id"
+    t.bigint "position_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["game_object_id"], name: "index_object_positions_on_game_object_id"
     t.index ["position_id"], name: "index_object_positions_on_position_id"
   end
 
-  create_table "positions", force: :cascade do |t|
+  create_table "positions", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "symbol", null: false
     t.integer "x", null: false
     t.integer "y", null: false
     t.integer "width", null: false
     t.integer "height", null: false
     t.string "text", default: ""
-    t.integer "stage_id"
+    t.bigint "stage_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["stage_id"], name: "index_positions_on_stage_id"
   end
 
-  create_table "scripts", force: :cascade do |t|
+  create_table "scripts", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", default: ""
     t.string "text", default: ""
-    t.integer "game_object_id"
+    t.bigint "game_object_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["game_object_id"], name: "index_scripts_on_game_object_id"
   end
 
-  create_table "stages", force: :cascade do |t|
+  create_table "stages", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.integer "width", null: false
     t.integer "height", null: false
-    t.integer "game_id"
+    t.bigint "game_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["game_id"], name: "index_stages_on_game_id"
   end
 
-  create_table "users", force: :cascade do |t|
+  create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "name", default: "", null: false
