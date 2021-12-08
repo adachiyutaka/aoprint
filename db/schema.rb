@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_10_045944) do
+ActiveRecord::Schema.define(version: 2021_12_08_072117) do
 
   create_table "active_storage_attachments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", null: false
@@ -79,6 +79,14 @@ ActiveRecord::Schema.define(version: 2021_03_10_045944) do
     t.index ["stage_id"], name: "index_positions_on_stage_id"
   end
 
+  create_table "preset_game_objects", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "groupe", default: ""
+    t.bigint "game_object_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["game_object_id"], name: "index_preset_game_objects_on_game_object_id"
+  end
+
   create_table "scripts", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", default: ""
     t.string "text", default: ""
@@ -116,4 +124,5 @@ ActiveRecord::Schema.define(version: 2021_03_10_045944) do
   add_foreign_key "games", "users"
   add_foreign_key "object_positions", "game_objects"
   add_foreign_key "object_positions", "positions"
+  add_foreign_key "preset_game_objects", "game_objects"
 end

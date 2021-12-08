@@ -7,6 +7,7 @@ class GamesController < ApplicationController
   def index
     @games = Game.all.order(created_at: 'DESC')
     @gameForm = GameForm.new
+    @presetImages = PresetGameObject.all
   end
 
   def show
