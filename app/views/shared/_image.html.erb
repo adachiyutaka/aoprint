@@ -1,16 +1,16 @@
-<ul class='image-list' id='image_list'>
   <li class='image-groupe' id='uploaded_images'>
     <div class='groupe-name'>
-      
+    		<%= presetImage[:groupe] %>
     </div>
     <div class='image-cards' id='image_cards'>
+    <% presetImage[:game_objects].each do |gameObject| %>
       <div class='image-card' id='image_card'>
-        <img src='#' class='image' id='image'>
+        <%= image_tag gameObject.game_object.image, class: 'image'%>
         <div class='image-name' id='image_name'></div>
         <div class='image-delete-button-wrapper' id='image_delete_button_wrapper'>
           <div class='image-delete-button' id='image_delete_button'>x</div>
         </div>
       </div>
+    <% end %>
     </div>
   </li>
-</ul>

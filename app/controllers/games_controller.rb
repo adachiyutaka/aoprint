@@ -5,9 +5,15 @@ require 'google/cloud/vision'
 class GamesController < ApplicationController
 
   def index
+    groupe_name = ['character', 'stage', 'gimmick', 'background', 'etc']
+
     @games = Game.all.order(created_at: 'DESC')
     @gameForm = GameForm.new
-    @presetImages = PresetGameObject.all
+    @presetImages = []
+    groupe_name.each do |groupe|
+      images = {groupe: groupe, game_objects: PresetGameObject.where(groupe: groupe)}
+      @presetImages.push(images)
+    end
   end
 
   def show
@@ -101,4 +107,5 @@ class GamesController < ApplicationController
   def imageToBase64(image)
     return Base64.encode64(image.download)
   end
+
 end

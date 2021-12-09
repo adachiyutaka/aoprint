@@ -11,9 +11,6 @@
     </div>
     <%# games一覧 %>
     <div id='read-btn'>テストボタン</div>
-    <% @gameObjects.each do |gameObject|%>
-       <%= image_tag gameObject.image %>
-    <% end %>
     <div id='result'><%= @result %></div>
       <img style="max-width: 400px;"><input type="file" accept="image/*" />
   </div>
@@ -210,7 +207,12 @@
             その他
             </li>
           </ul>
-        <ul class='image-list' id='image_list'>
+          <ul class='image-list' id='image_list'>
+            <% @presetImages.each do |presetImage| %>
+              <%= render partial: "shared/image", locals: { presetImage: presetImage } %>
+            <% end %>
+          </ul>
+        <%# <ul class='image-list' id='image_list'>
           <li class='image-groupe' id='uploaded_images'>
             <div class='groupe-name'>
               アップロードした画像
@@ -273,7 +275,7 @@
               その他
             </div>
           </li>
-        </ul>
+        </ul> %>
       </div>
 
         <%# stage読み込みボタン %>

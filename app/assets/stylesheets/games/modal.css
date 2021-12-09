@@ -60,7 +60,7 @@
 
 .modal-container{
   height: 100%;
-  padding: 25px 15px 0px 15px;
+  padding: 24px 16px 0px 16px;
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -358,14 +358,14 @@
   margin-top: 16px;
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
   border-bottom: 1px solid #dddddd;
 }
 
 .image-index{
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
   justify-content: flex-start;
   width: auto;
   list-style: none;
@@ -378,6 +378,7 @@
 
 .image-list{
   height: 300px;
+  width: 768px;
   padding: 8px;
   overflow: auto;
   list-style: none;
@@ -402,8 +403,8 @@
 }
 
 .image{
-  width: 80px;
-  height: 80px;
+  width: 100%;
+  height: auto;
   border-radius: 3px;
   background-color: #ffffff;
 }
