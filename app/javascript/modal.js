@@ -17,6 +17,31 @@ const modal = () => {
   const imageBackground = document.getElementById('image_modal_background');
 
 
+  // ゲーム作成モーダルを表示する
+  const gameDisplay = () => {
+    modalParent.style.display = 'block';
+  }
+
+  // ゲーム作成モーダルを非表示にする
+  const gameExit = () => {
+    modalParent.style.display = 'none';
+  }
+
+  // イメージ選択モーダルの表示
+  const imageDisplay = () => {
+    imageModal.style.display = 'block';
+    imageBackground.style.display = 'block';
+    background.style.display = 'none';
+  }
+
+  // イメージ選択モーダルを非表示にする
+  const imageExit = () => {
+    imageModal.style.display = 'none';
+    imageBackground.style.display = 'none';
+    background.style.display = 'block';
+  }
+
+
   // ゲーム制作モーダルの表示
   gameButton.addEventListener('click', gameDisplay);
   
@@ -30,31 +55,6 @@ const modal = () => {
   // イメージ選択モーダルの非表示  
   imageBackground.addEventListener('click', imageExit);
   imageExitButton.addEventListener('click', imageExit);
-
-
-  // ゲーム作成モーダルを表示する
-  function gameDisplay() {
-    modalParent.style.display = 'block';
-  }
-
-  // ゲーム作成モーダルを非表示にする
-  function gameExit() {
-    modalParent.style.display = 'none';
-  }
-
-  // イメージ選択モーダルの表示
-  function imageDisplay() {
-    imageModal.style.display = 'block';
-    imageBackground.style.display = 'block';
-    background.style.display = 'none';
-  }
-
-  // イメージ選択モーダルを非表示にする
-  function imageExit() {
-    imageModal.style.display = 'none';
-    imageBackground.style.display = 'none';
-    background.style.display = 'block';
-  }
 }
 
 window.addEventListener("load", modal)

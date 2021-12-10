@@ -40,8 +40,8 @@ const handMove = (element) => {
 
     // マウスボタンが離されたとき、またはカーソルが外れたときの設定
     document.body.addEventListener("mouseup", mouseUp, false);
-    this.addEventListener("mouseleave", mouseUp, false);
     document.body.addEventListener("touchend", mouseUp, false);
+    this.addEventListener("mouseleave", mouseUp, false);
     this.addEventListener("touchleave", mouseUp, false);
   } 
 
@@ -79,6 +79,7 @@ const handMove = (element) => {
   function mouseUp(e){
     console.log("mouseUp");
 
+    //ドラッグしている要素を取得
     let drag = document.querySelector(".drag");
 
     // handツールで移動し終わった値を設定する
@@ -93,10 +94,12 @@ const handMove = (element) => {
     //ムーブベントハンドラの消去
     document.body.removeEventListener("mousemove", mouseMove, false);
     document.body.removeEventListener("touchmove", mouseMove, false);
+    document.body.removeEventListener("mouseup", mouseUp, false);
+    document.body.removeEventListener("touchend", mouseUp, false);
+    this.removeEventListener("mouseleave", mouseUp, false);
+    this.removeEventListener("touchleave", mouseUp, false);
+
     if (drag) {
-      drag.removeEventListener("mouseup", mouseUp, false);
-      drag.removeEventListener("touchend", mouseUp, false);
-      //クラス名 .drag も消す
       drag.classList.remove("drag");
     }
     

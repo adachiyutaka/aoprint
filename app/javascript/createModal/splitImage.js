@@ -9,6 +9,7 @@ window.gameImages = [];
 console.log(CreateController);
 
 const sendImage = () => {
+
   // リスナーをセットするステージフォーム要素を取得
   const stageForm = document.getElementById('game_form_stage_input');
   const stageLabel = document.getElementById('stage_label');
@@ -18,6 +19,19 @@ const sendImage = () => {
   const playerLabel = document.getElementById('player_label');
   const objectForm = document.getElementById('game_form_object_input');
   const objectLabel = document.getElementById('object_label');
+
+  const previewContainer = document.getElementById('preview_container');
+
+
+  previewContainer.addEventListener('mousedown', () => {
+    removeSelected();
+
+    // CreateControllerのSelectedGameObjectを更新する
+    CreateController.selectedGameObject = null;
+
+    // info欄を更新する
+    CreateController.updateInfo();
+  });
 
   // ステージフォームの処理
   stageForm.addEventListener('change', (e) => {
@@ -72,7 +86,9 @@ const sendImage = () => {
 };
 
 const splitImage = (file, type) => {
-// pngに変換するためにcanvasを準備
+  const previewContainer = document.getElementById('preview_container');
+
+  // pngに変換するためにcanvasを準備
   const canvas = document.getElementById('canvas');
   const context = canvas.getContext('2d');
   const imageDialog = document.getElementById('imageDialog');
@@ -252,9 +268,6 @@ const splitImage = (file, type) => {
       console.log(item, i);
     })
 
-
-    const previewContainer = document.getElementById('preview_container');
-
     // 受け取ったデータをJSON形式にパースする
     // const json = JSON.parse(XHR.response);
     // const images = json['images'];
@@ -307,6 +320,11 @@ const splitImage = (file, type) => {
 
       // info欄の表示切り替えとimg要素の枠線表示
       function selectGameObject(e){
+        console.log("previewImg mouse down");
+
+        // 親要素（preview container）にクリックが伝わらないようにする
+        e.stopPropagation();
+
         // 選択したimg要素の輪郭を表示するために、指定した要素にのみ"selected"クラスをつける
         addSelected(e.currentTarget);
 
@@ -590,12 +608,18 @@ const makeStageCard = (id, json) =>{
 
 const addSelected = (element) => {
   // 全ての要素の"selected"クラスを外す
-  let Images = Array.from(document.querySelectorAll('.selected'));
-  Images.forEach( (image) => {
-    image.classList.remove('selected');
-  });
+  removeSelected();
+
   // 選択された要素に"selected"クラスを付ける
   element.classList.add('selected');
+}
+
+const removeSelected = () => {
+  // 全ての要素の"selected"クラスを外す
+  let selectedElements = Array.from(document.querySelectorAll('.selected'));
+  selectedElements.forEach( (Element) => {
+    Element.classList.remove('selected');
+  });
 }
 
 // // info欄が更新された際にGUI内の該当するオブジェクトの描画位置を更新する
