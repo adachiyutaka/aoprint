@@ -391,20 +391,21 @@
 
 .image-cards{
   display: flex;
-  padding: 8px 0px;
-  margin-bottom: 40px;
+  flex-wrap: wrap;
+  padding: 16px 0px;
+  margin-bottom: 24px;
 }
 
 .image-card{
   position: relative;
   width: 80px;
   margin-right: 8px;
-  height: 80px;
 }
 
 .image{
-  width: 100%;
-  height: auto;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
   border-radius: 3px;
   background-color: #ffffff;
 }

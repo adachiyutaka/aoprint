@@ -90,16 +90,34 @@ class CreateController {
 
   // Info欄を更新する
   updateInfo() {
+    let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
+
+    let image = document.getElementById('info_image');
+    let x = document.getElementById('x');
+    let y = document.getElementById('y');
+    let width = document.getElementById('width');
+    let height = document.getElementById('height');
+    let role = document.getElementById('role_select');
+
+    if(this.selectedGameObject != null) {
       let gameObject = this.selectedGameObject;
       let position = gameObject.position;
-      let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
 
-      document.getElementById('info_image').src = gameObject.image;
-      document.getElementById('x').value = position.x;
-      document.getElementById('y').value = position.y;
-      document.getElementById('width').value = position.width;
-      document.getElementById('height').value = position.height;
-      document.getElementById('role_select').selectedIndex = roleIndex[gameObject.script]; 
+      image.src = gameObject.image;
+      x.value = position.x;
+      y.value = position.y;
+      width.value = position.width;
+      height.value = position.height;
+      role.selectedIndex = roleIndex[gameObject.script]; 
+    }
+    else {
+      image.src = "";
+      x.value = null;
+      y.value = null;
+      width.value = null;
+      height.value = null;
+      role.selectedIndex = roleIndex[0]; 
+    }
   }
 }
 

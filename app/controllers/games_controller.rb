@@ -5,13 +5,18 @@ require 'google/cloud/vision'
 class GamesController < ApplicationController
 
   def index
-    groupe_name = ['character', 'stage', 'gimmick', 'background', 'etc']
+    groupe_names = [{column: 'upload', index: 'アップロード'},
+                    {column: 'character', index: 'キャラクター'},
+                    {column: 'stage', index: 'ステージ'},
+                    {column: 'gimmick', index: 'ギミック'},
+                    {column: 'background',index: '背景'},
+                    {column: 'etc', index: 'その他'}]
 
     @games = Game.all.order(created_at: 'DESC')
     @gameForm = GameForm.new
     @presetImages = []
-    groupe_name.each do |groupe|
-      images = {groupe: groupe, game_objects: PresetGameObject.where(groupe: groupe)}
+    groupe_names.each do |groupe_name|
+      images = {groupe: groupe_name[:index], game_objects: PresetGameObject.where(groupe: groupe_name[:column])}
       @presetImages.push(images)
     end
   end
