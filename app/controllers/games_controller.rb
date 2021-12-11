@@ -16,7 +16,7 @@ class GamesController < ApplicationController
     @gameForm = GameForm.new
     @presetImages = []
     groupe_names.each do |groupe_name|
-      images = {groupe: groupe_name[:index], game_objects: PresetGameObject.where(groupe: groupe_name[:column])}
+      images = {groupe: groupe_name, game_objects: PresetGameObject.where(groupe: groupe_name[:column])}
       @presetImages.push(images)
     end
   end

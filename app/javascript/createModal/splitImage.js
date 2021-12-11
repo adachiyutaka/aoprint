@@ -10,6 +10,7 @@ console.log(CreateController);
 
 const sendImage = () => {
 
+
   // リスナーをセットするステージフォーム要素を取得
   const stageForm = document.getElementById('game_form_stage_input');
   const stageLabel = document.getElementById('stage_label');
@@ -22,6 +23,10 @@ const sendImage = () => {
 
   const previewContainer = document.getElementById('preview_container');
 
+  // 画像リストに画像アップロードボタンを移動
+  const imageCardsUpload = document.getElementById('image_cards_upload');
+  imageCardsUpload.appendChild(stageLabel);
+  stageLabel.classList.remove('hidden');
 
   previewContainer.addEventListener('mousedown', () => {
     removeSelected();

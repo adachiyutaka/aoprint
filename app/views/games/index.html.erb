@@ -13,6 +13,8 @@
     <div id='read-btn'>テストボタン</div>
     <div id='result'><%= @result %></div>
     <img style="max-width: 400px;"><input type="file" accept="image/*" />
+    <div id='child'>child</div>
+    <div id='parent'>parent</div>
   </div>
 </div>
 
@@ -276,20 +278,6 @@
             </div>
           </li>
         </ul> %>
-      </div>
-
-        <%# stage読み込みボタン %>
-        <label class='label' id='stage_label'>
-          <p class='label-plus'>+</p>
-          <p class='label-text' id='stage-click_or_dd'>
-          クリックかドラッグ＆ドロップでステージ用の画像ファイルをアップロード
-          </p>
-          <p class='label-text hidden' id='stage-please_drop'>
-          画像ファイルをドロップしてください
-          </p>
-          <%= f.file_field :stage_input, class: 'hidden'%>
-        </label>
-      </div>
       <p class='list-title'>image list</p>
       <div class='image-list' id='imageList'>
       </div>
@@ -351,6 +339,21 @@
           </div>
         </div>
       </div>
+
+      <%# 画像読み込みボタン %>
+      <%# jsで画像リスト内に移動させる %>
+      <label class='label hidden' id='stage_label'>
+        <p class='label-plus'>+</p>
+        <p class='label-text' id='stage-click_or_dd'>
+        クリックかドラッグ＆ドロップでステージ用の画像ファイルをアップロード
+        </p>
+        <p class='label-text hidden' id='stage-please_drop'>
+        画像ファイルをドロップしてください
+        </p>
+        <%= f.file_field :stage_input, class: 'hidden'%>
+      </label>
+      <%# 画像読み込みボタン %>
+
       
       <div id='textContainer'>
         <%= f.text_area :name, class:'name', placeholder:'ゲームのタイトル（40文字まで)', maxlength:'40' %>
