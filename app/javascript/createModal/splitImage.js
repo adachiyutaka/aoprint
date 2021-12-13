@@ -14,12 +14,6 @@ const sendImage = () => {
   // リスナーをセットするステージフォーム要素を取得
   const stageForm = document.getElementById('game_form_stage_input');
   const stageLabel = document.getElementById('stage_label');
-  const stageClickOrDD = document.getElementById('click_or_dd');
-  const stagePleaseDrop = document.getElementById('please_drop');
-  const playerForm = document.getElementById('game_form_player_input');
-  const playerLabel = document.getElementById('player_label');
-  const objectForm = document.getElementById('game_form_object_input');
-  const objectLabel = document.getElementById('object_label');
 
   const previewContainer = document.getElementById('preview_container');
 
@@ -43,50 +37,6 @@ const sendImage = () => {
     // ユーザーがセットしたファイルから画像ファイルを読み取り
     const file = e.target.files[0];
     splitImage(file, 'stage')
-  });
-
-  // ドロップ可能エリアに入った時
-  stageLabel.addEventListener('dragenter', () => {
-    stageLabel.style.backgroundColor = "#418dca"
-    console.log(stageClickOrDD.classList)
-    stageClickOrDD.classList.add('hidden');
-    stagePleaseDrop.classList.remove('hidden');
-  });
-
-  // ドロップ可能エリアを出た時
-  stageLabel.addEventListener('dragleave', () => {
-    stageLabel.style.backgroundColor = "#1074c5"
-    stageClickOrDD.classList.remove('hidden');
-    stagePleaseDrop.classList.add('hidden');
-    
-  });
-
-  stageLabel.addEventListener('dragover', (e) => {
-    e.preventDefault();
-  });
-
-  // ファイルをドロップした時
-  stageLabel.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const file = e.dataTransfer.files[0];
-      stagePleaseDrop.innerText = file.name;
-      stageLabel.classList.add('hidden');
-      splitImage(file, 'stage')
-  });
-
-  // プレイヤーフォームの処理
-  playerForm.addEventListener('change', (e) => {
-    // ユーザーがセットしたファイルから画像ファイルを読み取り
-    const file = e.target.files[0];
-    splitImage(file, 'character')
-  });
-
-  // オブジェクトフォームの処理
-  objectForm.addEventListener('change', (e) => {
-    // ユーザーがセットしたファイルから画像ファイルを読み取り
-    const file = e.target.files[0];
-    objectLabel.classList.add('hidden');
-    splitImage(file, 'object')
   });
 };
 
@@ -282,15 +232,6 @@ const splitImage = (file, type) => {
     const xRatio = previewContainer.clientWidth / src.rows;
     const yRatio = previewContainer.clientHeight / src.cols;
     
-    console.log(`xRatio: ${xRatio} / yRatio: ${yRatio}`);
-
-    // 画像を格納するdivタグ要素を取得
-    const objectList = document.getElementById(`objectList`);
-    const imageList = document.getElementById(`imageList`);
-
-    let output = document.getElementById('output');
-    // let createController = CreateController;
-
     // 各データに対応するimg要素とGameObjectを生成する
     images.forEach( (image) => {
       // img要素を生成し、分割した画像を設定
@@ -315,10 +256,6 @@ const splitImage = (file, type) => {
       previewImg.classList.add('preview-image');
       previewImg.classList.add('drag-and-drop');
       previewImg.dataset.gameObjectId = CreateController.gameObjects.length - 1;
-      // previewImg.style.left = position.x.toString() + "px";
-      // previewImg.style.top = position.y.toString() + "px";
-      // previewImg.style.width = position.width.toString() + "px";
-      // previewImg.style.height = position.height.toString() + "px";
 
       // preview内のgameObjectにリスナーを設定
       previewImg.addEventListener('mousedown', selectGameObject);
@@ -348,268 +285,9 @@ const splitImage = (file, type) => {
 
       // プレビュー画面を更新する
       CreateController.updatePreview();
-
-      // 画像がステージかキャラクターかで条件分岐
-      // let type = image['type'];
-      // if (true) {
-      //   // ステージ画像の場合
-
-      //   // 分割した画像ごとにステージカードのリストを生成し、objectListに挿入
-      //   objectList.insertAdjacentHTML("beforeend", makeStageCard(index, json));
-      //   const card = document.getElementById(`${index}`);
-
-      //   // カード内のシンボル、位置、オブジェクトを配置するコンテナ要素を取得
-      //   let symbolContainer = card.children[0];
-      //   let positionContainer = card.children[1];
-      //   let objectContainer = card.children[2];
-
-      //   // 位置、オブジェクトのコンテナに画像を配置する
-      //   positionContainer.insertBefore(img.cloneNode(), positionContainer.children[0]);
-      //   objectContainer.insertBefore(img.cloneNode(), objectContainer.children[0]);
-
-      //   // オブジェクト画像、オブジェクトの削除・追加ボタンの要素を取得
-      //   let symbolDeleteBtn = Array.from(symbolContainer.children).find((o) => o.classList.contains('delete-btn'));
-      //   let objectDeleteBtn = Array.from(objectContainer.children).find((o) => o.classList.contains('delete-btn'));
-      //   let objectNewBtn = Array.from(objectContainer.children).find((o) => o.classList.contains('new-btn'));
-      //   let objectImg = Array.from(objectContainer.children).find((o) => o.classList.contains('split-img'));
-
-      //   // オブジェクト追加ボタンに押下時の処理
-      //   objectNewBtn.addEventListener('click', (e) => {
-      //     // dialogImageListを空にする
-      //     dialogImageList = [];
-
-      //     // 各ステージカードのオブジェクト画像と、キャラクター画像をdialogImageListに格納
-      //     Array.from(objectList.children).forEach((card) => {
-      //       dialogImageList.push(Array.from(card.children[2].children).find((o) => o.classList.contains('split-img')).cloneNode());
-      //     });
-      //     Array.from(imageList.children).forEach((img) => {
-      //       dialogImageList.push(img.cloneNode());
-      //     });
-
-      //     // オブジェクト追加ダイアログにdialogImageListの各画像を配置
-      //     dialogImageList.forEach((img) => {
-      //       imageDialog.appendChild(img);
-
-      //       // dialogImageList内の各画像にボタン押下時の処理
-      //       img.addEventListener('click', (e) => {
-      //         // オブジェクトを新規作成するオブジェクトコンテナにクリックした画像を追加
-      //         objectContainer.insertBefore(e.target.cloneNode(), objectContainer.children[0]);
-      //         // オブジェクト追加ダイアログを非表示に
-      //         imageDialog.classList.add('hidden');
-      //         // オブジェクト追加ダイアログに追加した画像を全て削除
-      //         Array.from(imageDialog.children).forEach((o) => {
-      //           o.remove()
-      //         });
-      //       });
-      //     });
-
-      //     // オブジェクト追加ダイアログを表示
-      //     imageDialog.classList.remove('hidden');
-      //   });
-
-      //   // オブジェクト削除ボタン押下時の処理
-      //   objectDeleteBtn.addEventListener('click', (e) => {
-      //     // オブジェクト画像と削除ボタンを消す
-      //     objectImg.remove();
-      //     objectDeleteBtn.remove();
-      //   });
-
-      //   // ステージカードのid
-      //   index += 1
-
-      // } else if (type == 'character') {
-      //   // キャラクター画像の場合
-
-      //   // キャラクター画像のリストに各画像を配置する
-      //   imageList.appendChild(img);
-      // }
     });
-
-    // let elements = document.getElementsByClassName("drag-and-drop");
-
-    // //要素内のクリックされた位置を取得するグローバル（のような）変数
-    // let x;
-    // let y;
-
-    // //マウスが要素内で押されたとき、又はタッチされたとき発火
-    // for(let i = 0; i < elements.length; i++) {
-    //     elements[i].addEventListener("mousedown", mdown, false);
-    //     elements[i].addEventListener("touchstart", mdown, false);
-    // }
-
-    // //マウスが押された際の関数
-    // function mdown(e) {
-    //   //クラス名に .drag を追加
-    //   this.classList.add("drag");
-    //   let event;
-      
-    //   // console.log(`mdown target: ${e.currentTarget.dataset.gameObjectId}`);
-
-    //   //タッチデイベントとマウスのイベントの差異を吸収
-    //   if(e.type === "mousedown") {
-    //       event = e;
-    //   } else {
-    //       event = e.changedTouches[0];
-    //   }
-
-    //   // 重なった他の要素を動かさないように指定
-    //   e.stopPropagation();
-      
-    //   //要素内の相対座標を取得
-    //   x = event.pageX - this.offsetLeft;
-    //   y = event.pageY - this.offsetTop;
-
-    //   //ムーブイベントにコールバック
-    //   document.body.addEventListener("mousemove", mmove, false);
-    //   document.body.addEventListener("touchmove", mmove, false);
-
-    //   //マウスボタンが離されたとき、またはカーソルが外れたとき発火
-    //   this.addEventListener("mouseup", mup, false);
-    //   document.body.addEventListener("mouseleave", mup, false);
-    //   this.addEventListener("touchend", mup, false);
-    //   document.body.addEventListener("touchleave", mup, false);
-    // }
-
-    // //マウスカーソルが動いたときに発火
-    // function mmove(e) {
-
-    //   //ドラッグしている要素を取得
-    //   let drag = document.querySelector(".drag");
-    //   let event;
-
-    //   //同様にマウスとタッチの差異を吸収
-    //   if(e.type === "mousemove") {
-    //       event = e;
-    //   } else {
-    //       event = e.changedTouches[0];
-    //   }
-
-    //   //フリックしたときに画面を動かさないようにデフォルト動作を抑制
-    //   e.preventDefault();
-
-    //   let previewX = e.pageX - x;
-    //   let previewY = e.pageY - y;
-    //   let originalX = Math.round(previewX / xRatio);
-    //   let originalY = Math.round(previewY / yRatio);
-    //   //マウスが動いた場所に要素を動かす
-    //   drag.style.left = previewX + "px";
-    //   drag.style.top = previewY + "px";
-
-    //   // info欄の値を更新する
-    //   infoX.value = originalX;
-    //   infoY.value = originalY;
-    //   // gameObjectの値を更新する
-    //   let gameObject = window.gameObjects[drag.dataset.gameObjectId];
-    //   gameObject.position.x = originalX;
-    //   gameObject.position.y = originalY;
-    // }
-
-    // //マウスボタンが上がったら発火
-    // function mup(e) {
-    //   let drag = document.querySelector(".drag");
-
-    //   //ムーブベントハンドラの消去
-    //   document.body.removeEventListener("mousemove", mmove, false);
-    //   document.body.removeEventListener("touchmove", mmove, false);
-    //   if (drag) {
-    //     drag.removeEventListener("mouseup", mup, false);
-    //     drag.removeEventListener("touchend", mup, false);
-    //     //クラス名 .drag も消す
-    //     drag.classList.remove("drag");
-    //   }
-    // }
-
-    // openCVテスト
-    
-    // 画像のテキストを読み取り
-    // const readText = new ReadText();
-    // readText.readText(imgURL);
-    // console.log("読み取り開始");
-    
-    // Promise.resolve(png)
-    // .then(sendAPI)
-    // .then(res => {
-    //   console.log('SUCCESS!', res);
-    //   document.querySelector('pre').innerHTML = JSON.stringify(res, null, 2);
-    // })
-    // .catch(err => {
-    //   console.log('FAILED:(', err);
-    //   document.querySelector('pre').innerHTML = JSON.stringify(err, null, 2);
-    // });
-
-    // ↓rubyと通信する場合の記述
-
-    // const token = document.getElementsByName('csrf-token')[0].content;
-    // const XHR = new XMLHttpRequest();
-    // // openでリクエストを初期化する
-    // XHR.open("POST", `/games/read_text`, true);
-    // // レスポンスのタイプを指定する
-
-    // XHR.responseType = "json";
-    // XHR.setRequestHeader('Content-Type', 'application/json');
-    // XHR.setRequestHeader("X-CSRF-Token", token);  // リクエストヘッダーを追加（セキュリティトークンの追加）
-
-    // // sendでリクエストを送信する
-    // game data = {};
-    // data.url = imgURL;
-    // var json = JSON.stringify(data);
-    // XHR.send(json);
-    // // XHR.send();
-
-    // XHR.onload = () => {
-    //   const item = XHR.response;
-    //   console.log(item);
-    // }
-
-    // ↑rubyと通信する場合の記述
   };
 };
-
-const makeStageCard = (id, json) =>{
-  // stage画像を分割したオブジェクトを表示するレイアウト
-  // idと画像の配置、サイズの情報をHTML属性に持たせる
-  let card = `
-  <div class='object-card' id='${id}'>
-    <div class='symbol container'>
-      <input type='text' class='symbol-input' id='symbolInput'>
-    </div>
-    <div class='position container'>
-
-
-
-    <div class='delete-btn' id='deleteButton'>削除</div>
-      <div class='position-indicator'></div>
-    </div>
-    <div class='object container'>
-      <div class='delete-btn' id='deleteButton'>削除</div>
-      <div class='object new-btn'>+</div>
-    </div>
-    <div class='script container'>
-      <select class='script-select' id='scriptSelect' name="example">
-        <option value="object">未選択</option>
-        <option value="player">プレイヤー</option>
-        <option value="enemy">敵</option>
-        <option value="item">アイテム</option>
-        <option value="goal">ゴール</option>
-      </select>
-      <div class='object new-btn'>+</div>
-    </div>
-  </div>
-  `
-  return card
-}
-
-// <div id='vertices' ${verticesDataTag(json)}></div>
-
-
-// const verticesDataTag = (json) => {
-//   let dataset = '';
-//   let vertices = json['vertices'];
-//   for (key in vertices) {
-//     dataset += (`data-${key}=${vertices[key]} `);
-//   }
-//   return dataset;
-// }
 
 const addSelected = (element) => {
   // 全ての要素の"selected"クラスを外す
@@ -626,40 +304,6 @@ const removeSelected = () => {
     Element.classList.remove('selected');
   });
 }
-
-// // info欄が更新された際にGUI内の該当するオブジェクトの描画位置を更新する
-// const imageMover = (e, gameObjects) => {
-//   let image = document.querySelector('.selected');
-//   let gameObject = gameObjects[image.dataset.gameObjectId];
-//   let position = gameObject.position;
-//   let value = e.currentTarget.value;
-  
-//   switch(e.currentTarget.id){
-//     case 'x':
-//       gameObject.position.x = value;
-//       // image.style.left = position.previewSize('x').toString() + 'px';
-//       image.style.left = position.x.toString() + 'px';
-//       break
-//     case 'y':
-//       gameObject.position.y = value;
-//       // image.style.top = position.previewSize('y').toString() + 'px';
-//       image.style.top = position.y.toString() + 'px';
-//       break
-//     case 'width':
-//       gameObject.position.width = value;
-//       // image.style.width = position.previewSize('width').toString() + 'px';
-//       image.style.width = position.width.toString() + 'px';
-//       break
-//     case 'height':
-//       gameObject.position.height = value;
-//       // image.style.height = position.previewSize('height').toString() + 'px';
-//       image.style.height = position.height.toString() + 'px';
-//       break
-//     case 'role_select':
-//       gameObject.script = value;
-//       break
-//   }
-// }
 
 function clipOutside(src, mask, inside = true){
   let dst = cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC4);

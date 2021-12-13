@@ -90,14 +90,14 @@ class CreateController {
 
   // Info欄を更新する
   updateInfo() {
-    let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
+    let scriptIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
 
     let image = document.getElementById('info_image');
     let x = document.getElementById('x');
     let y = document.getElementById('y');
     let width = document.getElementById('width');
     let height = document.getElementById('height');
-    let role = document.getElementById('role_select');
+    let script = document.getElementById('script_select');
 
     if(this.selectedGameObject != null) {
       let gameObject = this.selectedGameObject;
@@ -108,7 +108,7 @@ class CreateController {
       y.value = position.y;
       width.value = position.width;
       height.value = position.height;
-      role.selectedIndex = roleIndex[gameObject.script]; 
+      script.selectedIndex = scriptIndex[gameObject.script]; 
     }
     else {
       image.src = "";
@@ -116,7 +116,7 @@ class CreateController {
       y.value = null;
       width.value = null;
       height.value = null;
-      role.selectedIndex = roleIndex[0]; 
+      script.selectedIndex = scriptIndex[0];
     }
   }
 }

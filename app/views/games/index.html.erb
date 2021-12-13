@@ -13,8 +13,11 @@
     <div id='read-btn'>テストボタン</div>
     <div id='result'><%= @result %></div>
     <img style="max-width: 400px;"><input type="file" accept="image/*" />
-    <div id='child'>child</div>
-    <div id='parent'>parent</div>
+    <div class='parent'>
+      parent
+      <div class='child1'>child1</div>
+      <div class='child2'>child2</div>
+    </div>
   </div>
 </div>
 
@@ -93,99 +96,83 @@
       <%# object card %>
       <%# id要編集 %>
       <div class='object-info' id='object_info'>
-        <%# imageカラム %>
-        <div class='image-cotainer' id='image_cotainer'>
-          <p class='content-title'>
-          イメージ
-          </p>
-          <div class='setting-list' id='setting_list'>
-            <div class='setting-card' id='setting_card'>
-              <input type='text' class='symbol-input' id='symbol_input'>
-              <%# script側から作成するので本来は不要 %>
-              <img src='#' class='info-image' id='info_image'>
-            </div>
-          </div>
-          <div class='add-setting-btn' id='add_image_btn'>
-            <p>
-              + 追加
-            </p>
-          </div>
-        </div>
+        <ul class='setting-list'>
+          <%# image %>
+          <li class='setting-card'>
+            <%# script側から作成するので本来は不要 %>
+            <img src='https://1.bp.blogspot.com/-P4iXuEh6dZY/Wfg04oWG6eI/AAAAAAABH1I/S1sgOjG8b-QsAs_yp3Xv79tshwlJG6R8ACLcBGAs/s800/food_oden_chikuwabu.png' class='info-image' id='info_image'>
+          </li>
 
-        <%# positionカラム %>
-        <div class='position-cotainer' id='position_cotainer'>
-          <p class='content-title'>
-          位置
-          </p>
-          <div class='setting-list' id='setting_list'>
-            <div class='setting-card' id='setting_card'>
-              <input type='text' class='symbol-input' id='symbol_input'>
-              <ul class='positions' id='positions'>
-                <li>
-                  <label class='inline-label'>
-                    <span class='label-name'>
-                    X : 
-                    </span>
-                    <input type='text' class='position-input' id='x'>
-                  </label>
-                </li>
-                <li>
-                  <label class='inline-label'>
-                    <span class='label-name'>
-                    Y :
-                    </span>
-                    <input type='text' class='position-input' id='y'>
-                  </label>
-                </li>
-                <li>
-                  <label class='inline-label'>
-                    <span class='label-name'>
-                    横幅 :
-                    </span>
-                    <input type='text' class='position-input' id='width'>
-                  </label>
-                </li>
-                <li>
-                  <label class='inline-label'>
-                    <span class='label-name'>
-                    高さ :
-                    </span>
-                    <input type='text' class='position-input' id='height'>
-                  </label>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class='add-setting-btn' id='add_position_btn'>
-            <p>
-              + 追加
-            </p>
-          </div>
-        </div>
+          <%# 罫線 %>
+          <div class="hr"></div>
 
-        <%# roleカラム %>
-        <div class='role-cotainer' id='role_cotainer'>
-          <p class='content-title'>
-          役割・動き
-          </p>
-          <div class='setting-list' id='setting_list'>
-            <div class='setting-card' id='setting_card'>
-              <select class='role-select' id='role_select' name="example">
-                <option value="object">ステージ</option>
-                <option value="player">プレイヤー</option>
-                <option value="enemy">敵</option>
-                <option value="item">アイテム</option>
-                <option value="goal">ゴール</option>
-              </select>
-            </div>
+          <%# position %>
+          <li class='setting-card'>
+            <ul class='positions' id='positions'>
+              <li>
+                <label class='inline-label'>
+                  <span class='label-name position'>
+                  X : 
+                  </span>
+                  <input type='text' class='position-input' id='x'>
+                </label>
+              </li>
+              <li>
+                <label class='inline-label'>
+                  <span class='label-name position'>
+                  Y :
+                  </span>
+                  <input type='text' class='position-input' id='y'>
+                </label>
+              </li>
+            </ul>
+          </li>
+          <li class='setting-card'>
+            <ul class='size' id='size'>
+              <li>
+                <label class='inline-label'>
+                  <span class='label-name'>
+                  横幅 :
+                  </span>
+                  <input type='text' class='position-input' id='width'>
+                </label>
+              </li>
+              <li>
+                <label class='inline-label'>
+                  <span class='label-name'>
+                  高さ :
+                  </span>
+                  <input type='text' class='position-input' id='height'>
+                </label>
+              </li>
+            </ul>
+          </li>
+
+          <%# 罫線 %>
+          <div class="hr"></div>
+
+          <%# roleカラム %>
+          <li class='setting-card script'>
+            <p>役割</p>
+            <div class='info-script-list'>
+            <ul>
+              <li>
+                <select class='script-select' id='script_select' name="example">
+                  <option value="object">ステージ</option>
+                  <option value="player">プレイヤー</option>
+                  <option value="enemy">敵</option>
+                  <option value="item">アイテム</option>
+                  <option value="goal">ゴール</option>
+                </select>
+              </li>
+            </ul>
           </div>
-          <div class='add-setting-btn' id='add_role_btn'>
-            <p>
-              + 追加
-            </p>
-          </div>
-        </div>
+          </li>
+
+        </ul>
       </div>
+
+
 
       <%# image list %>
       <div class='image-list-container' id='image_list_contaner'>
@@ -214,114 +201,10 @@
               <%= render partial: "shared/image", locals: { presetImage: presetImage } %>
             <% end %>
           </ul>
-        <%# <ul class='image-list' id='image_list'>
-          <li class='image-groupe' id='uploaded_images'>
-            <div class='groupe-name'>
-              アップロードした画像
-            </div>
-            <div class='image-cards' id='image_cards'>
-              <div class='image-card' id='image_card'>
-                <img src='https://1.bp.blogspot.com/-l4fWuSze_MI/YHDkJRsVYzI/AAAAAAABdlM/4lid3iHq_aMFybNb9PYCOpNIEtOwgwRFwCNcBGAsYHQ/s755/hengao_mabuta_uragaesu.png' class='image' id='image'>
-                <div class='image-name' id='image_name'>まぶたを裏返す子供</div>
-                <div class='image-delete-button-wrapper' id='image_delete_button_wrapper'>
-                  <div class='image-delete-button' id='image_delete_button'>x</div>
-                </div>
-              </div>
-              <div class='image-card' id='image_card'>
-                <img src='https://1.bp.blogspot.com/-l4fWuSze_MI/YHDkJRsVYzI/AAAAAAABdlM/4lid3iHq_aMFybNb9PYCOpNIEtOwgwRFwCNcBGAsYHQ/s755/hengao_mabuta_uragaesu.png' class='image' id='image'>
-                <div class='image-name' id='image_name'>まぶたを裏返す子供</div>
-                <div class='image-delete-button-wrapper' id='image_delete_button_wrapper'>
-                  <div class='image-delete-button' id='image_delete_button'>x</div>
-                </div>
-              </div>
-           </div>
-          </li>
-          <li class='image-groupe' id='character_groupe'>
-            <div class='groupe-name'>
-              キャラクター
-            </div>
-            <div class='image-cards' id='image_cards'>
-              <div class='image-card' id='image_card'>
-                <img src='https://1.bp.blogspot.com/-l4fWuSze_MI/YHDkJRsVYzI/AAAAAAABdlM/4lid3iHq_aMFybNb9PYCOpNIEtOwgwRFwCNcBGAsYHQ/s755/hengao_mabuta_uragaesu.png' class='image' id='image'>
-                <div class='image-name' id='image_name'>まぶたを裏返す子供</div>
-                <div class='image-delete-button-wrapper' id='image_delete_button_wrapper'>
-                  <div class='image-delete-button' id='image_delete_button'>x</div>
-                </div>
-              </div>
-              <div class='image-card' id='image_card'>
-                <img src='https://1.bp.blogspot.com/-l4fWuSze_MI/YHDkJRsVYzI/AAAAAAABdlM/4lid3iHq_aMFybNb9PYCOpNIEtOwgwRFwCNcBGAsYHQ/s755/hengao_mabuta_uragaesu.png' class='image' id='image'>
-                <div class='image-name' id='image_name'>まぶたを裏返す子供</div>
-                <div class='image-delete-button-wrapper' id='image_delete_button_wrapper'>
-                  <div class='image-delete-button' id='image_delete_button'>x</div>
-                </div>
-              </div>
-           </div>
-          </li>
-          <li class='image-groupe' id='stage_groupe'>
-            <div class='groupe-name'>
-              ステージ
-            </div>
-          </li>
-          <li class='image-groupe' id='gimmick_groupe'>
-            <div class='groupe-name'>
-              仕掛けのあるオブジェクト
-            </div>
-          </li>
-          <li class='image-groupe' id='back_ground_groupe'>
-            <div class='groupe-name'>
-              背景
-            </div>
-          </li>
-          <li class='image-groupe' id='etc_groupe'>
-            <div class='groupe-name'>
-              その他
-            </div>
-          </li>
-        </ul> %>
-      <p class='list-title'>image list</p>
-      <div class='image-list' id='imageList'>
-      </div>
 
-      <div class='image-dialog hidden' id='imageDialog'>
-      </div>
-
-      <div class='image-container' id='playerImageContainer'>
-        <label class='label' id='player_label'>
-          <p class='label-plus'>+</p>
-          <p class='label-text' id='player-click_or_dd'>
-          クリックかドラッグ＆ドロップでプレイヤー用の画像ファイルをアップロード
-          </p>
-          <p class='label-text hidden' id='player-please_drop'>
-          画像ファイルをドロップしてください
-          </p>
-          <%= f.file_field :player_input, class: 'hidden'%>
-        </label>
-      </div>
-      <div class='image-container' id='objectImageContainer'>
-        <label class='label' id='object_label'>
-          <p class='label-plus'>+</p>
-          <p class='label-text' id='object-click_or_dd'>
-          クリックかドラッグ＆ドロップでオブジェクト用の画像ファイルをアップロード
-          </p>
-          <p class='label-text hidden' id='object-please_drop'>
-          画像ファイルをドロップしてください
-          </p>
-          <%= f.file_field :object_input, class: 'hidden'%>
-        </label>
-      </div>
-
-      <div class='object-list' id='objectList'>
-      </div>
-      <p class='list-title'>image list</p>
-      <div class='image-list' id='imageList'>
-      </div>
-
-      <%# 画像選択ダイアログの原型 %>
-      <div class='image-dialog hidden' id='imageDialog'>
-      </div>
-      
+      <%# 非表示 %>
       <%# スクリプト編集モーダルの原型 %>
-      <div class='script-modal' id='scriptModal'>
+      <div class='script-modal hidden' id='scriptModal'>
         <div class='script-wrapper'>
           <div class='script-header'>
           <p>script editor</p>
@@ -339,17 +222,12 @@
           </div>
         </div>
       </div>
+      <%# 非表示 %>
 
       <%# 画像読み込みボタン %>
       <%# jsで画像リスト内に移動させる %>
       <label class='label hidden' id='stage_label'>
         <p class='label-plus'>+</p>
-        <p class='label-text' id='stage-click_or_dd'>
-        クリックかドラッグ＆ドロップでステージ用の画像ファイルをアップロード
-        </p>
-        <p class='label-text hidden' id='stage-please_drop'>
-        画像ファイルをドロップしてください
-        </p>
         <%= f.file_field :stage_input, class: 'hidden'%>
       </label>
       <%# 画像読み込みボタン %>
