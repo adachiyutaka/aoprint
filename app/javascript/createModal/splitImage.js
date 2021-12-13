@@ -1,16 +1,10 @@
 import CreateController from './createController.js';
 import GameObject from './gameObject.js';
 import handMove from './handMove.js';
+import showInfo from './showInfo.js';
 
-// ゲーム作成画面の編集内容を一時保存するオブジェクト
-window.gameObjects = [];
-window.gameImages = [];
-
-console.log(CreateController);
 
 const sendImage = () => {
-
-
   // リスナーをセットするステージフォーム要素を取得
   const stageForm = document.getElementById('game_form_stage_input');
   const stageLabel = document.getElementById('stage_label');
@@ -262,8 +256,6 @@ const splitImage = (file, type) => {
 
       // info欄の表示切り替えとimg要素の枠線表示
       function selectGameObject(e){
-        console.log("previewImg mouse down");
-
         // 親要素（preview container）にクリックが伝わらないようにする
         e.stopPropagation();
 
@@ -275,6 +267,9 @@ const splitImage = (file, type) => {
 
         // info欄を更新する
         CreateController.updateInfo();
+
+        // info欄を表示する
+        showInfo(e.currentTarget);
       }
 
       // preview内のGameObjectにD&Dを設定

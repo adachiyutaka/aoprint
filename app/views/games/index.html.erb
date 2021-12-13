@@ -13,7 +13,7 @@
     <div id='read-btn'>テストボタン</div>
     <div id='result'><%= @result %></div>
     <img style="max-width: 400px;"><input type="file" accept="image/*" />
-    <div class='parent'>
+    <div class='div1' id='div1'>
       parent
       <div class='child1'>child1</div>
       <div class='child2'>child2</div>
@@ -83,6 +83,85 @@
         </div>
         <%# GUI %>
         <div class='preview-container' id='preview_container'>
+
+          <%# object card %>
+          <div class='object-info' id='object_info'>
+            <ul class='setting-list'>
+              <%# image %>
+              <li class='setting-card'>
+                <%# script側から作成するので本来は不要 %>
+                <img src='https://1.bp.blogspot.com/-P4iXuEh6dZY/Wfg04oWG6eI/AAAAAAABH1I/S1sgOjG8b-QsAs_yp3Xv79tshwlJG6R8ACLcBGAs/s800/food_oden_chikuwabu.png' class='info-image' id='info_image'>
+              </li>
+
+              <%# 罫線 %>
+              <div class="hr"></div>
+
+              <%# position %>
+              <li class='setting-card'>
+                <ul class='positions' id='positions'>
+                  <li>
+                    <label class='inline-label'>
+                      <span class='label-name position'>
+                      X : 
+                      </span>
+                      <input type='text' class='position-input' id='x'>
+                    </label>
+                  </li>
+                  <li>
+                    <label class='inline-label'>
+                      <span class='label-name position'>
+                      Y :
+                      </span>
+                      <input type='text' class='position-input' id='y'>
+                    </label>
+                  </li>
+                </ul>
+              </li>
+              <li class='setting-card'>
+                <ul class='size' id='size'>
+                  <li>
+                    <label class='inline-label'>
+                      <span class='label-name'>
+                      横幅 :
+                      </span>
+                      <input type='text' class='position-input' id='width'>
+                    </label>
+                  </li>
+                  <li>
+                    <label class='inline-label'>
+                      <span class='label-name'>
+                      高さ :
+                      </span>
+                      <input type='text' class='position-input' id='height'>
+                    </label>
+                  </li>
+                </ul>
+              </li>
+
+              <%# 罫線 %>
+              <div class="hr"></div>
+
+              <%# roleカラム %>
+              <li class='setting-card script'>
+                <p>役割</p>
+                <div class='info-script-list'>
+                <ul>
+                  <li>
+                    <select class='script-select' id='script_select' name="example">
+                      <option value="object">ステージ</option>
+                      <option value="player">プレイヤー</option>
+                      <option value="enemy">敵</option>
+                      <option value="item">アイテム</option>
+                      <option value="goal">ゴール</option>
+                    </select>
+                  </li>
+                </ul>
+              </div>
+              </li>
+
+            </ul>
+          </div>
+
           <div class='add-object-btn' id='add_object_btn'>
             + 追加
           </div>
@@ -93,84 +172,6 @@
       <%#= render 'shared/error_messages', model: @item %>
       <div class='object-list' id='objectList'>
       
-      <%# object card %>
-      <%# id要編集 %>
-      <div class='object-info' id='object_info'>
-        <ul class='setting-list'>
-          <%# image %>
-          <li class='setting-card'>
-            <%# script側から作成するので本来は不要 %>
-            <img src='https://1.bp.blogspot.com/-P4iXuEh6dZY/Wfg04oWG6eI/AAAAAAABH1I/S1sgOjG8b-QsAs_yp3Xv79tshwlJG6R8ACLcBGAs/s800/food_oden_chikuwabu.png' class='info-image' id='info_image'>
-          </li>
-
-          <%# 罫線 %>
-          <div class="hr"></div>
-
-          <%# position %>
-          <li class='setting-card'>
-            <ul class='positions' id='positions'>
-              <li>
-                <label class='inline-label'>
-                  <span class='label-name position'>
-                  X : 
-                  </span>
-                  <input type='text' class='position-input' id='x'>
-                </label>
-              </li>
-              <li>
-                <label class='inline-label'>
-                  <span class='label-name position'>
-                  Y :
-                  </span>
-                  <input type='text' class='position-input' id='y'>
-                </label>
-              </li>
-            </ul>
-          </li>
-          <li class='setting-card'>
-            <ul class='size' id='size'>
-              <li>
-                <label class='inline-label'>
-                  <span class='label-name'>
-                  横幅 :
-                  </span>
-                  <input type='text' class='position-input' id='width'>
-                </label>
-              </li>
-              <li>
-                <label class='inline-label'>
-                  <span class='label-name'>
-                  高さ :
-                  </span>
-                  <input type='text' class='position-input' id='height'>
-                </label>
-              </li>
-            </ul>
-          </li>
-
-          <%# 罫線 %>
-          <div class="hr"></div>
-
-          <%# roleカラム %>
-          <li class='setting-card script'>
-            <p>役割</p>
-            <div class='info-script-list'>
-            <ul>
-              <li>
-                <select class='script-select' id='script_select' name="example">
-                  <option value="object">ステージ</option>
-                  <option value="player">プレイヤー</option>
-                  <option value="enemy">敵</option>
-                  <option value="item">アイテム</option>
-                  <option value="goal">ゴール</option>
-                </select>
-              </li>
-            </ul>
-          </div>
-          </li>
-
-        </ul>
-      </div>
 
 
 
