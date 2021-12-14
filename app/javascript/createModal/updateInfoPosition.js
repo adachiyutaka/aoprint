@@ -1,35 +1,34 @@
 import CreateController from './createController.js';
 
-const showInfo = (element) => {
-  console.log("showInfo");
-
+const updateInfoPosition = () => {
   let x;
   let y;
-
+  
   let previewWindowX = 700;
   let previewWindowY = 495;
   let windowMargin = 16;
-  let objectMargin = 36;
+  let objectMargin = 24;
+
+  let info = CreateController.info;
+  let infoWidth = info.clientWidth;
+  let infoHeight = info.clientHeight;
+
+  let elementStyle = CreateController.selectedElement.style;
+
+  let objectX = parseFloat(elementStyle.left);
+  let objectY = parseFloat(elementStyle.top);
+  let objectWidth = parseFloat(elementStyle.width);
+  let objectHeight = parseFloat(elementStyle.height);
 
   let xMin = windowMargin;
   let xMax = previewWindowX - windowMargin;
   let yMin = windowMargin;
-  let yMax = previewWindowY - windowMargin;
-
-  let objectX = parseFloat(element.style.left);
-  let objectY = parseFloat(element.style.top);
-  let objectWidth = parseFloat(element.style.width);
-  let objectHeight = parseFloat(element.style.height);
+  let yMax = previewWindowY - windowMargin - infoHeight;
 
   let centerX = objectX + objectWidth / 2;
   let centerY = objectY + objectHeight / 2;
 
-  let info = document.getElementById('object_info');
 
-  let infoWidth = info.clientWidth;
-  let infoHeight = info.clientHeight;
-
-  console.log("info.clientWidth", info.clientWidth);
   // x位置の計算
   // オブジェクトの中心に合わせたinfo欄の左端が下限か
   if (centerX - (infoWidth / 2) < xMin){
@@ -47,7 +46,7 @@ const showInfo = (element) => {
   // y位置の計算
   // オブジェクトの中心がプレビューウィンドウの中心より下か上か
   if (centerY > previewWindowY / 2) {
-    // オブジェクトの上側に表示する
+    // 下の場合、info欄をオブジェクトの上側に表示する
     y = objectY - objectMargin - infoHeight;
 
     // プレビューウィンドウの下限以下の場合、上限の値に
@@ -56,18 +55,18 @@ const showInfo = (element) => {
     }
   }
   else {
-    // オブジェクトの下側に表示する
+    // 上の場合、info欄をオブジェクトの下側に表示する
     y = objectY + objectHeight + objectMargin;
 
     // プレビューウィンドウの上限以上の場合、下限の値に
     if (y > yMax) {
-      y = yMax - infoHeight;
+      y = yMax;
     }
   }
 
-  console.log("objectY", objectY,"objectMargin", objectMargin,"infoHeight:", infoHeight);
+  // 計算した x, y 位置を設定
   info.style.left = x.toString() + "px";
   info.style.top = y.toString() + "px";
 }
 
-export default showInfo;
+export default updateInfoPosition;

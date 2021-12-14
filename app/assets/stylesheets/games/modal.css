@@ -186,7 +186,7 @@
   position: absolute;
   bottom: 50px;
   left: 100px;
-  z-index: 2;
+  z-index: 3;
   width: 100px;
   height: 100px;
   border-radius: 3px;
@@ -217,10 +217,11 @@
 /* object-card */
 
 .object-info{
+  visibility: hidden;
   position: absolute;
   top: 0px;
   left: 0px;
-  z-index: 2;
+  z-index: 4;
   width: 300px;
   display: inline-block;
   padding: 0px 8px;
@@ -341,10 +342,11 @@
 }
 
 .drag {
-  z-index: 3;
+  z-index: 4;
 }
 
 .selected{
+  z-index: 2;
   outline: 1px solid #1074c5;
 }
 

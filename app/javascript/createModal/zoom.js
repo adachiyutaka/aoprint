@@ -8,13 +8,13 @@ const zoom = () => {
   // 数値input要素が更新された時、ズーム率とpreview画面を更新する
   range.addEventListener('input', (e) => {
     number.value = range.value;
-    CreateController.setZoom(range.value);
+    CreateController.updateZoom(range.value);
   });
 
   // スライダーinput要素が更新された時、ズーム率とpreview画面を更新する
   number.addEventListener('input', (e) => {
     range.value = number.value;
-    CreateController.setZoom(number.value);
+    CreateController.updateZoom(number.value);
   });
 }
 

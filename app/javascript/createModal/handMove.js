@@ -13,8 +13,10 @@ const handMove = (element) => {
   function mouseDown(e) {
     console.log("mouseDown");
 
-    //クラス名に .drag を追加
-    this.classList.add("drag");
+    let element = CreateController.selectedElement;
+
+    // 手前に表示されるようz-indexを変更するため、クラス名に drag を追加
+    element.classList.add("drag");
 
     //タッチデイベントとマウスのイベントの差異を吸収
     let event;
@@ -29,10 +31,6 @@ const handMove = (element) => {
 
     oldPosX = event.pageX;
     oldPosY = event.pageY;
-
-    //要素内の相対座標を取得(ページ内の絶対位置 - クリックした要素の親との相対位置)
-    // x = event.pageX - this.offsetLeft;
-    // y = event.pageY - this.offsetTop;
     
     // ドラッグ中の要素の動きを設定
     document.body.addEventListener("mousemove", mouseMove, false);
@@ -41,17 +39,13 @@ const handMove = (element) => {
     // マウスボタンが離されたとき、またはカーソルが外れたときの設定
     document.body.addEventListener("mouseup", mouseUp, false);
     document.body.addEventListener("touchend", mouseUp, false);
-    this.addEventListener("mouseleave", mouseUp, false);
-    this.addEventListener("touchleave", mouseUp, false);
+    element.addEventListener("mouseleave", mouseUp, false);
+    element.addEventListener("touchleave", mouseUp, false);
   } 
 
   // マウスの動きに合わせてドラッグした要素を移動させる
   function mouseMove(e){
     console.log("mouseMove");
-
-    //ドラッグしている要素を取得
-    let drag = document.querySelector(".drag");
-    let id = drag.dataset.gameObjectId;
 
     //同様にマウスとタッチの差異を吸収
     let event;
@@ -67,23 +61,23 @@ const handMove = (element) => {
     // 重なった他の要素を動かさないように指定
     event.stopPropagation();
 
-    // ドラッグで移動した値をCreateControllerから設定する
-    let movePosX = event.pageX - oldPosX;
-    let movePosY = event.pageY - oldPosY;
-    oldPosX = event.pageX;
-    oldPosY = event.pageY;
-    console.log("id", id, "downPosX:", oldPosX, "event.pageX:", event.pageX, "movePosX:", movePosX);
-    CreateController.setHandMove(movePosX, movePosY);
+    // マウスの位置の差をCreateControllerから設定する
+    // pos : 現在のマウスの位置
+    // oldPos: 一つ前のmousemoveイベント発火時のマウスの位置
+    let posX = event.pageX;
+    let posY = event.pageY;
+    CreateController.updateHandMove(posX - oldPosX, posY - oldPosY);
+
+    // 現在のマウスの位置を oldPos に設定する
+    oldPosX = posX;
+    oldPosY = posY;
   }
 
   function mouseUp(e){
     console.log("mouseUp");
 
-    //ドラッグしている要素を取得
-    let drag = document.querySelector(".drag");
-
     // handツールで移動し終わった値を設定する
-    // CreateController.setViewPosition(movePosX, movePosY);
+    CreateController.finishHandMove();
 
     // handツールの位置情報を初期化する
     oldPosX = null;
@@ -92,24 +86,16 @@ const handMove = (element) => {
     movePosY = null;
 
     //ムーブベントハンドラの消去
+    let element = CreateController.selectedElement;
     document.body.removeEventListener("mousemove", mouseMove, false);
     document.body.removeEventListener("touchmove", mouseMove, false);
     document.body.removeEventListener("mouseup", mouseUp, false);
     document.body.removeEventListener("touchend", mouseUp, false);
-    this.removeEventListener("mouseleave", mouseUp, false);
-    this.removeEventListener("touchleave", mouseUp, false);
+    element.removeEventListener("mouseleave", mouseUp, false);
+    element.removeEventListener("touchleave", mouseUp, false);
 
-    if (drag) {
-      drag.classList.remove("drag");
-    }
-    
-    // mdownで設定したリスナーを解除する
-    // this.removeEventListener("mousemove", mouseMove, false);
-    // this.removeEventListener("touchmove", mouseMove, false);
-    // this.removeEventListener("mouseup", mouseUp, false);
-    // this.removeEventListener("mouseleave", mouseUp, false);
-    // this.removeEventListener("touchend", mouseUp, false);
-    // this.removeEventListener("touchleave", mouseUp, false);
+    // クラス名 drag を削除
+    element.classList.remove("drag");
   }
 }
 

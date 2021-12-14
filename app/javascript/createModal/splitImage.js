@@ -1,8 +1,6 @@
 import CreateController from './createController.js';
 import GameObject from './gameObject.js';
 import handMove from './handMove.js';
-import showInfo from './showInfo.js';
-
 
 const sendImage = () => {
   // リスナーをセットするステージフォーム要素を取得
@@ -22,8 +20,7 @@ const sendImage = () => {
     // CreateControllerのSelectedGameObjectを更新する
     CreateController.selectedGameObject = null;
 
-    // info欄を更新する
-    CreateController.updateInfo();
+    CreateController.updatePreview();
   });
 
   // ステージフォームの処理
@@ -221,7 +218,7 @@ const splitImage = (file, type) => {
     // const json = JSON.parse(XHR.response);
     // const images = json['images'];
     
-    // 元画像をpreview画面サイズに合わせるための比 （プレビュー画面サイズ / 元画像サイズ）
+    // 元画像をpreview画面サイズに合わせるための比 （preview画面サイズ / 元画像サイズ）
     // 一回の画像読み取りで複数のimg要素を得た場合も全てこの比でサイズを調整する
     const xRatio = previewContainer.clientWidth / src.rows;
     const yRatio = previewContainer.clientHeight / src.cols;
@@ -252,38 +249,39 @@ const splitImage = (file, type) => {
       previewImg.dataset.gameObjectId = CreateController.gameObjects.length - 1;
 
       // preview内のgameObjectにリスナーを設定
-      previewImg.addEventListener('mousedown', selectGameObject);
+      previewImg.addEventListener('mousedown', (e) => {
+        e.stopPropagation;
+        selectPreviewImage(e.currentTarget);
+      });
 
-      // info欄の表示切り替えとimg要素の枠線表示
-      function selectGameObject(e){
-        // 親要素（preview container）にクリックが伝わらないようにする
-        e.stopPropagation();
-
-        // 選択したimg要素の輪郭を表示するために、指定した要素にのみ"selected"クラスをつける
-        addSelected(e.currentTarget);
-
-        // CreateControllerのSelectedGameObjectを更新する
-        CreateController.selectedGameObject = CreateController.gameObjects[previewImg.dataset.gameObjectId];
-
-        // info欄を更新する
-        CreateController.updateInfo();
-
-        // info欄を表示する
-        showInfo(e.currentTarget);
-      }
+      selectPreviewImage(previewImg)
 
       // preview内のGameObjectにD&Dを設定
       handMove(previewImg);
+
       
-      // プレビュー画面内にimg要素を配置
+      // preview画面内にimg要素を配置
       previewContainer.appendChild(previewImg);
 
-      // プレビュー画面を更新する
+      // preview画面を更新する
       CreateController.updatePreview();
     });
   };
 };
 
+// preview内のGameObjectをクリックした際の処理
+const selectPreviewImage = (element) => {
+  // 選択したimg要素の輪郭を表示するために、指定した要素にのみ"selected"クラスをつける
+  addSelected(element);
+
+  // CreateControllerのSelectedGameObjectを更新する
+  CreateController.updateSelectedGameObject(element);
+
+  // preview画面を更新する
+  CreateController.updatePreview();
+}
+
+// 選択したimg要素の輪郭を表示するための'selected'クラス操作
 const addSelected = (element) => {
   // 全ての要素の"selected"クラスを外す
   removeSelected();

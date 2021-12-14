@@ -1,12 +1,16 @@
+import updateInfoPosition from "./updateInfoPosition";
+
 class CreateController {
   constructor() {
     this.gameObjects = [];
     this.selectedGameObject = null;
+    this.selectedElement = null;
     this.zoomRatio = 1;
     this.handMoveX = null;
     this.handMoveY = null;
     this.viewPositionX = null;
     this.viewPositionY = null;
+    this.info = null;
   }
 
   // GameObjectを追加する
@@ -14,8 +18,18 @@ class CreateController {
     this.gameObjects.push(gameObject);
   }
 
+  setInfo(element) {
+    this.info = element;
+  }
+
+  // 選択中のGameObjectを設定する
+  updateSelectedGameObject(element) {
+    this.selectedGameObject = this.gameObjects[element.dataset.gameObjectId];
+    this.selectedElement = element;
+  }
+
   // ズーム倍率を設定する
-  setZoom(zoomValue) {
+  updateZoom(zoomValue) {
     // inputの値からズーム倍率を設定
     this.zoomRatio = zoomValue / 100;
     
@@ -24,7 +38,7 @@ class CreateController {
   }
 
   // info欄に入力された値を更新する
-  setInfo(e) {
+  updateInfo(e) {
     let value = parseFloat(e.currentTarget.value);
     let gameObject = this.selectedGameObject;
     let position = gameObject.position;
@@ -54,7 +68,7 @@ class CreateController {
   }
 
   // HandMoveの移動量を設定する
-  setHandMove(x, y) {
+  updateHandMove(x, y) {
     // gameObjectのpositionを更新する
     // x, yはズーム倍率を除いた値に変換する
     let position = this.selectedGameObject.position;
@@ -63,14 +77,24 @@ class CreateController {
 
     // preview画面を更新する
     this.updatePreview();
+  }
 
-    // info欄を更新する
-    this.updateInfo();
+  // positionの値を四捨五入する
+  // mousemoveごとに四捨五入すると誤差が大きくなるため、mouseupにのみ使う
+  finishHandMove() {
+    // 小数点以下を四捨五入した値に設定する
+    let position = this.selectedGameObject.position;
+    position.x = Math.round(position.x);
+    position.y = Math.round(position.y);
+
+    // preview画面を更新する
+    this.updatePreview();
   }
 
   // preview画面の画像の位置、サイズを更新する
   updatePreview() {
-    // preview画面の画像要素を取得
+    // img要素の更新
+    // img要素を取得
     let images = document.querySelectorAll('.preview-image');
 
     if(this.gameObjects != null && images != null){
@@ -86,10 +110,8 @@ class CreateController {
         image.style.height = (position.height * this.zoomRatio).toString() + "px";
       });
     }
-  }
 
-  // Info欄を更新する
-  updateInfo() {
+    // info欄の更新
     let scriptIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
 
     let image = document.getElementById('info_image');
@@ -104,19 +126,17 @@ class CreateController {
       let position = gameObject.position;
 
       image.src = gameObject.image;
-      x.value = position.x;
-      y.value = position.y;
-      width.value = position.width;
-      height.value = position.height;
-      script.selectedIndex = scriptIndex[gameObject.script]; 
+      // mousemoveしている間、実際のpositionの値はfloat型で計算するが、見栄えのため表示上は小数点以下を四捨五入する
+      x.value = Math.round(position.x);
+      y.value = Math.round(position.y);
+      width.value = Math.round(position.width);
+      height.value = Math.round(position.height);
+      script.selectedIndex = scriptIndex[gameObject.script];
+      updateInfoPosition(this.selectedElement);
+      this.info.style.visibility = 'visible';
     }
     else {
-      image.src = "";
-      x.value = null;
-      y.value = null;
-      width.value = null;
-      height.value = null;
-      script.selectedIndex = scriptIndex[0];
+      this.info.style.visibility = 'hidden';
     }
   }
 }
