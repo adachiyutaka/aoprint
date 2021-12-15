@@ -475,3 +475,20 @@
   color: white;
   background-color: #444444;
 }
+
+.hand-icon{
+  visibility: hidden;
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  width: 24px;
+  height: 24px;
+  font-size: 24px;
+  text-align: center;
+  border-radius: 3px;
+  background-color: #ffffff;
+}
+
+.hand{
+  cursor: move;
+}

@@ -9,7 +9,12 @@ const info = () => {
   document.getElementById('script_select').addEventListener('change', (e) => CreateController.updateInfo(e));
 
   // info欄の要素を取得
-  CreateController.setInfo(document.getElementById('object_info'));
+  let info = document.getElementById('object_info');
+  CreateController.setInfo(info);
+  
+  // preview画面のイベント（preview内imageの選択キャンセル）を発火させないために
+  // stopPropagationを設定
+  info.addEventListener('click', (e) => {e.stopPropagation();});
 };
 
 window.addEventListener('load', info);

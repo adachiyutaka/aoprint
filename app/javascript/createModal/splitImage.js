@@ -1,6 +1,6 @@
 import CreateController from './createController.js';
 import GameObject from './gameObject.js';
-import handMove from './handMove.js';
+import objectMove from './objectMove.js';
 
 const sendImage = () => {
   // リスナーをセットするステージフォーム要素を取得
@@ -14,7 +14,7 @@ const sendImage = () => {
   imageCardsUpload.appendChild(stageLabel);
   stageLabel.classList.remove('hidden');
 
-  previewContainer.addEventListener('mousedown', () => {
+  previewContainer.addEventListener('click', () => {
     removeSelected();
 
     // CreateControllerのSelectedGameObjectを更新する
@@ -257,7 +257,7 @@ const splitImage = (file, type) => {
       selectPreviewImage(previewImg)
 
       // preview内のGameObjectにD&Dを設定
-      handMove(previewImg);
+      objectMove(previewImg);
 
       
       // preview画面内にimg要素を配置

@@ -6,10 +6,10 @@ class CreateController {
     this.selectedGameObject = null;
     this.selectedElement = null;
     this.zoomRatio = 1;
+    this.objectMoveX = null;
+    this.objectMoveY = null;
     this.handMoveX = null;
     this.handMoveY = null;
-    this.viewPositionX = null;
-    this.viewPositionY = null;
     this.info = null;
   }
 
@@ -39,7 +39,7 @@ class CreateController {
 
   // info欄に入力された値を更新する
   updateInfo(e) {
-    let value = parseFloat(e.currentTarget.value);
+    let value = e.currentTarget.value;
     let gameObject = this.selectedGameObject;
     let position = gameObject.position;
 
@@ -47,18 +47,18 @@ class CreateController {
     // 更新された要素に合わせてgameObjectの値を更新する
     switch(e.currentTarget.id){
       case 'x':
-        position.x = value;
+        position.x = parseFloat(value);
         break
       case 'y':
-        position.y = value;
+        position.y = parseFloat(value);
         break
       case 'width':
-        position.width = value;
+        position.width = parseFloat(value);
         break
       case 'height':
-        position.height = value;
+        position.height = parseFloat(value);
         break
-      case 'role_select':
+      case 'script_select':
         gameObject.script = value;
         break
     }
@@ -67,8 +67,8 @@ class CreateController {
     this.updatePreview();
   }
 
-  // HandMoveの移動量を設定する
-  updateHandMove(x, y) {
+  // ObjectMoveの移動量を設定する
+  updateObjectMove(x, y) {
     // gameObjectのpositionを更新する
     // x, yはズーム倍率を除いた値に変換する
     let position = this.selectedGameObject.position;
@@ -81,11 +81,32 @@ class CreateController {
 
   // positionの値を四捨五入する
   // mousemoveごとに四捨五入すると誤差が大きくなるため、mouseupにのみ使う
-  finishHandMove() {
+  finishObjectMove() {
     // 小数点以下を四捨五入した値に設定する
     let position = this.selectedGameObject.position;
     position.x = Math.round(position.x);
     position.y = Math.round(position.y);
+
+    // preview画面を更新する
+    this.updatePreview();
+  }
+
+  // HandMoveの移動量を設定する
+  updateHandMove(x, y) {
+    // HandMoveの移動量を設定する
+    this.handMoveX = this.handMoveX + x;
+    this.handMoveY = this.handMoveY + y;
+
+    // preview画面を更新する
+    this.updatePreview();
+  }
+
+  // HandMoveの値を四捨五入する
+  // mousemoveごとに四捨五入すると誤差が大きくなるため、mouseupにのみ使う
+  finishHandMove() {
+    // 小数点以下を四捨五入した値に設定する
+    this.handMoveX = Math.round(this.handMoveX);
+    this.handMoveY = Math.round(this.handMoveY);
 
     // preview画面を更新する
     this.updatePreview();

@@ -15,6 +15,7 @@ require("../createModal/zoom")
 require("../createModal/info")
 require("../createModal/script")
 require("../createModal/create")
+require("../createModal/handMove")
 cv = require("../createModal/opencv")
 
 // Uncomment to copy all static images under ../images to the output folder and reference
