@@ -6,10 +6,10 @@ class CreateController {
     this.selectedGameObject = null;
     this.selectedElement = null;
     this.zoomRatio = 1;
-    this.objectMoveX = null;
-    this.objectMoveY = null;
     this.handMoveX = null;
     this.handMoveY = null;
+    this.oldHandMoveX = null;
+    this.oldHandMoveY = null;
     this.info = null;
   }
 
@@ -33,6 +33,11 @@ class CreateController {
     // inputの値からズーム倍率を設定
     this.zoomRatio = zoomValue / 100;
     
+    // this.oldHandMoveX = this.handMoveX;
+    // this.oldHandMoveY = this.handMoveY;
+    // this.handMoveX = 0;
+    // this.handMoveY = 0;
+
     // preview画面を更新する
     this.updatePreview();
   }
@@ -94,8 +99,9 @@ class CreateController {
   // HandMoveの移動量を設定する
   updateHandMove(x, y) {
     // HandMoveの移動量を設定する
-    this.handMoveX = this.handMoveX + x;
-    this.handMoveY = this.handMoveY + y;
+    // mouse moveの入力値をpreview画面の倍率に合わせる
+    this.handMoveX = this.handMoveX + (x / this.zoomRatio);
+    this.handMoveY = this.handMoveY + (y / this.zoomRatio);
 
     // preview画面を更新する
     this.updatePreview();
@@ -125,8 +131,9 @@ class CreateController {
         let position = this.gameObjects[image.dataset.gameObjectId].position;
 
         // 位置、サイズを更新する
-        image.style.left = ((position.x - (700 / 2)) * this.zoomRatio + (700 / 2)).toString() + "px";
-        image.style.top = ((position.y - (495 / 2)) * this.zoomRatio + (495 / 2)).toString() + "px";
+        image.style.left = ((position.x - (700 / 2) + this.handMoveX) * this.zoomRatio + (700 / 2)).toString() + "px";
+        image.style.top = ((position.y - (495 / 2) + this.handMoveY) * this.zoomRatio + (495 / 2)).toString() + "px";
+
         image.style.width = (position.width * this.zoomRatio).toString() + "px";
         image.style.height = (position.height * this.zoomRatio).toString() + "px";
       });
