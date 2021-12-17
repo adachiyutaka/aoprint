@@ -13,12 +13,12 @@ const updateInfoPosition = () => {
   let infoWidth = info.clientWidth;
   let infoHeight = info.clientHeight;
 
-  let elementStyle = CreateController.selectedElement.style;
+  let element = CreateController.selectedElement;
 
-  let objectX = parseFloat(elementStyle.left);
-  let objectY = parseFloat(elementStyle.top);
-  let objectWidth = parseFloat(elementStyle.width);
-  let objectHeight = parseFloat(elementStyle.height);
+  let objectX = parseFloat(element.style.left);
+  let objectY = parseFloat(element.style.top);
+  let objectWidth = parseFloat(element.style.width);
+  let objectHeight = parseFloat(element.style.height);
 
   let xMin = windowMargin;
   let xMax = previewWindowX - windowMargin;

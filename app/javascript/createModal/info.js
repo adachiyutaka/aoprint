@@ -2,7 +2,10 @@ import CreateController from './createController';
 
 const info = () => {
   // info欄に入力された際に、GUIを更新するリスナーを設定
-  document.getElementById('x').addEventListener('input', (e) => CreateController.updateInfo(e));
+  document.getElementById('x').addEventListener('input', (e) => {
+    console.log('x');
+    CreateController.updateInfo(e);
+  });
   document.getElementById('y').addEventListener('input', (e) => CreateController.updateInfo(e));
   document.getElementById('width').addEventListener('input', (e) => CreateController.updateInfo(e));
   document.getElementById('height').addEventListener('input', (e) => CreateController.updateInfo(e));
@@ -14,7 +17,8 @@ const info = () => {
   
   // preview画面のイベント（preview内imageの選択キャンセル）を発火させないために
   // stopPropagationを設定
-  info.addEventListener('click', (e) => {e.stopPropagation();});
+  info.addEventListener('click', (e) => {e.stopPropagation()});
+  info.addEventListener('keydown', (e) => {e.stopPropagation()});
 };
 
 window.addEventListener('load', info);

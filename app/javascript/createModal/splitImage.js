@@ -21,6 +21,7 @@ const sendImage = () => {
     CreateController.selectedGameObject = null;
 
     CreateController.updatePreview();
+    CreateController.updateInfoInput();
   });
 
   // ステージフォームの処理
@@ -279,6 +280,7 @@ const selectPreviewImage = (element) => {
 
   // preview画面を更新する
   CreateController.updatePreview();
+  CreateController.updateInfoInput();
 }
 
 // 選択したimg要素の輪郭を表示するための'selected'クラス操作

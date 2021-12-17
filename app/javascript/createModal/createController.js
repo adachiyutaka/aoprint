@@ -32,11 +32,6 @@ class CreateController {
   updateZoom(zoomValue) {
     // inputの値からズーム倍率を設定
     this.zoomRatio = zoomValue / 100;
-    
-    // this.oldHandMoveX = this.handMoveX;
-    // this.oldHandMoveY = this.handMoveY;
-    // this.handMoveX = 0;
-    // this.handMoveY = 0;
 
     // preview画面を更新する
     this.updatePreview();
@@ -44,6 +39,7 @@ class CreateController {
 
   // info欄に入力された値を更新する
   updateInfo(e) {
+    console.log("updateInfo");
     let value = e.currentTarget.value;
     let gameObject = this.selectedGameObject;
     let position = gameObject.position;
@@ -82,6 +78,9 @@ class CreateController {
 
     // preview画面を更新する
     this.updatePreview();
+
+    // info欄を更新する
+    this.updateInfoInput();
   }
 
   // positionの値を四捨五入する
@@ -94,6 +93,9 @@ class CreateController {
 
     // preview画面を更新する
     this.updatePreview();
+
+    // info欄を更新する
+    this.updateInfoInput();
   }
 
   // HandMoveの移動量を設定する
@@ -105,6 +107,9 @@ class CreateController {
 
     // preview画面を更新する
     this.updatePreview();
+
+    // info欄を更新する
+    this.updateInfoInput();
   }
 
   // HandMoveの値を四捨五入する
@@ -116,6 +121,9 @@ class CreateController {
 
     // preview画面を更新する
     this.updatePreview();
+
+    // info欄を更新する
+    this.updateInfoInput();
   }
 
   // preview画面の画像の位置、サイズを更新する
@@ -131,6 +139,17 @@ class CreateController {
         let position = this.gameObjects[image.dataset.gameObjectId].position;
 
         // 位置、サイズを更新する
+        // // preview画面の中心位置
+        // let previewCenterX = (document.getElementById('preview_container').clientWidth / 2);
+        // let previewCenterY = (document.getElementById('preview_container').clientHeight / 2);
+        // // ズームの中心にしたい位置（preview画面の中心位置）
+        // let zoomCenterX = previewCenterX - this.handMoveX;
+        // let zoomCenterY = previewCenterY - this.handMoveY;
+        // // GameObjectの位置をズームの中心にしたい座標に置き換えて(- zoomCenterX)から、ズーム倍率をかけ、元の座標にもどし(+ zoomCenterX)、最後にhandMoveの値を足す
+        // let left = (position.x - zoomCenterX) * this.zoomRatio + zoomCenterX + this.handMoveX;
+        // let top = (position.y - zoomCenterY) * this.zoomRatio + zoomCenterY + this.handMoveY;
+        // 上記の計算をまとめたものが以下
+
         image.style.left = ((position.x - (700 / 2) + this.handMoveX) * this.zoomRatio + (700 / 2)).toString() + "px";
         image.style.top = ((position.y - (495 / 2) + this.handMoveY) * this.zoomRatio + (495 / 2)).toString() + "px";
 
@@ -138,7 +157,9 @@ class CreateController {
         image.style.height = (position.height * this.zoomRatio).toString() + "px";
       });
     }
+  }
 
+  updateInfoInput() {
     // info欄の更新
     let scriptIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
 
@@ -160,7 +181,7 @@ class CreateController {
       width.value = Math.round(position.width);
       height.value = Math.round(position.height);
       script.selectedIndex = scriptIndex[gameObject.script];
-      updateInfoPosition(this.selectedElement);
+      updateInfoPosition();
       this.info.style.visibility = 'visible';
     }
     else {

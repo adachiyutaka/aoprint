@@ -1,6 +1,6 @@
 import CreateController from './createController';
 
-// preview画面にマウスが乗っている間、かつ、spaceキー押下中にドラッグすることで画面kを移動させる
+// preview画面にマウスが乗っている間、かつ、spaceキー押下中にドラッグすることで画面を移動させる
 // 画面移動機能を使っている間は、spaceキーによるスクロールは抑制される
 const handMove = () => {
   
@@ -13,6 +13,7 @@ const handMove = () => {
   // preview画面上にマウスが乗っているかどうかの判定
   preview.addEventListener('mouseover', mouseOver);
   preview.addEventListener('mouseout', mouseOut);
+  preview.addEventListener('mouseleave', mouseOut);
 
   // preview画面上にマウスが乗っている場合、spaceキー押下を読み取るリスナーを設定する
   // マウスがpreview画面から離れる際に、このリスナーは削除する
