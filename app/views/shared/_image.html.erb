@@ -1,0 +1,16 @@
+<li class='image-groupe' id='image_groupe_<%= presetImage[:groupe][:column] %>'>
+  <div class='groupe-name' id='groupe_name_<%= presetImage[:groupe][:column] %>'>
+      <%= presetImage[:groupe][:index] %>
+  </div>
+  <div class='image-cards' id='image_cards_<%= presetImage[:groupe][:column] %>'>
+  <% presetImage[:game_objects].each do |gameObject| %>
+    <div class='image-card'>
+      <%= image_tag gameObject.game_object.image, class: 'image'%>
+      <div class='image-name'></div>
+      <div class='image-delete-button-wrapper'>
+        <div class='image-delete-button'>x</div>
+      </div>
+    </div>
+  <% end %>
+  </div>
+</li>

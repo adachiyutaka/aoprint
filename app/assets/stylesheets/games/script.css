@@ -1,0 +1,104 @@
+.script-modal{
+  width: 700px;
+  height: 500px;
+}
+
+.script-wrapper{
+  height: auto;
+  background-color: #999999;
+}
+
+.script-header{
+  height: 50px;
+  background-color: #eeeeee;
+}
+
+.script-content{
+  display: flex;
+  flex-direction: row;
+  height: 400px;
+  background-color: #dddddd;
+}
+
+.script-list{
+  height: 400px;
+  width: 30%;
+  background-color: #ffffff;
+  overflow: auto;
+}
+
+.script-field{
+  height: 400px;
+  width: 70%;
+  background-color: #cccccc;
+  overflow: auto;
+}
+
+.script-card{
+  position: relative;
+  padding: 3px; 
+  background-color: #ffffff;
+  border: solid 1px #666666;
+}
+
+.script-delete-button{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+    font-size: 8px;
+    line-height: 6px;
+    text-align: center;
+    color: white;
+}
+
+.script-delete-button:hover {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  font-size: 8px;
+  line-height: 6px;
+  text-align: center;
+  color: white;
+  background-color: #cc5555;
+}
+
+.script-container{
+  padding: 1px;
+  background-color: #dddddd;
+}
+
+.function-name{
+}
+
+.script-input{
+  height: 100%;
+  border: none;
+}
+
+.operator{
+  height: 15px;
+}
+
+.value{
+  border: none;
+}
+
+.comment-out{
+  color: #666666;
+  border: none;
+}
+
+.row{
+  display: flex;
+  flex-direction: row;
+}
+
+.active{
+  background-color: #99ccee;
+}

@@ -5,8 +5,20 @@ require 'google/cloud/vision'
 class GamesController < ApplicationController
 
   def index
+    groupe_names = [{column: 'upload', index: 'アップロード'},
+                    {column: 'character', index: 'キャラクター'},
+                    {column: 'stage', index: 'ステージ'},
+                    {column: 'gimmick', index: 'ギミック'},
+                    {column: 'background',index: '背景'},
+                    {column: 'etc', index: 'その他'}]
+
     @games = Game.all.order(created_at: 'DESC')
     @gameForm = GameForm.new
+    @presetImages = []
+    groupe_names.each do |groupe_name|
+      images = {groupe: groupe_name, game_objects: PresetGameObject.where(groupe: groupe_name[:column])}
+      @presetImages.push(images)
+    end
   end
 
   def show
@@ -63,6 +75,8 @@ class GamesController < ApplicationController
       object[:isObject] = true if obj.object == true
       object[:isPlayer] = true if obj.player == true
       object[:isEnemy] = true if obj.enemy == true
+      object[:isItem] = true if obj.item == true
+      object[:isGoal] = true if obj.goal == true
       objects << object
     end
 
@@ -98,4 +112,5 @@ class GamesController < ApplicationController
   def imageToBase64(image)
     return Base64.encode64(image.download)
   end
+
 end

@@ -12,21 +12,66 @@
     <%# games一覧 %>
     <div id='read-btn'>テストボタン</div>
     <div id='result'><%= @result %></div>
-      <img style="max-width: 400px;"><input type="file" accept="image/*" />
+    <img style="max-width: 400px;"><input type="file" accept="image/*" />
+    <div class='div1' id='div1'>
+      parent
+      <div class='child1'>child1</div>
+      <div class='child2'>child2</div>
+    </div>
   </div>
 </div>
 
 <%# games#new ボタン %>
 <% if user_signed_in? %>
-  <div class='create-btn' id='create-btn'>
+  <div class='create-btn' id='create_btn'>
     <span class='create-btn-text'>作る</span>
   </div>
 <% end %>
 
 <%# games#new モーダル %>
-<div class='modal-background' id='modal-background'>
-  <div class='modal' id='modal'>
-    <div class='modal-content'>
+<div class='modal-parent' id='modal_parent'>
+  <div class='modal-background' id='modal_background'></div>
+  <div class='image-modal-background' id='image_modal_background'></div>
+  
+  <div class='image-modal'  id='image_modal'>
+    <div class='image exit-btn' id='image_exit_btn'>×</div>
+    <%# image list %>
+    <div class='image-list-container' id='image_list_contaner'>
+      <ul class='image-index' id='image_index'>
+        <li class='index-card' id='uploaded'>
+        アップロード
+        </li>
+        <li class='index-card' id='character_index'>
+        キャラクター
+        </li>
+        <li class='index-card' id='stage_index'>
+        ステージ
+        </li>
+        <li class='index-card' id='gimmick_index'>
+        ギミック
+        </li>
+        <li class='index-card' id='back_ground_index'>
+        背景
+        </li>
+        <li class='index-card' id='etc_index'>
+        その他
+        </li>
+      </ul>
+      <ul class='image-list' id='image_list'>
+        <% @presetImages.each do |presetImage| %>
+          <%= render partial: "shared/image", locals: { presetImage: presetImage } %>
+        <% end %>
+      </ul>
+    </div>
+    <div class='submit-line'>
+      <div class='image submit-btn' id='image_submit_btn'>
+        <div class='submit-text'>決定</div>
+      </div>  
+    </div>
+  </div>
+  
+  <div class='game-modal' id='game_modal'>
+    <div class='modal-container'>
 
       <%# Game#newのフォーム %>
       <%= form_with model: @gameForm, id: 'game_form', url: games_path, class: 'game-form', local: true do |f| %>
@@ -34,65 +79,159 @@
       <%# png画像変換用のcanvas %>
       <canvas id='canvas' class='hidden'></canvas>
 
+      <%# gui %>
+      <div class='gui-container' id='gui_container'>
+        <%# レイヤー設定 %>
+        <div class='layer-container' id='layer_container'>
+          <select class='layer-select' id='layer_select'>
+            <option value="0">0</option>
+          </select>
+          <div class='add-layer-btn' id='add_layer_btn'>
+          + レイヤー追加
+          </div>
+          <label class='inline-label'>
+            <span class='label-name'>
+            深さ : 
+            </span>
+            <input type='text' class='depth-input' id='depth'>
+          </label>
+        </div>
+        <%# GUI %>
+        <div class='preview-container' id='preview_container'>
+
+          <%# object card %>
+          <div class='object-info' id='object_info'>
+            <ul class='setting-list'>
+              <%# image %>
+              <li class='setting-card'>
+                <%# script側から作成するので本来は不要 %>
+                <img src='https://1.bp.blogspot.com/-P4iXuEh6dZY/Wfg04oWG6eI/AAAAAAABH1I/S1sgOjG8b-QsAs_yp3Xv79tshwlJG6R8ACLcBGAs/s800/food_oden_chikuwabu.png' class='info-image' id='info_image'>
+              </li>
+
+              <%# 罫線 %>
+              <div class="hr"></div>
+
+              <%# position %>
+              <li class='setting-card'>
+                <ul class='positions' id='positions'>
+                  <li>
+                    <label class='inline-label'>
+                      <span class='label-name position'>
+                      X : 
+                      </span>
+                      <input type='text' class='position-input' id='x'>
+                    </label>
+                  </li>
+                  <li>
+                    <label class='inline-label'>
+                      <span class='label-name position'>
+                      Y :
+                      </span>
+                      <input type='text' class='position-input' id='y'>
+                    </label>
+                  </li>
+                </ul>
+              </li>
+              <li class='setting-card'>
+                <ul class='size' id='size'>
+                  <li>
+                    <label class='inline-label'>
+                      <span class='label-name'>
+                      横幅 :
+                      </span>
+                      <input type='text' class='position-input' id='width'>
+                    </label>
+                  </li>
+                  <li>
+                    <label class='inline-label'>
+                      <span class='label-name'>
+                      高さ :
+                      </span>
+                      <input type='text' class='position-input' id='height'>
+                    </label>
+                  </li>
+                </ul>
+              </li>
+
+              <%# 罫線 %>
+              <div class="hr"></div>
+
+              <%# roleカラム %>
+              <li class='setting-card script'>
+                <p>役割</p>
+                <div class='info-script-list'>
+                <ul>
+                  <li>
+                    <select class='script-select' id='script_select' name="example">
+                      <option value="object">ステージ</option>
+                      <option value="player">プレイヤー</option>
+                      <option value="enemy">敵</option>
+                      <option value="item">アイテム</option>
+                      <option value="goal">ゴール</option>
+                    </select>
+                  </li>
+                </ul>
+              </div>
+              </li>
+
+            </ul>
+          </div>
+
+          <div class='add-object-btn' id='add_object_btn'>
+            + 追加
+          </div>
+          <div class='hand-icon' id='hand_icon'>
+            ✋
+          </div>
+        </div>
+        <input type="range" name="zoom" id="zoom_range" value='100' min='1' max='200'> <input type='number' id='zoom_number' value='100'>
+      </div>
+
       <%#= render 'shared/error_messages', model: @item %>
-      <div class='form-list'>
-        <div class='image-container' id='stageImageContainer'>
-          <label class='label' id='stage_label'>
-            <p class='label-plus'>+</p>
-            <p class='label-text' id='stage-click_or_dd'>
-            クリックかドラッグ＆ドロップでステージ用の画像ファイルをアップロード
-            </p>
-            <p class='label-text hidden' id='stage-please_drop'>
-            画像ファイルをドロップしてください
-            </p>
-            <%= f.file_field :stage_input, class: 'hidden'%>
-          </label>
+
+      <%# 非表示 %>
+      <%# スクリプト編集モーダルの原型 %>
+      <div class='script-modal hidden' id='scriptModal'>
+        <div class='script-wrapper'>
+          <div class='script-header'>
+          <p>script editor</p>
+          <select class='script-select' id='scriptSelect' name="example">
+            <option value="object">ステージ</option>
+            <option value="player">プレイヤー</option>
+            <option value="enemy">敵キャラクター</option>
+            <option value="item">アイテム</option>
+            <option value="goal">ゴール</option>
+          </select>
+          </div>
+          <div class='script-content'>
+            <div class='script-list' id='scriptList'></div>
+            <div class='script-field' id='scriptField'></div>
+          </div>
         </div>
-        <p class='list-title'>symbol position object script</p>
-        <div class='object-list' id='objectList'>
-        </div>
-        <p class='list-title'>image list</p>
-        <div class='image-list' id='imageList'>
-        </div>
-        <div class='image-dialog hidden' id='imageDialog'>
-        </div>
-        <div class='image-container' id='playerImageContainer'>
-          <label class='label' id='player_label'>
-            <p class='label-plus'>+</p>
-            <p class='label-text' id='player-click_or_dd'>
-            クリックかドラッグ＆ドロップでプレイヤー用の画像ファイルをアップロード
-            </p>
-            <p class='label-text hidden' id='player-please_drop'>
-            画像ファイルをドロップしてください
-            </p>
-            <%= f.file_field :player_input, class: 'hidden'%>
-          </label>
-        </div>
-        <div class='image-container' id='objectImageContainer'>
-          <label class='label' id='object_label'>
-            <p class='label-plus'>+</p>
-            <p class='label-text' id='object-click_or_dd'>
-            クリックかドラッグ＆ドロップでオブジェクト用の画像ファイルをアップロード
-            </p>
-            <p class='label-text hidden' id='object-please_drop'>
-            画像ファイルをドロップしてください
-            </p>
-            <%= f.file_field :object_input, class: 'hidden'%>
-          </label>
-        </div>
-        <div id='textContainer'>
-          <%= f.text_area :name, class:'name', placeholder:'ゲームのタイトル（40文字まで)', maxlength:'40' %>
-          <%= f.text_area :text, class:'text', placeholder:'ゲームの説明' ,rows:'3' ,maxlength:'1000' %>
-        </div>
-        <pre></pre>
-        <div class='submit-line'>
-          <%= f.submit 'これで遊ぶ' ,class:"submit-btn" %>
-        </div>
+      </div>
+      <%# 非表示 %>
+
+      <%# 画像読み込みボタン %>
+      <%# jsで画像リスト内に移動させる %>
+      <label class='label hidden' id='stage_label'>
+        <p class='label-plus'>+</p>
+        <%= f.file_field :stage_input, class: 'hidden'%>
+      </label>
+      <%# 画像読み込みボタン %>
+
+      
+      <div id='textContainer'>
+        <%= f.text_area :name, class:'name', placeholder:'ゲームのタイトル（40文字まで)', maxlength:'40' %>
+        <%= f.text_area :text, class:'text', placeholder:'ゲームの説明' ,rows:'3' ,maxlength:'1000' %>
+      </div>
+      <pre></pre>
+      <div class='submit-line'>
+        <%= f.submit 'これで遊ぶ' ,class:"submit-btn" %>
       </div>
       <% end %>
       <%# Game#newのフォーム %>
 
-      <div class='exit-btn' id='exit-btn'>×</div>
+      <div class='exit-btn' id='exit_btn'>×</div>
 
     </div>
   </div>
