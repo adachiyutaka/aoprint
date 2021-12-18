@@ -294,9 +294,9 @@ const addSelected = (element) => {
 
 const removeSelected = () => {
   // 全ての要素の"selected"クラスを外す
-  let selectedElements = Array.from(document.querySelectorAll('.selected'));
-  selectedElements.forEach( (Element) => {
-    Element.classList.remove('selected');
+  let previewImages = Array.from(document.querySelectorAll('.preview-image'));
+  previewImages.forEach( (image) => {
+    image.classList.remove('selected');
   });
 }
 

@@ -5,7 +5,7 @@
   <div class='image-cards' id='image_cards_<%= presetImage[:groupe][:column] %>'>
   <% presetImage[:game_objects].each do |gameObject| %>
     <div class='image-card'>
-      <%= image_tag gameObject.game_object.image, class: 'image'%>
+      <%= image_tag gameObject.game_object.image, class: 'gameobject-image'%>
       <div class='image-name'></div>
       <div class='image-delete-button-wrapper'>
         <div class='image-delete-button'>x</div>

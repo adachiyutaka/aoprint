@@ -8,9 +8,13 @@ class CreateController {
     this.zoomRatio = 1;
     this.handMoveX = null;
     this.handMoveY = null;
-    this.oldHandMoveX = null;
-    this.oldHandMoveY = null;
     this.info = null;
+    this.mode = {updateImage : 1, newGameObject : 2};
+    this.currentMode = null;
+  }
+
+  setInfo(element) {
+    this.info = element;
   }
 
   // GameObjectを追加する
@@ -18,8 +22,21 @@ class CreateController {
     this.gameObjects.push(gameObject);
   }
 
-  setInfo(element) {
-    this.info = element;
+  // 画像選択モーダルのモードを新規作成か画像変更か設定する
+  updateMode(mode) {
+    this.currentMode = mode;
+    let newGO = document.getElementById('submit_text_new');
+    let changeImage = document.getElementById('submit_text_change');
+
+    // 画像選択モーダルの決定ボタンの表示を変更する
+    if (mode == this.mode.updateImage){
+      changeImage.classList.remove('hidden');
+      newGO.classList.add('hidden');
+    }
+    else if (mode == this.mode.newGameObject){
+      newGO.classList.remove('hidden');
+      changeImage.classList.add('hidden');
+    }
   }
 
   // 選択中のGameObjectを設定する
@@ -38,8 +55,8 @@ class CreateController {
   }
 
   // info欄に入力された値を更新する
-  updateInfo(e) {
-    console.log("updateInfo");
+  updateInfoValue(e) {
+    console.log("updateInfoValue");
     let value = e.currentTarget.value;
     let gameObject = this.selectedGameObject;
     let position = gameObject.position;
@@ -66,6 +83,12 @@ class CreateController {
 
     // preview画面を更新する
     this.updatePreview();
+  }
+
+  updateInfoImage(image) {
+    this.selectedGameObject.image = image;
+    this.updatePreview();
+    this.updateInfoInput();
   }
 
   // ObjectMoveの移動量を設定する
@@ -136,9 +159,10 @@ class CreateController {
       // 全ての画像を更新する
       images.forEach( (image) => {
         // 画像要素のdata属性からgameObjectのidを指定する
+        let gameObject = this.gameObjects[image.dataset.gameObjectId];
         let position = this.gameObjects[image.dataset.gameObjectId].position;
 
-        // 位置、サイズを更新する
+        // 位置、サイズ、画像を更新する
         // // preview画面の中心位置
         // let previewCenterX = (document.getElementById('preview_container').clientWidth / 2);
         // let previewCenterY = (document.getElementById('preview_container').clientHeight / 2);
@@ -149,12 +173,13 @@ class CreateController {
         // let left = (position.x - zoomCenterX) * this.zoomRatio + zoomCenterX + this.handMoveX;
         // let top = (position.y - zoomCenterY) * this.zoomRatio + zoomCenterY + this.handMoveY;
         // 上記の計算をまとめたものが以下
-
         image.style.left = ((position.x - (700 / 2) + this.handMoveX) * this.zoomRatio + (700 / 2)).toString() + "px";
         image.style.top = ((position.y - (495 / 2) + this.handMoveY) * this.zoomRatio + (495 / 2)).toString() + "px";
 
         image.style.width = (position.width * this.zoomRatio).toString() + "px";
         image.style.height = (position.height * this.zoomRatio).toString() + "px";
+
+        image.src = gameObject.image;
       });
     }
   }
