@@ -130,12 +130,21 @@
   color: white;
 }
 
+.unclickable{
+  background-color: #bbbbbb;
+  color: #eeeeee;
+}
+
 .submit-text{
-  color: white;
+  color: #ffffff;
 }
 
 .submit-btn:hover {
   background-color:#418dca;
+}
+
+.unclickable:hover{
+  background-color: #bbbbbb;
 }
 
 .form-list{
