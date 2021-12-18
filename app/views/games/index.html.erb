@@ -35,18 +35,33 @@
   
   <div class='image-modal'  id='image_modal'>
     <div class='image exit-btn' id='image_exit_btn'>×</div>
-    <div class='image-modal-container' id='image_modal_container'>
-      <div class='image-modal-title'>画像を選択</div>
-      <div class='image-container' id='image_container'>
-        <div class='no object-image' id='no_object_image'>No Image</div>
-        <div class='upload object-image' id='upload_object_image'>Upload Image</div>
-        <div class='object-image' id='object_image'>
-        </div>
-        <div class='object-image' id='object_image'>
-        </div>
-        <div class='object-image' id='object_image'>
-        </div>
-      </div>
+    <%# image list %>
+    <div class='image-list-container' id='image_list_contaner'>
+      <ul class='image-index' id='image_index'>
+        <li class='index-card' id='uploaded'>
+        アップロード
+        </li>
+        <li class='index-card' id='character_index'>
+        キャラクター
+        </li>
+        <li class='index-card' id='stage_index'>
+        ステージ
+        </li>
+        <li class='index-card' id='gimmick_index'>
+        ギミック
+        </li>
+        <li class='index-card' id='back_ground_index'>
+        背景
+        </li>
+        <li class='index-card' id='etc_index'>
+        その他
+        </li>
+      </ul>
+      <ul class='image-list' id='image_list'>
+        <% @presetImages.each do |presetImage| %>
+          <%= render partial: "shared/image", locals: { presetImage: presetImage } %>
+        <% end %>
+      </ul>
     </div>
     <div class='submit-line'>
       <div class='image submit-btn' id='image_submit_btn'>
@@ -173,38 +188,6 @@
       </div>
 
       <%#= render 'shared/error_messages', model: @item %>
-      <div class='object-list' id='objectList'>
-      
-
-
-
-      <%# image list %>
-      <div class='image-list-container' id='image_list_contaner'>
-          <ul class='image-index' id='image_index'>
-            <li class='index-card' id='uploaded'>
-            アップロード
-            </li>
-            <li class='index-card' id='character_index'>
-            キャラクター
-            </li>
-            <li class='index-card' id='stage_index'>
-            ステージ
-            </li>
-            <li class='index-card' id='gimmick_index'>
-            ギミック
-            </li>
-            <li class='index-card' id='back_ground_index'>
-            背景
-            </li>
-            <li class='index-card' id='etc_index'>
-            その他
-            </li>
-          </ul>
-          <ul class='image-list' id='image_list'>
-            <% @presetImages.each do |presetImage| %>
-              <%= render partial: "shared/image", locals: { presetImage: presetImage } %>
-            <% end %>
-          </ul>
 
       <%# 非表示 %>
       <%# スクリプト編集モーダルの原型 %>
