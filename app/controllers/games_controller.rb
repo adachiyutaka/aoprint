@@ -21,6 +21,41 @@ class GamesController < ApplicationController
     end
   end
 
+  def game_object
+    groupe_names = [{column: 'upload', index: 'アップロード'},
+      {column: 'character', index: 'キャラクター'},
+      {column: 'stage', index: 'ステージ'},
+      {column: 'gimmick', index: 'ギミック'},
+      {column: 'background',index: '背景'},
+      {column: 'etc', index: 'その他'}]
+
+    puts "ajax game_object"
+    puts params
+    data = ["ゲームオブジェクト", "2"]
+    if params[:game_object][:init]
+      # puts "init is true"
+      # preset_game_objects = []
+      # groupe_names.each do |groupe_name|
+      #   game_objects = {groupe: groupe_name, game_objects: PresetGameObject.where(groupe: groupe_name[:column])}
+      #   # puts game_objects
+      #   preset_game_objects.push(game_objects)
+      # end
+      # data = preset_game_objects
+    end
+    base64 = imageToBase64(PresetGameObject.take.game_object.image)
+    type = image_type(base64)
+    # test = PresetGameObject.take.game_object.image
+    # result = []
+    # 10.times do |i|
+    #   id = params[:id] + i
+    # result << {id: id, str: "エンドポイント経由"}
+    # end
+    # render json: JSON.generate(result)
+
+    render json: JSON.generate({base64: base64, type: type})
+    # render json: JSON.generate(params[:name])
+  end
+
   def show
     @game = Game.find_by(id: params[:id])
     @games = Game.all
@@ -111,6 +146,20 @@ class GamesController < ApplicationController
 
   def imageToBase64(image)
     return Base64.encode64(image.download)
+  end
+
+  def image_type(base64)
+    binary_data = Base64.decode64(base64)
+    case binary_data
+    when /GIF8[79]a/n
+      return 'gif'
+    when /\x89PNG/n
+      return 'png'
+    when /\xFF\xD8/n
+      return 'jpeg'
+    else
+      raise "不明な形式の画像です。"
+    end
   end
 
 end
