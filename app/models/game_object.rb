@@ -1,7 +1,6 @@
 class GameObject < ApplicationRecord
-  has_one_attached :image
-
   belongs_to :game
+  has_one :image
   has_one :preset_game_object
   has_one :object_position
 
