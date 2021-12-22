@@ -2,6 +2,7 @@ import updateInfoPosition from "./updateInfoPosition";
 
 class CreateController {
   constructor() {
+    this.presetGameObjects = [];
     this.gameObjects = [];
     this.selectedGameObject = null;
     this.selectedElement = null;
@@ -9,12 +10,40 @@ class CreateController {
     this.handMoveX = null;
     this.handMoveY = null;
     this.info = null;
+    this.imageList = null;
     this.mode = {updateImage : 1, newGameObject : 2};
     this.currentMode = null;
   }
 
   setInfo(element) {
     this.info = element;
+  }
+
+  setImageList(element) {
+    this.imageList = element;
+  }
+
+  // プリセットのGameObjectのグループを追加する
+  setPresetGameObjects(json) {
+    this.presetGameObjects = json;
+    this.presetGameObjects.forEach(gameObjects => {
+      let groupeName = gameObjects.groupe;
+      this.addImageListGroupe(groupeName);
+      gameObjects.game_objects.forEach(gameObject => {
+        this.addImageList(groupeName, gameObject)
+      });
+    });
+
+    // 画像リストに画像アップロードボタンを移動
+    const stageLabel = document.getElementById('stage_label');
+    const imageCardsUpload = document.getElementById('image_cards_upload');
+    imageCardsUpload.appendChild(stageLabel);
+    stageLabel.classList.remove('hidden');
+  }
+
+  // プリセットのGameObjectを追加する
+  addPresetGameObject(groupeName, gameObject) {
+    this.presetGameObjects.find(groupe => groupe.name === groupeName).push(gameObject);
   }
 
   // GameObjectを追加する
@@ -212,6 +241,41 @@ class CreateController {
     else {
       this.info.style.visibility = 'hidden';
     }
+  }
+  
+  addImageListGroupe(groupe_name) {
+    let div = document.createElement('div');
+    let variableName = groupe_name.column;
+    let indexName = groupe_name.index;
+
+    let groupeListHtml =
+    `<li class='image-groupe' id='image_groupe_${variableName}'>
+      <div class='groupe-name' id='groupe_name_${variableName}'>
+        ${indexName}
+      </div>
+      <div class='image-cards' id='image_cards_${variableName}'>
+      </div>
+    </li>`;
+
+    div.innerHTML = groupeListHtml;
+    this.imageList.appendChild(div);
+  }
+
+  addImageList(groupeName, gameObject) {
+    let div = document.createElement('div');
+    let cardContainer = document.getElementById('image_cards_' + groupeName.column);
+
+    let imageCardHtml =
+    `<div class='image-card'>
+    <img src='data:image/${gameObject.image.type};base64,${gameObject.image.base64}' class='gameobject-image'>
+    <div class='image-name'></div>
+      <div class='image-delete-button-wrapper'>
+        <div class='image-delete-button'>x</div>
+      </div>
+    </div>`;
+
+    div.innerHTML = imageCardHtml;
+    cardContainer.appendChild(div);
   }
 }
 

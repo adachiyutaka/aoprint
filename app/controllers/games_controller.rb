@@ -21,39 +21,33 @@ class GamesController < ApplicationController
     end
   end
 
-  def game_object
+  def load_game_object
     groupe_names = [{column: 'upload', index: 'アップロード'},
-      {column: 'character', index: 'キャラクター'},
-      {column: 'stage', index: 'ステージ'},
-      {column: 'gimmick', index: 'ギミック'},
-      {column: 'background',index: '背景'},
-      {column: 'etc', index: 'その他'}]
+                    {column: 'character', index: 'キャラクター'},
+                    {column: 'stage', index: 'ステージ'},
+                    {column: 'gimmick', index: 'ギミック'},
+                    {column: 'background',index: '背景'},
+                    {column: 'etc', index: 'その他'}]
 
-    puts "ajax game_object"
-    puts params
-    data = ["ゲームオブジェクト", "2"]
+    data = []
+
+    # 初回読み込み時の処理
     if params[:game_object][:init]
-      # puts "init is true"
-      # preset_game_objects = []
-      # groupe_names.each do |groupe_name|
-      #   game_objects = {groupe: groupe_name, game_objects: PresetGameObject.where(groupe: groupe_name[:column])}
-      #   # puts game_objects
-      #   preset_game_objects.push(game_objects)
-      # end
-      # data = preset_game_objects
+      puts "init objects"
+      groupe_names.each do |groupe_name|
+        game_objects = []
+        PresetGameObject.where(groupe: groupe_name[:column]).limit(5).each do |preset_go|
+          go = preset_go.game_object
+          base64 = imageToBase64(go.image.image)
+          type = image_type(base64)
+          image = {id: go.image.id, base64: base64, type: type}
+          game_objects.push({symbol: go.symbol, name: go.name, text: go.text, image: image, script: nil})
+        end
+        data.push({groupe: groupe_name, game_objects: game_objects})
+      end
     end
-    base64 = imageToBase64(PresetGameObject.take.game_object.image)
-    type = image_type(base64)
-    # test = PresetGameObject.take.game_object.image
-    # result = []
-    # 10.times do |i|
-    #   id = params[:id] + i
-    # result << {id: id, str: "エンドポイント経由"}
-    # end
-    # render json: JSON.generate(result)
 
-    render json: JSON.generate({base64: base64, type: type})
-    # render json: JSON.generate(params[:name])
+    render json: JSON.generate(data)
   end
 
   def show
