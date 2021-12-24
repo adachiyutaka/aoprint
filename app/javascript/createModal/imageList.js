@@ -75,19 +75,23 @@ const imageList = () => {
     imageExit();
   });
 
-  
+
   // 読み込み処理
   // DBからの読み込みを行い、その後、画像リストの要素にリスナーを設定する
   const loadGameObjects = () => {
-    // 非同期での画像読み込み処理
+    // XMLHttpRequestの作成
     const httpRequest = new XMLHttpRequest();
     if (!httpRequest) {
       alert('中断 :( XMLHTTP インスタンスを生成できませんでした');
       return false;
     }
-  
+
+    // JSだけでajax通信する場合は、セキュリティトークンを設定する必要がある
     const token = document.getElementsByName('csrf-token')[0].content;
-    let data = {"game_object": {"groupe_name": null, "init": false}};
+
+    // リクエストの内容
+    // 読み込みたいgroupe_nameを設定するか
+    let data = {"gameObject": {"groupeName": null, "init": false}};
   
     // レスポンス中、レスポンス後の処理
     // 通信に成功した場合、帰ってきたJSONをCreateControllerのpresetGameObjectsにセットする
@@ -110,7 +114,6 @@ const imageList = () => {
 
             // 画像リストの画像をクリックできるようにリスナーを設定
             let gameObjectImages = Array.from(document.querySelectorAll('.gameobject-image'));
-            console.log(gameObjectImages);
             gameObjectImages.forEach( (image) => {
               image.addEventListener('click', (e) => addSelected(e.currentTarget));
             });
@@ -136,9 +139,9 @@ const imageList = () => {
     httpRequest.responseType = "json";
     httpRequest.setRequestHeader("Content-Type", "application/json");
     httpRequest.setRequestHeader("X-CSRF-Token", token);
-    data.game_object.init = true;
+    data.gameObject.init = true;
     httpRequest.send(JSON.stringify(data));
-    data.game_object.init = false;
+    data.gameObject.init = false;
   }
   
   const addImageListGroupe = (groupeName) => {

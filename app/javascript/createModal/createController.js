@@ -22,7 +22,7 @@ class CreateController {
     json.forEach(groupe => {
       // GameObjectを生成し、画像、サイズ、位置データを設定、presetGOGroupsに格納
       let gameObjects = [];
-      groupe.game_objects.forEach(go => {
+      groupe.gameObjects.forEach(go => {
         let gameObject = new GameObject();
         // PresetのGameObjectにはサイズ、位置情報がない想定のため
         gameObject.setPosition(0, 0, 0, 0);

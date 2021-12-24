@@ -32,7 +32,7 @@ class GamesController < ApplicationController
     data = []
 
     # 初回読み込み時の処理
-    if params[:game_object][:init]
+    if params[:gameObject][:init]
       groupe_names.each do |name|
         game_objects = []
         PresetGameObject.where(groupe: name[:column]).limit(5).each do |preset_go|
@@ -43,7 +43,7 @@ class GamesController < ApplicationController
           image = {id: go.image.id, base64url: base64url}
           game_objects.push({symbol: go.symbol, name: go.name, text: go.text, image: image, script: nil})
         end
-        data.push({name: name, game_objects: game_objects})
+        data.push({name: name, gameObjects: game_objects})
       end
     end
 
