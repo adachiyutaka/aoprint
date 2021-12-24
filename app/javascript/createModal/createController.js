@@ -1,8 +1,9 @@
 import updateInfoPosition from "./updateInfoPosition";
+import GameObject from './gameObject.js';
 
 class CreateController {
   constructor() {
-    this.presetGameObjects = [];
+    this.presetGOGroups = [];
     this.gameObjects = [];
     this.selectedGameObject = null;
     this.selectedElement = null;
@@ -10,62 +11,36 @@ class CreateController {
     this.handMoveX = null;
     this.handMoveY = null;
     this.info = null;
-    this.imageList = null;
-    this.mode = {updateImage : 1, newGameObject : 2};
-    this.currentMode = null;
   }
 
   setInfo(element) {
     this.info = element;
   }
 
-  setImageList(element) {
-    this.imageList = element;
-  }
-
   // プリセットのGameObjectのグループを追加する
   setPresetGameObjects(json) {
-    this.presetGameObjects = json;
-    this.presetGameObjects.forEach(gameObjects => {
-      let groupeName = gameObjects.groupe;
-      this.addImageListGroupe(groupeName);
-      gameObjects.game_objects.forEach(gameObject => {
-        this.addImageList(groupeName, gameObject)
+    json.forEach(groupe => {
+      // GameObjectを生成し、画像、サイズ、位置データを設定、presetGOGroupsに格納
+      let gameObjects = [];
+      groupe.game_objects.forEach(go => {
+        let gameObject = new GameObject();
+        // PresetのGameObjectにはサイズ、位置情報がない想定のため
+        gameObject.setPosition(0, 0, 0, 0);
+        gameObject.setImage(go.image.id, go.image.base64url);
+        gameObjects.push(gameObject);
       });
+      this.presetGOGroups.push({'name': groupe.name, 'gameObjects': gameObjects});
     });
-
-    // 画像リストに画像アップロードボタンを移動
-    const stageLabel = document.getElementById('stage_label');
-    const imageCardsUpload = document.getElementById('image_cards_upload');
-    imageCardsUpload.appendChild(stageLabel);
-    stageLabel.classList.remove('hidden');
   }
 
   // プリセットのGameObjectを追加する
   addPresetGameObject(groupeName, gameObject) {
-    this.presetGameObjects.find(groupe => groupe.name === groupeName).push(gameObject);
+    this.presetGOGroups.find(groupe => groupe.name.column === groupeName.column).push(gameObject);
   }
 
   // GameObjectを追加する
   addGameObject(gameObject) {
     this.gameObjects.push(gameObject);
-  }
-
-  // 画像選択モーダルのモードを新規作成か画像変更か設定する
-  updateMode(mode) {
-    this.currentMode = mode;
-    let newGO = document.getElementById('submit_text_new');
-    let changeImage = document.getElementById('submit_text_change');
-
-    // 画像選択モーダルの決定ボタンの表示を変更する
-    if (mode == this.mode.updateImage){
-      changeImage.classList.remove('hidden');
-      newGO.classList.add('hidden');
-    }
-    else if (mode == this.mode.newGameObject){
-      newGO.classList.remove('hidden');
-      changeImage.classList.add('hidden');
-    }
   }
 
   // 選択中のGameObjectを設定する
@@ -114,8 +89,8 @@ class CreateController {
     this.updatePreview();
   }
 
-  updateInfoImage(image) {
-    this.selectedGameObject.image = image;
+  updateInfoImage(base64url) {
+    this.selectedGameObject.image.base64url = base64url;
     this.updatePreview();
     this.updateInfoInput();
   }
@@ -208,7 +183,7 @@ class CreateController {
         image.style.width = (position.width * this.zoomRatio).toString() + "px";
         image.style.height = (position.height * this.zoomRatio).toString() + "px";
 
-        image.src = gameObject.image;
+        image.src = gameObject.image.base64url;
       });
     }
   }
@@ -228,7 +203,7 @@ class CreateController {
       let gameObject = this.selectedGameObject;
       let position = gameObject.position;
 
-      image.src = gameObject.image;
+      image.src = gameObject.image.base64url;
       // mousemoveしている間、実際のpositionの値はfloat型で計算するが、見栄えのため表示上は小数点以下を四捨五入する
       x.value = Math.round(position.x);
       y.value = Math.round(position.y);
@@ -241,41 +216,6 @@ class CreateController {
     else {
       this.info.style.visibility = 'hidden';
     }
-  }
-  
-  addImageListGroupe(groupe_name) {
-    let div = document.createElement('div');
-    let variableName = groupe_name.column;
-    let indexName = groupe_name.index;
-
-    let groupeListHtml =
-    `<li class='image-groupe' id='image_groupe_${variableName}'>
-      <div class='groupe-name' id='groupe_name_${variableName}'>
-        ${indexName}
-      </div>
-      <div class='image-cards' id='image_cards_${variableName}'>
-      </div>
-    </li>`;
-
-    div.innerHTML = groupeListHtml;
-    this.imageList.appendChild(div);
-  }
-
-  addImageList(groupeName, gameObject) {
-    let div = document.createElement('div');
-    let cardContainer = document.getElementById('image_cards_' + groupeName.column);
-
-    let imageCardHtml =
-    `<div class='image-card'>
-    <img src='data:image/${gameObject.image.type};base64,${gameObject.image.base64}' class='gameobject-image'>
-    <div class='image-name'></div>
-      <div class='image-delete-button-wrapper'>
-        <div class='image-delete-button'>x</div>
-      </div>
-    </div>`;
-
-    div.innerHTML = imageCardHtml;
-    cardContainer.appendChild(div);
   }
 }
 

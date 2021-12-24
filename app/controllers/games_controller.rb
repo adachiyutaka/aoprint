@@ -33,17 +33,17 @@ class GamesController < ApplicationController
 
     # 初回読み込み時の処理
     if params[:game_object][:init]
-      puts "init objects"
-      groupe_names.each do |groupe_name|
+      groupe_names.each do |name|
         game_objects = []
-        PresetGameObject.where(groupe: groupe_name[:column]).limit(5).each do |preset_go|
+        PresetGameObject.where(groupe: name[:column]).limit(5).each do |preset_go|
           go = preset_go.game_object
           base64 = imageToBase64(go.image.image)
           type = image_type(base64)
-          image = {id: go.image.id, base64: base64, type: type}
+          base64url = "data:image/" + type + ";base64," + base64
+          image = {id: go.image.id, base64url: base64url}
           game_objects.push({symbol: go.symbol, name: go.name, text: go.text, image: image, script: nil})
         end
-        data.push({groupe: groupe_name, game_objects: game_objects})
+        data.push({name: name, game_objects: game_objects})
       end
     end
 

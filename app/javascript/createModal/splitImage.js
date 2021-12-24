@@ -213,18 +213,13 @@ const splitImage = (file, type) => {
     // const json = JSON.parse(XHR.response);
     // const images = json['images'];
     
-    // 元画像をpreview画面サイズに合わせるための比 （preview画面サイズ / 元画像サイズ）
-    // 一回の画像読み取りで複数のimg要素を得た場合も全てこの比でサイズを調整する
-    const xRatio = previewContainer.clientWidth / src.rows;
-    const yRatio = previewContainer.clientHeight / src.cols;
-    
     // 各データに対応するimg要素とGameObjectを生成する
     images.forEach( (image) => {
       // img要素を生成し、分割した画像を設定
       let img = document.createElement('img');
       cv.imshow(canvas, image['image']);
-      let imgBase64 = canvas.toDataURL();
-      img.src = imgBase64;
+      let base64url = canvas.toDataURL();
+      img.src = base64url;
       
       // img.src = `data:image/png;base64,${image['image']}`;
       let previewImg = img.cloneNode();
@@ -232,9 +227,9 @@ const splitImage = (file, type) => {
 
       // GameObjectを生成し、画像、サイズ、位置データを設定、CreateControllerのGameObjectsに格納
       let gameObject = new GameObject();
-      gameObject.image = imgBase64;
+      gameObject.setImage(null, base64url);
       let vertices = image['vertices'];
-      gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height'], xRatio, yRatio);
+      gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height']);
       CreateController.addGameObject(gameObject);
 
       // 生成したimg要素のサイズ、位置、idを設定
@@ -249,6 +244,7 @@ const splitImage = (file, type) => {
         selectPreviewImage(e.currentTarget);
       });
 
+      // 作成したpreview内のオブジェクトを選択した状態にする
       selectPreviewImage(previewImg)
 
       // preview内のGameObjectにD&Dを設定

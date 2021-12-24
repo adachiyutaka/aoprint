@@ -8,12 +8,6 @@ const info = () => {
   document.getElementById('height').addEventListener('input', (e) => CreateController.updateInfoValue(e));
   document.getElementById('script_select').addEventListener('change', (e) => CreateController.updateInfoValue(e));
 
-  // 画像変更モーダルを呼び出すリスナーを設定
-  document.getElementById('info_image').addEventListener('click', () => {
-    // 画像変更モードに切り替え
-    CreateController.updateMode(CreateController.mode.updateImage);
-  });
-
   // info欄の要素を取得
   let info = document.getElementById('object_info');
   CreateController.setInfo(info);
