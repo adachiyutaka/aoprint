@@ -35,7 +35,7 @@ class CreateController {
 
   // プリセットのGameObjectを追加する
   addPresetGameObject(groupeName, gameObject) {
-    this.presetGOGroups.find(groupe => groupe.name.column === groupeName.column).push(gameObject);
+    this.presetGOGroups.find(groupe => groupe.name.column === groupeName.column).gameObjects.push(gameObject);
   }
 
   // GameObjectを追加する

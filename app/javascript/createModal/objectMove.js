@@ -1,5 +1,7 @@
 import CreateController from './createController.js';
 
+
+// preview内で要素をD&Dできるようにする処理
 const objectMove = (element) => {
   let oldPosX = 0;
   let oldPosY = 0;

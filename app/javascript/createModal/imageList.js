@@ -1,4 +1,7 @@
 import CreateController from './createController';
+import splitImageCV from './splitImageCV.js';
+import GameObject from './gameObject.js';
+
 
 const imageList = () => {
   const mode = {updateImage : 1, newGameObject : 2};
@@ -15,7 +18,6 @@ const imageList = () => {
   const submitButton = document.getElementById('image_submit_btn');
   const newGO = document.getElementById('submit_text_new');
   const changeImage = document.getElementById('submit_text_change');
-
 
   // イメージ選択モーダルの表示
   const imageDisplay = (mode) => {
@@ -161,26 +163,130 @@ const imageList = () => {
     div.innerHTML = groupeListHtml;
     imageList.appendChild(div);
   }
-  
-  const addImageList = (groupeName, gameObject) => {
-    let div = document.createElement('div');
-    let cardContainer = document.getElementById('image_cards_' + groupeName.column);
-  
-    let imageCardHtml =
-    `<div class='image-card'>
-    <img src='${gameObject.image.base64url}' class='gameobject-image'>
-    <div class='image-name'></div>
-      <div class='image-delete-button-wrapper'>
-        <div class='image-delete-button'>x</div>
-      </div>
-    </div>`;
-  
-    div.innerHTML = imageCardHtml;
-    cardContainer.appendChild(div);
-  }
+
+
+  // リスナーをセットするステージフォーム要素を取得
+  const stageForm = document.getElementById('game_form_stage_input');
+  const previewContainer = document.getElementById('preview_container');
+
+  previewContainer.addEventListener('click', () => {
+    removeSelected();
+
+    // CreateControllerのSelectedGameObjectを更新する
+    CreateController.selectedGameObject = null;
+
+    CreateController.updatePreview();
+    CreateController.updateInfoInput();
+  });
+
+  // ステージフォームの処理
+  stageForm.addEventListener('change', (e) => {
+    // ユーザーがセットしたファイルから画像ファイルを読み取り
+    const file = e.target.files[0];
+    const previewContainer = document.getElementById('preview_container');
+
+    // pngに変換するためにcanvasを準備
+    const canvas = document.getElementById('canvas');
+    const img = new Image();
+    img.src = window.URL.createObjectURL(file);
+    let images = []
+
+    const imgOnload = new Promise((resolve, reject) => {
+      img.onload = () => {
+        resolve(splitImageCV(img));
+      };
+    });
+
+    imgOnload.then((images) => {
+      console.log("images:", images);
+      images.forEach((image) => {
+        console.log("images.forEach splitImage:", image);
+
+        // img要素を生成し、分割した画像を設定
+        let img = document.createElement('img');
+        cv.imshow(canvas, image['image']);
+        let base64url = canvas.toDataURL();
+        img.src = base64url;
+        console.log("base64url:", base64url);
+        let previewImg = img.cloneNode();
+        img.classList.add('split-img');
+
+        // GameObjectを生成し、画像、サイズ、位置データを設定、CreateControllerのGameObjectsに格納
+        let gameObject = new GameObject();
+        gameObject.setImage(null, base64url);
+        let vertices = image['vertices'];
+        gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height']);
+        let groupeName = {column: 'upload', index: 'アップロード'};
+        CreateController.addPresetGameObject(groupeName, gameObject);
+        addImageList(groupeName, gameObject);
+      });
+    });
+
+    // 各データに対応するimg要素とGameObjectを生成する
+    images.forEach((image) => {
+      console.log("here");
+      // // img要素を生成し、分割した画像を設定
+      // let img = document.createElement('img');
+      // cv.imshow(canvas, image['image']);
+      // let base64url = canvas.toDataURL();
+      // img.src = base64url;
+      
+      // console.log("base64url:", base64url);
+      // // img.src = `data:image/png;base64,${image['image']}`;
+      // let previewImg = img.cloneNode();
+      // img.classList.add('split-img');
+
+      // // GameObjectを生成し、画像、サイズ、位置データを設定、CreateControllerのGameObjectsに格納
+      // let gameObject = new GameObject();
+      // gameObject.setImage(null, base64url);
+      // let vertices = image['vertices'];
+      // gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height']);
+      // let groupeName = {column: 'upload', index: 'アップロード'};
+      // CreateController.addPresetGameObject(groupeName, gameObject);
+      // addImageList(groupeName, gameObject);
+
+      // // 生成したimg要素のサイズ、位置、idを設定
+      // previewImg.style.position = "absolute";
+      // previewImg.classList.add('preview-image');
+      // previewImg.classList.add('drag-and-drop');
+      // previewImg.dataset.gameObjectId = CreateController.gameObjects.length - 1;
+
+      // // preview内のgameObjectにリスナーを設定
+      // previewImg.addEventListener('mousedown', (e) => {
+      //   e.stopPropagation;
+      //   selectPreviewImage(e.currentTarget);
+      // });
+
+      // // 作成したpreview内のオブジェクトを選択した状態にする
+      // selectPreviewImage(previewImg)
+
+      // // preview内のGameObjectにD&Dを設定
+      // objectMove(previewImg);
+
+      
+      // // preview画面内にimg要素を配置
+      // previewContainer.appendChild(previewImg);
+
+      // // preview画面を更新する
+      // CreateController.updatePreview();
+    });
+  });
 
   // railsのDBからpresetGameObjectを読み込み
   loadGameObjects();
+}
+
+// preview内のGameObjectをクリックした際の処理
+const selectPreviewImage = (element) => {
+  // 選択したimg要素の輪郭を表示するために、指定した要素にのみ"selected"クラスをつける
+  addSelected(element);
+
+  // CreateControllerのSelectedGameObjectを更新する
+  CreateController.updateSelectedGameObject(element);
+
+  // preview画面を更新する
+  CreateController.updatePreview();
+  CreateController.updateInfoInput();
 }
 
 // 選択したimg要素の輪郭を表示するための'selected'クラス操作
@@ -198,6 +304,23 @@ const removeSelected = () => {
   selectedElements.forEach( (Element) => {
     Element.classList.remove('selected');
   });
+}
+
+const addImageList = (groupeName, gameObject) => {
+  let div = document.createElement('div');
+  let cardContainer = document.getElementById('image_cards_' + groupeName.column);
+
+  let imageCardHtml =
+  `<div class='image-card'>
+  <img src='${gameObject.image.base64url}' class='gameobject-image'>
+  <div class='image-name'></div>
+    <div class='image-delete-button-wrapper'>
+      <div class='image-delete-button'>x</div>
+    </div>
+  </div>`;
+
+  div.innerHTML = imageCardHtml;
+  cardContainer.appendChild(div);
 }
 
 window.addEventListener('load', imageList);
