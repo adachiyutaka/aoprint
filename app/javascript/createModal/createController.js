@@ -18,15 +18,16 @@ class CreateController {
   }
 
   // プリセットのGameObjectのグループを追加する
-  setPresetGameObjects(json) {
+  setPresetGOGroups(json) {
     json.forEach(groupe => {
       // GameObjectを生成し、画像、サイズ、位置データを設定、presetGOGroupsに格納
       let gameObjects = [];
       groupe.gameObjects.forEach(go => {
         let gameObject = new GameObject();
-        // PresetのGameObjectにはサイズ、位置情報がない想定のため
-        gameObject.setPosition(0, 0, 0, 0);
-        gameObject.setImage(go.image.id, go.image.base64url);
+        let image = go.image;
+        let position = go.position;     
+        gameObject.setPosition(0, 0, position.width, position.height);
+        gameObject.setImage(image.id, image.base64url);
         gameObjects.push(gameObject);
       });
       this.presetGOGroups.push({'name': groupe.name, 'gameObjects': gameObjects});
