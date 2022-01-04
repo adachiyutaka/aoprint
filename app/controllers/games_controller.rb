@@ -21,6 +21,35 @@ class GamesController < ApplicationController
     end
   end
 
+  def load_game_object
+    groupe_names = [{column: 'upload', index: 'アップロード'},
+                    {column: 'character', index: 'キャラクター'},
+                    {column: 'stage', index: 'ステージ'},
+                    {column: 'gimmick', index: 'ギミック'},
+                    {column: 'background',index: '背景'},
+                    {column: 'etc', index: 'その他'}]
+
+    data = []
+
+    # 初回読み込み時の処理
+    if params[:gameObject][:init]
+      groupe_names.each do |name|
+        game_objects = []
+        PresetGameObject.where(groupe: name[:column]).limit(5).each do |preset_go|
+          go = preset_go.game_object
+          base64 = imageToBase64(go.image.image)
+          type = image_type(base64)
+          base64url = "data:image/" + type + ";base64," + base64
+          image = {id: go.image.id, base64url: base64url}
+          game_objects.push({symbol: go.symbol, position: {x: 0, y: 0, width: go.image.width, height: go.image.height, image: nil}, name: go.name, text: go.text, image: image, script: nil})
+        end
+        data.push({name: name, gameObjects: game_objects})
+      end
+    end
+
+    render json: JSON.generate(data)
+  end
+
   def show
     @game = Game.find_by(id: params[:id])
     @games = Game.all
@@ -111,6 +140,20 @@ class GamesController < ApplicationController
 
   def imageToBase64(image)
     return Base64.encode64(image.download)
+  end
+
+  def image_type(base64)
+    binary_data = Base64.decode64(base64)
+    case binary_data
+    when /GIF8[79]a/n
+      return 'gif'
+    when /\x89PNG/n
+      return 'png'
+    when /\xFF\xD8/n
+      return 'jpeg'
+    else
+      raise "不明な形式の画像です。"
+    end
   end
 
 end

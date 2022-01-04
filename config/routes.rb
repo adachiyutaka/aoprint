@@ -9,5 +9,8 @@ Rails.application.routes.draw do
     collection do
       post 'read_text'
     end
+    collection do
+      post 'load_game_object'
+    end
   end
 end

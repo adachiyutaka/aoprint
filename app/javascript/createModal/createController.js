@@ -1,25 +1,47 @@
 import updateInfoPosition from "./updateInfoPosition";
+import GameObject from './gameObject.js';
 
 class CreateController {
   constructor() {
+    this.presetGOGroups = [];
     this.gameObjects = [];
     this.selectedGameObject = null;
     this.selectedElement = null;
     this.zoomRatio = 1;
     this.handMoveX = null;
     this.handMoveY = null;
-    this.oldHandMoveX = null;
-    this.oldHandMoveY = null;
     this.info = null;
+  }
+
+  setInfo(element) {
+    this.info = element;
+  }
+
+  // プリセットのGameObjectのグループを追加する
+  setPresetGOGroups(json) {
+    json.forEach(groupe => {
+      // GameObjectを生成し、画像、サイズ、位置データを設定、presetGOGroupsに格納
+      let gameObjects = [];
+      groupe.gameObjects.forEach(go => {
+        let gameObject = new GameObject();
+        let image = go.image;
+        let position = go.position;     
+        gameObject.setPosition(0, 0, position.width, position.height);
+        gameObject.setImage(image.id, image.base64url);
+        gameObjects.push(gameObject);
+      });
+      this.presetGOGroups.push({'name': groupe.name, 'gameObjects': gameObjects});
+    });
+  }
+
+  // プリセットのGameObjectを追加する
+  addPresetGameObject(groupeName, gameObject) {
+    this.presetGOGroups.find(groupe => groupe.name.column === groupeName.column).gameObjects.push(gameObject);
   }
 
   // GameObjectを追加する
   addGameObject(gameObject) {
     this.gameObjects.push(gameObject);
-  }
-
-  setInfo(element) {
-    this.info = element;
   }
 
   // 選択中のGameObjectを設定する
@@ -38,8 +60,8 @@ class CreateController {
   }
 
   // info欄に入力された値を更新する
-  updateInfo(e) {
-    console.log("updateInfo");
+  updateInfoValue(e) {
+    console.log("updateInfoValue");
     let value = e.currentTarget.value;
     let gameObject = this.selectedGameObject;
     let position = gameObject.position;
@@ -66,6 +88,12 @@ class CreateController {
 
     // preview画面を更新する
     this.updatePreview();
+  }
+
+  updateInfoImage(base64url) {
+    this.selectedGameObject.image.base64url = base64url;
+    this.updatePreview();
+    this.updateInfoInput();
   }
 
   // ObjectMoveの移動量を設定する
@@ -136,9 +164,10 @@ class CreateController {
       // 全ての画像を更新する
       images.forEach( (image) => {
         // 画像要素のdata属性からgameObjectのidを指定する
+        let gameObject = this.gameObjects[image.dataset.gameObjectId];
         let position = this.gameObjects[image.dataset.gameObjectId].position;
 
-        // 位置、サイズを更新する
+        // 位置、サイズ、画像を更新する
         // // preview画面の中心位置
         // let previewCenterX = (document.getElementById('preview_container').clientWidth / 2);
         // let previewCenterY = (document.getElementById('preview_container').clientHeight / 2);
@@ -149,12 +178,13 @@ class CreateController {
         // let left = (position.x - zoomCenterX) * this.zoomRatio + zoomCenterX + this.handMoveX;
         // let top = (position.y - zoomCenterY) * this.zoomRatio + zoomCenterY + this.handMoveY;
         // 上記の計算をまとめたものが以下
-
         image.style.left = ((position.x - (700 / 2) + this.handMoveX) * this.zoomRatio + (700 / 2)).toString() + "px";
         image.style.top = ((position.y - (495 / 2) + this.handMoveY) * this.zoomRatio + (495 / 2)).toString() + "px";
 
         image.style.width = (position.width * this.zoomRatio).toString() + "px";
         image.style.height = (position.height * this.zoomRatio).toString() + "px";
+
+        image.src = gameObject.image.base64url;
       });
     }
   }
@@ -174,7 +204,7 @@ class CreateController {
       let gameObject = this.selectedGameObject;
       let position = gameObject.position;
 
-      image.src = gameObject.image;
+      image.src = gameObject.image.base64url;
       // mousemoveしている間、実際のpositionの値はfloat型で計算するが、見栄えのため表示上は小数点以下を四捨五入する
       x.value = Math.round(position.x);
       y.value = Math.round(position.y);

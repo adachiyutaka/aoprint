@@ -15,7 +15,7 @@
     <img style="max-width: 400px;"><input type="file" accept="image/*" />
     <div class='div1' id='div1'>
       parent
-      <div class='child1'>child1</div>
+      <canvas class='child1' id='output'>child1</canvas>
       <div class='child2'>child2</div>
     </div>
   </div>
@@ -58,14 +58,12 @@
         </li>
       </ul>
       <ul class='image-list' id='image_list'>
-        <% @presetImages.each do |presetImage| %>
-          <%= render partial: "shared/image", locals: { presetImage: presetImage } %>
-        <% end %>
       </ul>
     </div>
     <div class='submit-line'>
-      <div class='image submit-btn' id='image_submit_btn'>
-        <div class='submit-text'>決定</div>
+      <div class='image submit-btn unclickable' id='image_submit_btn'>
+        <div class='submit-text unclickable' id='submit_text_new'>決定</div>
+        <div class='submit-text unclickable' id='submit_text_change'>変更</div>
       </div>  
     </div>
   </div>
