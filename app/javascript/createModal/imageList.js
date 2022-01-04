@@ -1,11 +1,13 @@
 import CreateController from './createController';
 import splitImageCV from './splitImageCV.js';
 import GameObject from './gameObject.js';
+import objectMove from './objectMove.js';
 
 
 const imageList = () => {
   const mode = {updateImage : 1, newGameObject : 2};
   let currentMode = null;
+  let currentGameObject = null;
 
   // イメージ選択モーダルと表示/非表示する要素
   const imageList = document.getElementById('image_list');
@@ -16,8 +18,11 @@ const imageList = () => {
   const imageExitButton = document.getElementById('image_exit_btn');
   const imageBackground = document.getElementById('image_modal_background');
   const submitButton = document.getElementById('image_submit_btn');
-  const newGO = document.getElementById('submit_text_new');
-  const changeImage = document.getElementById('submit_text_change');
+  const newGOText = document.getElementById('submit_text_new');
+  const changeImageText = document.getElementById('submit_text_change');
+
+  // preview画面
+  const previewContainer = document.getElementById('preview_container');
 
   // イメージ選択モーダルの表示
   const imageDisplay = (mode) => {
@@ -31,6 +36,7 @@ const imageList = () => {
 
   // イメージ選択モーダルを非表示にする
   const imageExit = () => {
+    removeSelected('gameobject-image');
     imageModal.style.display = 'none';
     imageBackground.style.display = 'none';
     background.style.display = 'block';
@@ -38,13 +44,11 @@ const imageList = () => {
 
   // イメージ選択モーダルのsubmitボタンの処理
   const submit = () => {
-    let base64url;
-    base64url = document.getElementsByClassName('gameobject-image selected')[0].src;
-
     if (currentMode == mode.updateImage){
-      CreateController.updateInfoImage(base64url);
+      CreateController.updateInfoImage(document.getElementsByClassName('gameobject-image selected')[0].src);
     }
     else if (currentMode == mode.newGameObject){
+      makePreviewObject(currentGameObject);
     }
   }
 
@@ -54,12 +58,12 @@ const imageList = () => {
 
     // 画像選択モーダルの決定ボタンの表示を変更する
     if (currentMode == mode.updateImage){
-      changeImage.classList.remove('hidden');
-      newGO.classList.add('hidden');
+      changeImageText.classList.remove('hidden');
+      newGOText.classList.add('hidden');
     }
     else if (currentMode == mode.newGameObject){
-      newGO.classList.remove('hidden');
-      changeImage.classList.add('hidden');
+      newGOText.classList.remove('hidden');
+      changeImageText.classList.add('hidden');
     }
   }
 
@@ -78,9 +82,21 @@ const imageList = () => {
   });
 
 
+  // プレビュー画面の何もない部分をクリックした際の処理
+  previewContainer.addEventListener('click', () => {
+    removeSelected("preview-image");
+
+    // CreateControllerのSelectedGameObjectを更新する
+    CreateController.selectedGameObject = null;
+
+    CreateController.updatePreview();
+    CreateController.updateInfoInput();
+  });
+
+
   // 読み込み処理
   // DBからの読み込みを行い、その後、画像リストの要素にリスナーを設定する
-  const loadGameObjects = () => {
+  const loadPresetGOGroups = () => {
     // XMLHttpRequestの作成
     const httpRequest = new XMLHttpRequest();
     if (!httpRequest) {
@@ -92,7 +108,8 @@ const imageList = () => {
     const token = document.getElementsByName('csrf-token')[0].content;
 
     // リクエストの内容
-    // 読み込みたいgroupe_nameを設定するか
+    // 初期の読み込み時には "init" : true を設定する
+    // 特定のgroupeを読み込む場合は、groupe_nameを設定する
     let data = {"gameObject": {"groupeName": null, "init": false}};
   
     // レスポンス中、レスポンス後の処理
@@ -103,21 +120,15 @@ const imageList = () => {
           if (httpRequest.status === 200) {
             // 正常にレスポンスが帰ってきた場合
             // PresetGameObjectをセットする
-            CreateController.setPresetGameObjects(httpRequest.response);
+            CreateController.setPresetGOGroups(httpRequest.response);
   
             // 画像リストにGameObjectのgroupeの分類とGameObjectの画像を表示する
             CreateController.presetGOGroups.forEach(groupe => {
               let groupeName = groupe.name;
-              addImageListGroupe(groupeName);
+              makeImageListGroupe(groupeName);
               groupe.gameObjects.forEach(gameObject => {
-              addImageList(groupeName, gameObject)
+                makeImageCard(groupeName, gameObject);
               });
-            });
-
-            // 画像リストの画像をクリックできるようにリスナーを設定
-            let gameObjectImages = Array.from(document.querySelectorAll('.gameobject-image'));
-            gameObjectImages.forEach( (image) => {
-              image.addEventListener('click', (e) => addSelected(e.currentTarget));
             });
   
             // 画像リストに画像アップロードボタンを移動
@@ -145,8 +156,50 @@ const imageList = () => {
     httpRequest.send(JSON.stringify(data));
     data.gameObject.init = false;
   }
-  
-  const addImageListGroupe = (groupeName) => {
+
+  // ローカル画像の読み込みボタンの処理
+  const stageForm = document.getElementById('game_form_stage_input');
+
+  // 画像を輪郭で切り取り、PresetGameObjectへ登録する
+  stageForm.addEventListener('change', (e) => {
+    // ユーザーがセットしたファイルから画像ファイルを読み取り
+    const file = e.target.files[0];
+
+    // OpenCVに読み込んだ画像ファイルを再び画像ファイルとして扱うためにcanvasを準備
+    const canvas = document.getElementById('canvas');
+    const img = new Image();
+    img.src = window.URL.createObjectURL(file);
+
+    // splitImageCVで画像をトリミング
+    // Promiseを使い、onload発火後に ImageCard 作成を行う
+    const imgOnload = new Promise((resolve, reject) => {
+      img.onload = () => {
+        resolve(splitImageCV(img));
+      };
+    });
+
+    imgOnload.then((images) => {
+      console.log("images:", images);
+      images.forEach((image) => {
+        console.log("images.forEach splitImage:", image);
+
+        // GameObjectを生成し、画像、サイズ、位置データを設定、CreateControllerのPresetGameObjectsに格納
+        let gameObject = new GameObject();
+        gameObject.setImage(null, base64url);
+        let vertices = image['vertices'];
+        gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height']);
+        let groupeName = {column: 'upload', index: 'アップロード'};
+        CreateController.addPresetGameObject(groupeName, gameObject);
+
+        // ImageListにカードを追加
+        makeImageCard(groupeName, gameObject);
+      });
+    });
+  });
+
+
+  // ImageList内のGroupe名要素を作成する
+  const makeImageListGroupe = (groupeName) => {
     let div = document.createElement('div');
     let variableName = groupeName.column;
     let indexName = groupeName.index;
@@ -164,116 +217,37 @@ const imageList = () => {
     imageList.appendChild(div);
   }
 
+  // ImageList内のImageCardを作成
+  const makeImageCard = (groupeName, gameObject) => {
+    let div = document.createElement('div');
+    let cardContainer = document.getElementById('image_cards_' + groupeName.column);
 
-  // リスナーをセットするステージフォーム要素を取得
-  const stageForm = document.getElementById('game_form_stage_input');
-  const previewContainer = document.getElementById('preview_container');
+    let imageCardHtml =
+    `<div class='image-card'>
+    <img src='${gameObject.image.base64url}' class='gameobject-image'>
+    <div class='image-name'></div>
+      <div class='image-delete-button-wrapper'>
+        <div class='image-delete-button'>x</div>
+      </div>
+    </div>`;
 
-  previewContainer.addEventListener('click', () => {
-    removeSelected();
+    // 作成したImageCardを配置する
+    div.innerHTML = imageCardHtml;
+    cardContainer.appendChild(div);
 
-    // CreateControllerのSelectedGameObjectを更新する
-    CreateController.selectedGameObject = null;
+    // クリックできるようにリスナーを設定する
+    div.firstChild.getElementsByTagName('img')[0].addEventListener('click', (e) => {
+      // 選択された状態を表示する
+      addSelected(e.currentTarget);
 
-    CreateController.updatePreview();
-    CreateController.updateInfoInput();
-  });
-
-  // ステージフォームの処理
-  stageForm.addEventListener('change', (e) => {
-    // ユーザーがセットしたファイルから画像ファイルを読み取り
-    const file = e.target.files[0];
-    const previewContainer = document.getElementById('preview_container');
-
-    // pngに変換するためにcanvasを準備
-    const canvas = document.getElementById('canvas');
-    const img = new Image();
-    img.src = window.URL.createObjectURL(file);
-    let images = []
-
-    const imgOnload = new Promise((resolve, reject) => {
-      img.onload = () => {
-        resolve(splitImageCV(img));
-      };
+      // 選ばれているGameObjectを更新する
+      currentGameObject = gameObject;
     });
+  }
 
-    imgOnload.then((images) => {
-      console.log("images:", images);
-      images.forEach((image) => {
-        console.log("images.forEach splitImage:", image);
-
-        // img要素を生成し、分割した画像を設定
-        let img = document.createElement('img');
-        cv.imshow(canvas, image['image']);
-        let base64url = canvas.toDataURL();
-        img.src = base64url;
-        console.log("base64url:", base64url);
-        let previewImg = img.cloneNode();
-        img.classList.add('split-img');
-
-        // GameObjectを生成し、画像、サイズ、位置データを設定、CreateControllerのGameObjectsに格納
-        let gameObject = new GameObject();
-        gameObject.setImage(null, base64url);
-        let vertices = image['vertices'];
-        gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height']);
-        let groupeName = {column: 'upload', index: 'アップロード'};
-        CreateController.addPresetGameObject(groupeName, gameObject);
-        addImageList(groupeName, gameObject);
-      });
-    });
-
-    // 各データに対応するimg要素とGameObjectを生成する
-    images.forEach((image) => {
-      console.log("here");
-      // // img要素を生成し、分割した画像を設定
-      // let img = document.createElement('img');
-      // cv.imshow(canvas, image['image']);
-      // let base64url = canvas.toDataURL();
-      // img.src = base64url;
-      
-      // console.log("base64url:", base64url);
-      // // img.src = `data:image/png;base64,${image['image']}`;
-      // let previewImg = img.cloneNode();
-      // img.classList.add('split-img');
-
-      // // GameObjectを生成し、画像、サイズ、位置データを設定、CreateControllerのGameObjectsに格納
-      // let gameObject = new GameObject();
-      // gameObject.setImage(null, base64url);
-      // let vertices = image['vertices'];
-      // gameObject.setPosition(vertices['x'], vertices['y'], vertices['width'], vertices['height']);
-      // let groupeName = {column: 'upload', index: 'アップロード'};
-      // CreateController.addPresetGameObject(groupeName, gameObject);
-      // addImageList(groupeName, gameObject);
-
-      // // 生成したimg要素のサイズ、位置、idを設定
-      // previewImg.style.position = "absolute";
-      // previewImg.classList.add('preview-image');
-      // previewImg.classList.add('drag-and-drop');
-      // previewImg.dataset.gameObjectId = CreateController.gameObjects.length - 1;
-
-      // // preview内のgameObjectにリスナーを設定
-      // previewImg.addEventListener('mousedown', (e) => {
-      //   e.stopPropagation;
-      //   selectPreviewImage(e.currentTarget);
-      // });
-
-      // // 作成したpreview内のオブジェクトを選択した状態にする
-      // selectPreviewImage(previewImg)
-
-      // // preview内のGameObjectにD&Dを設定
-      // objectMove(previewImg);
-
-      
-      // // preview画面内にimg要素を配置
-      // previewContainer.appendChild(previewImg);
-
-      // // preview画面を更新する
-      // CreateController.updatePreview();
-    });
-  });
 
   // railsのDBからpresetGameObjectを読み込み
-  loadGameObjects();
+  loadPresetGOGroups();
 }
 
 // preview内のGameObjectをクリックした際の処理
@@ -292,35 +266,58 @@ const selectPreviewImage = (element) => {
 // 選択したimg要素の輪郭を表示するための'selected'クラス操作
 const addSelected = (element) => {
   // 全ての要素の"selected"クラスを外す
-  removeSelected();
+  removeSelected(element.classList);
 
   // 選択された要素に"selected"クラスを付ける
   element.classList.add('selected');
 }
 
-const removeSelected = () => {
-  // 全ての要素の"selected"クラスを外す
-  let selectedElements = Array.from(document.querySelectorAll('.gameobject-image'));
-  selectedElements.forEach( (Element) => {
-    Element.classList.remove('selected');
-  });
+const removeSelected = (className) => {
+  // 同じクラス名を持つ全ての要素の"selected"クラスを外す
+  if (className){
+    let selectedElements = Array.from(document.getElementsByClassName(className));
+    selectedElements.forEach( (element) => {
+      element.classList.remove('selected');
+    });
+  }
 }
 
-const addImageList = (groupeName, gameObject) => {
-  let div = document.createElement('div');
-  let cardContainer = document.getElementById('image_cards_' + groupeName.column);
+const makePreviewObject = (go) => {
 
-  let imageCardHtml =
-  `<div class='image-card'>
-  <img src='${gameObject.image.base64url}' class='gameobject-image'>
-  <div class='image-name'></div>
-    <div class='image-delete-button-wrapper'>
-      <div class='image-delete-button'>x</div>
-    </div>
-  </div>`;
+  CreateController.addGameObject(go);
 
-  div.innerHTML = imageCardHtml;
-  cardContainer.appendChild(div);
+  // 各データに対応するimg要素とGameObjectを生成する
+  // img要素を生成し、分割した画像を設定
+  let img = document.createElement('img');
+  img.src = go.image.base64url;
+  
+  let previewImg = img.cloneNode();
+  img.classList.add('split-img');
+
+  // 生成したimg要素のサイズ、位置、idを設定
+  previewImg.style.position = "absolute";
+  previewImg.classList.add('preview-image');
+  previewImg.classList.add('drag-and-drop');
+  previewImg.dataset.gameObjectId = CreateController.gameObjects.length - 1;
+
+  // preview内のgameObjectにリスナーを設定
+  previewImg.addEventListener('mousedown', (e) => {
+    e.stopPropagation;
+    selectPreviewImage(e.currentTarget);
+  });
+
+  // 作成したpreview内のオブジェクトを選択した状態にする
+  selectPreviewImage(previewImg)
+
+  // preview内のGameObjectにD&Dを設定
+  objectMove(previewImg);
+  
+  // preview画面内にimg要素を配置
+  const previewContainer = document.getElementById('preview_container');
+  previewContainer.appendChild(previewImg);
+
+  // preview画面を更新する
+  CreateController.updatePreview();
 }
 
 window.addEventListener('load', imageList);
