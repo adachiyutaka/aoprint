@@ -25,6 +25,9 @@ const imageList = () => {
   // preview画面
   const previewContainer = document.getElementById('preview_container');
 
+  // canvas
+  const canvas = document.getElementById('canvas');
+
   // イメージ選択モーダルの表示
   const imageDisplay = (mode) => {
     // イメージ選択モーダルのsubmitボタンの表示を切り替える
@@ -37,7 +40,7 @@ const imageList = () => {
 
   // イメージ選択モーダルを非表示にする
   const imageExit = () => {
-    Selected.remove('gameobject-image');
+    Selected.removeByClassName('gameobject-image');
     imageModal.style.display = 'none';
     imageBackground.style.display = 'none';
     background.style.display = 'block';
@@ -85,7 +88,7 @@ const imageList = () => {
 
   // プレビュー画面の何もない部分をクリックした際の処理
   previewContainer.addEventListener('click', () => {
-    Selected.remove("preview-image");
+    Selected.removeByClassName("preview-image");
 
     // CreateControllerのSelectedGameObjectを更新する
     CreateController.selectedGameObject = null;
@@ -158,6 +161,7 @@ const imageList = () => {
     data.gameObject.init = false;
   }
 
+
   // ローカル画像の読み込みボタンの処理
   const stageForm = document.getElementById('game_form_stage_input');
 
@@ -166,8 +170,6 @@ const imageList = () => {
     // ユーザーがセットしたファイルから画像ファイルを読み取り
     const file = e.target.files[0];
 
-    // OpenCVに読み込んだ画像ファイルを再び画像ファイルとして扱うためにcanvasを準備
-    const canvas = document.getElementById('canvas');
     const img = new Image();
     img.src = window.URL.createObjectURL(file);
 
@@ -183,6 +185,10 @@ const imageList = () => {
       console.log("images:", images);
       images.forEach((image) => {
         console.log("images.forEach splitImage:", image);
+
+        // OpenCVに読み込んだ画像ファイルを再び画像ファイルとして扱うためにimg要素を生成し、トリミングした画像を設定
+        cv.imshow(canvas, image['image']);
+        let base64url = canvas.toDataURL();
 
         // GameObjectを生成し、画像、サイズ、位置データを設定、CreateControllerのPresetGameObjectsに格納
         let gameObject = new GameObject();
@@ -264,17 +270,15 @@ const selectPreviewImage = (element) => {
   CreateController.updateInfoInput();
 }
 
+// Preview画面にGameObjectを作成する
 const makePreviewObject = (go) => {
 
   CreateController.addGameObject(go);
 
   // 各データに対応するimg要素とGameObjectを生成する
   // img要素を生成し、分割した画像を設定
-  let img = document.createElement('img');
-  img.src = go.image.base64url;
-  
-  let previewImg = img.cloneNode();
-  img.classList.add('split-img');
+  let previewImg = document.createElement('img');
+  previewImg.src = go.image.base64url;
 
   // 生成したimg要素のサイズ、位置、idを設定
   previewImg.style.position = "absolute";
