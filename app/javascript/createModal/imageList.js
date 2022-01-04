@@ -2,6 +2,7 @@ import CreateController from './createController';
 import splitImageCV from './splitImageCV.js';
 import GameObject from './gameObject.js';
 import objectMove from './objectMove.js';
+import Selected from './selected';
 
 
 const imageList = () => {
@@ -36,7 +37,7 @@ const imageList = () => {
 
   // イメージ選択モーダルを非表示にする
   const imageExit = () => {
-    removeSelected('gameobject-image');
+    Selected.remove('gameobject-image');
     imageModal.style.display = 'none';
     imageBackground.style.display = 'none';
     background.style.display = 'block';
@@ -84,7 +85,7 @@ const imageList = () => {
 
   // プレビュー画面の何もない部分をクリックした際の処理
   previewContainer.addEventListener('click', () => {
-    removeSelected("preview-image");
+    Selected.remove("preview-image");
 
     // CreateControllerのSelectedGameObjectを更新する
     CreateController.selectedGameObject = null;
@@ -238,7 +239,7 @@ const imageList = () => {
     // クリックできるようにリスナーを設定する
     div.firstChild.getElementsByTagName('img')[0].addEventListener('click', (e) => {
       // 選択された状態を表示する
-      addSelected(e.currentTarget);
+      Selected.add(e.currentTarget);
 
       // 選ばれているGameObjectを更新する
       currentGameObject = gameObject;
@@ -253,7 +254,7 @@ const imageList = () => {
 // preview内のGameObjectをクリックした際の処理
 const selectPreviewImage = (element) => {
   // 選択したimg要素の輪郭を表示するために、指定した要素にのみ"selected"クラスをつける
-  addSelected(element);
+  Selected.add(element);
 
   // CreateControllerのSelectedGameObjectを更新する
   CreateController.updateSelectedGameObject(element);
@@ -261,25 +262,6 @@ const selectPreviewImage = (element) => {
   // preview画面を更新する
   CreateController.updatePreview();
   CreateController.updateInfoInput();
-}
-
-// 選択したimg要素の輪郭を表示するための'selected'クラス操作
-const addSelected = (element) => {
-  // 全ての要素の"selected"クラスを外す
-  removeSelected(element.classList);
-
-  // 選択された要素に"selected"クラスを付ける
-  element.classList.add('selected');
-}
-
-const removeSelected = (className) => {
-  // 同じクラス名を持つ全ての要素の"selected"クラスを外す
-  if (className){
-    let selectedElements = Array.from(document.getElementsByClassName(className));
-    selectedElements.forEach( (element) => {
-      element.classList.remove('selected');
-    });
-  }
 }
 
 const makePreviewObject = (go) => {
