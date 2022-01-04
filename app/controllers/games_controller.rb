@@ -41,7 +41,7 @@ class GamesController < ApplicationController
           type = image_type(base64)
           base64url = "data:image/" + type + ";base64," + base64
           image = {id: go.image.id, base64url: base64url}
-          game_objects.push({symbol: go.symbol, name: go.name, text: go.text, image: image, script: nil})
+          game_objects.push({symbol: go.symbol, position: {x: 0, y: 0, width: go.image.width, height: go.image.height, image: nil}, name: go.name, text: go.text, image: image, script: nil})
         end
         data.push({name: name, gameObjects: game_objects})
       end
