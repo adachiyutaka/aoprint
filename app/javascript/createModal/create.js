@@ -28,7 +28,7 @@ const create = () => {
       let script = Array.from(scriptContainer.children).find((o) => o.id == 'roll_select').value;
 
       // JSONとして配列に加える
-      const gameObject = {symbol: symbolInput, position: {height: positions.height, width: positions.width, x: positions.x, y: positions.y, image: positionBase64}, object: objectBase64, script: script};
+      const gameObject = {symbol: symbolInput, position: {x: positions.x, y: positions.y, width: positions.width, height: positions.height, image: positionBase64}, object: objectBase64, script: script};
       objectData.push(gameObject);
     });
     
