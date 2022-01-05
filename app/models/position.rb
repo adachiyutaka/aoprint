@@ -8,5 +8,6 @@ class Position < ApplicationRecord
   end
   
   has_one :object_position
+  has_one :game_object, through: :object_position
   belongs_to :stage
 end

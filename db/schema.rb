@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_22_000020) do
+ActiveRecord::Schema.define(version: 2022_01_05_060155) do
 
   create_table "active_storage_attachments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", null: false
@@ -37,15 +37,15 @@ ActiveRecord::Schema.define(version: 2021_12_22_000020) do
     t.string "symbol", default: ""
     t.string "name", default: ""
     t.string "text", default: ""
-    t.boolean "player", default: false
-    t.boolean "object", default: false
+    t.integer "role_id", default: 1
     t.bigint "game_id"
+    t.bigint "image_id"
+    t.bigint "script_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.boolean "enemy", default: false
-    t.boolean "item", default: false
-    t.boolean "goal", default: false
     t.index ["game_id"], name: "index_game_objects_on_game_id"
+    t.index ["image_id"], name: "index_game_objects_on_image_id"
+    t.index ["script_id"], name: "index_game_objects_on_script_id"
   end
 
   create_table "games", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -60,10 +60,17 @@ ActiveRecord::Schema.define(version: 2021_12_22_000020) do
   create_table "images", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", default: ""
     t.string "text", default: ""
-    t.bigint "game_object_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["game_object_id"], name: "index_images_on_game_object_id"
+  end
+
+  create_table "object_images", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "game_object_id"
+    t.bigint "image_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["game_object_id"], name: "index_object_images_on_game_object_id"
+    t.index ["image_id"], name: "index_object_images_on_image_id"
   end
 
   create_table "object_positions", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -73,6 +80,15 @@ ActiveRecord::Schema.define(version: 2021_12_22_000020) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["game_object_id"], name: "index_object_positions_on_game_object_id"
     t.index ["position_id"], name: "index_object_positions_on_position_id"
+  end
+
+  create_table "object_scripts", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "game_object_id"
+    t.bigint "script_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["game_object_id"], name: "index_object_scripts_on_game_object_id"
+    t.index ["script_id"], name: "index_object_scripts_on_script_id"
   end
 
   create_table "positions", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -99,10 +115,8 @@ ActiveRecord::Schema.define(version: 2021_12_22_000020) do
   create_table "scripts", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", default: ""
     t.string "text", default: ""
-    t.bigint "game_object_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["game_object_id"], name: "index_scripts_on_game_object_id"
   end
 
   create_table "stages", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
