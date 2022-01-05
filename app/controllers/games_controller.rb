@@ -37,11 +37,11 @@ class GamesController < ApplicationController
         game_objects = []
         PresetGameObject.where(groupe: name[:column]).limit(5).each do |preset_go|
           go = preset_go.game_object
-          base64 = imageToBase64(go.image.image)
+          base64 = imageToBase64(go.images[0].image)
           type = image_type(base64)
           base64url = "data:image/" + type + ";base64," + base64
-          image = {id: go.image.id, base64url: base64url}
-          game_objects.push({symbol: go.symbol, position: {x: 0, y: 0, width: go.image.width, height: go.image.height, image: nil}, name: go.name, text: go.text, image: image, script: nil})
+          image = {id: go.images[0].id, base64url: base64url}
+          game_objects.push({symbol: go.symbol, position: {x: 0, y: 0, width: go.images[0].width, height: go.images[0].height, image: nil}, name: go.name, text: go.text, image: image, script: nil})
         end
         data.push({name: name, gameObjects: game_objects})
       end
