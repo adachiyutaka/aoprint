@@ -6,7 +6,7 @@ const info = () => {
   document.getElementById('y').addEventListener('input', (e) => CreateController.updateInfoValue(e));
   document.getElementById('width').addEventListener('input', (e) => CreateController.updateInfoValue(e));
   document.getElementById('height').addEventListener('input', (e) => CreateController.updateInfoValue(e));
-  document.getElementById('script_select').addEventListener('change', (e) => CreateController.updateInfoValue(e));
+  document.getElementById('role_select').addEventListener('change', (e) => CreateController.updateInfoValue(e));
 
   // info欄の要素を取得
   let info = document.getElementById('object_info');

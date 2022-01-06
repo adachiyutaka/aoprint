@@ -5,6 +5,7 @@ require 'google/cloud/vision'
 class GamesController < ApplicationController
 
   def index
+    @image = Image.find_by(id: 154)
     groupe_names = [{column: 'upload', index: 'アップロード'},
                     {column: 'character', index: 'キャラクター'},
                     {column: 'stage', index: 'ステージ'},
@@ -41,7 +42,7 @@ class GamesController < ApplicationController
           type = image_type(base64)
           base64url = "data:image/" + type + ";base64," + base64
           image = {id: go.images[0].id, base64url: base64url}
-          game_objects.push({symbol: go.symbol, position: {x: 0, y: 0, width: go.images[0].width, height: go.images[0].height, image: nil}, name: go.name, text: go.text, image: image, script: nil})
+          game_objects.push({symbol: go.symbol, position: {x: 0, y: 0, width: go.images[0].width, height: go.images[0].height, image: nil}, name: go.name, text: go.text, image: image, role: go.role_id, script: nil})
         end
         data.push({name: name, gameObjects: game_objects})
       end

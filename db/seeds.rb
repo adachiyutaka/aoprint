@@ -32,13 +32,9 @@ Dir.foreach(preset_images_dir) do |directory_name|
     next if file_name == '.' or file_name == '..'
 
     image = Image.create(name: 'test image', text: 'image explantion')
-    image.save!
     image.image.attach(io: File.open(dir + file_name), filename: file_name)
     game_object = GameObject.create(name: 'test game object', text: 'game object explanation', role_id: 1, game_id: game.id, image_id: image.id)
-    game_object.save!
     object_image = ObjectImage.create(game_object_id: game_object.id, image_id: image.id)
-    object_image.save!
     presetGameObject = PresetGameObject.create(groupe: directory_name, game_object_id: game_object.id)
-    presetGameObject.save!
   end
 end

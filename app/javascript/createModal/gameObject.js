@@ -3,8 +3,9 @@ class GameObject {
     this.symbol = '';
     this.position = null;
     this.image = null;
-    this.object = "";
-    this.script = "";
+    this.role = 1;
+    this.object = '';
+    this.script = '';
   }
 
   setPosition(x, y, width, height) {
