@@ -57,9 +57,9 @@ class GamesController < ApplicationController
   end
 
   def create
-    @game = GameForm.new(game_params)
-    json = @game.objects
-    @game.save
+    game_form = GameForm.new(game_params)
+    game_form.save
+    redirect_to game_path(game_form.game)
   end
 
   def read_text
@@ -90,7 +90,7 @@ class GamesController < ApplicationController
     render json: json
   end
 
-  def image
+  def unity
     game = Game.find_by(id: params[:id])
     stage = game.stages.first
 
@@ -100,13 +100,8 @@ class GamesController < ApplicationController
     # Objectをhash化
     objects = []
     game.game_objects.each do |obj|
-      object = {symbol: obj.symbol, image: imageToBase64(obj.image)}
-      # key名がupperCamelなのは、C#クラスとの互換のため
-      object[:isObject] = true if obj.object == true
-      object[:isPlayer] = true if obj.player == true
-      object[:isEnemy] = true if obj.enemy == true
-      object[:isItem] = true if obj.item == true
-      object[:isGoal] = true if obj.goal == true
+      object = {symbol: obj.symbol, image: imageToBase64(obj.images[0].image)}
+      object[:role] = obj.role.id
       objects << object
     end
 
@@ -120,9 +115,9 @@ class GamesController < ApplicationController
     # TODO: 1object対多positionに対応する必要あり
     object_positions = []
     game.game_objects.each do |obj|
-      objpos = obj.object_position
+      objpos = obj.object_positions[0]
       # key名がupperCamelなのは、C#クラスとの互換のため
-      object_positions << {objectId: objects.index{|obj| obj[:symbol] == objpos.game_object.symbol}, positionId: positions.index{|pos| pos[:symbol] == objpos.position.symbol}}
+      object_positions << {objectId: game.game_objects.index{|obj| obj == GameObject.find_by(id: objpos.game_object_id)}, positionId: stage.positions.index{|pos| pos == Position.find_by(id: objpos.position_id)}}
     end
 
     # key名がupperCamelなのは、C#クラスとの互換のため
