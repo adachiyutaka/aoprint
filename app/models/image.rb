@@ -11,26 +11,12 @@ class Image < ApplicationRecord
     image.metadata['width']
   end
 
-  # base64urlを画像ファイルに変換し、ActiveStorageで保存
+  # base64urlをActiveStorageで保存
   def attach_base64url(base64url)
-    # if base64url.present?
-    #   content_type = 'png'
-    #   base64 = base64url.sub %r/data:image\/png;base64/, ''
-    #   decoded_data = Base64.decode64(base64)
-    #   filename = Time.zone.now.to_s + '.' + content_type
-    #   File.open("#{Rails.root}/tmp/#{filename}", 'wb') do |f|
-    #     f.write(decoded_data)
-    #   end
-    # end
-    # image.attach(io: File.open("#{Rails.root}/tmp/#{filename}"), filename: filename)
-    # FileUtils.rm("#{Rails.root}/tmp/#{filename}")
-
-    base64 = base64url.sub %r/data:image\/png;base64/, ''
-    decoded_data = Base64.decode64(base64)
+    base64 = base64url.sub(%r/data:image\/png;base64/, '')
     filename = Time.zone.now.to_s + '.png'
-
     image.attach(
-      io: StringIO.new(decoded_data),
+      io: StringIO.new(Base64.decode64(base64)),
       filename: filename,
       content_type: "image/png"
     )
