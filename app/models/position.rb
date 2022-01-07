@@ -1,6 +1,5 @@
 class Position < ApplicationRecord
   with_options presence: true do
-    validates :symbol
     validates :x
     validates :y
     validates :width
