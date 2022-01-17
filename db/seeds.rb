@@ -8,10 +8,17 @@
 
 
 # imege list用のPresetGameObject作成seed
+User.destroy_all
 Game.destroy_all
+Image.destroy_all
+PresetGameObject.destroy_all
 GameObject.destroy_all
+ObjectImage.destroy_all
 
-game = Game.create(name: 'my game', text: 'game explantion', user_id: 1)
+user = User.create(name: 'black_lil_finger', email: 'a@gmail', password: 'qwe123')
+user.save!
+game = Game.create(name: 'my game', text: 'game explantion', user_id: user.id)
+game.save!
 
 preset_images_dir = 'app/assets/images/TestData/GameObject/'
 
@@ -24,10 +31,10 @@ Dir.foreach(preset_images_dir) do |directory_name|
     # カレントディレクトリを示す . や親ディレクトリを示す .. が含まれてしまうので、それらを除くため
     next if file_name == '.' or file_name == '..'
 
-    game_object = GameObject.create(name: 'test game object', text: 'game object explantion', game_id: game.id)
-    image = Image.create(name: 'test image', text: 'image explantion', game_object_id: game_object.id)
+    image = Image.create(name: 'test image', text: 'image explantion')
     image.image.attach(io: File.open(dir + file_name), filename: file_name)
-
-    PresetGameObject.create(groupe: directory_name, game_object_id: game_object.id)
+    game_object = GameObject.create(name: 'test game object', text: 'game object explanation', role_id: 1, game_id: game.id, image_id: image.id)
+    object_image = ObjectImage.create(game_object_id: game_object.id, image_id: image.id)
+    presetGameObject = PresetGameObject.create(groupe: directory_name, game_object_id: game_object.id)
   end
 end

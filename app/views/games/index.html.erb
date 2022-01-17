@@ -16,6 +16,7 @@
     <div class='div1' id='div1'>
       parent
       <canvas class='child1' id='output'>child1</canvas>
+      <%= image_tag @image.image %>
       <div class='child2'>child2</div>
     </div>
   </div>
@@ -160,12 +161,12 @@
                 <div class='info-script-list'>
                 <ul>
                   <li>
-                    <select class='script-select' id='script_select' name="example">
-                      <option value="object">ステージ</option>
-                      <option value="player">プレイヤー</option>
-                      <option value="enemy">敵</option>
-                      <option value="item">アイテム</option>
-                      <option value="goal">ゴール</option>
+                    <select class='role-select' id='role_select' name="example">
+                      <option value="1">ステージ</option>
+                      <option value="2">プレイヤー</option>
+                      <option value="3">敵</option>
+                      <option value="4">アイテム</option>
+                      <option value="5">ゴール</option>
                     </select>
                   </li>
                 </ul>
@@ -224,7 +225,7 @@
       </div>
       <pre></pre>
       <div class='submit-line'>
-        <%= f.submit 'これで遊ぶ' ,class:"submit-btn" %>
+        <%= f.submit 'これで遊ぶ', class:'submit-btn', id:'submit_btn' %>
       </div>
       <% end %>
       <%# Game#newのフォーム %>

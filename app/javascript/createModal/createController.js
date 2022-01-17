@@ -25,9 +25,10 @@ class CreateController {
       groupe.gameObjects.forEach(go => {
         let gameObject = new GameObject();
         let image = go.image;
-        let position = go.position;     
+        let position = go.position;
         gameObject.setPosition(0, 0, position.width, position.height);
         gameObject.setImage(image.id, image.base64url);
+        gameObject.role = go.role;
         gameObjects.push(gameObject);
       });
       this.presetGOGroups.push({'name': groupe.name, 'gameObjects': gameObjects});
@@ -81,8 +82,8 @@ class CreateController {
       case 'height':
         position.height = parseFloat(value);
         break
-      case 'script_select':
-        gameObject.script = value;
+      case 'role_select':
+        gameObject.role = value;
         break
     }
 
@@ -191,14 +192,14 @@ class CreateController {
 
   updateInfoInput() {
     // info欄の更新
-    let scriptIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
+    let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
 
     let image = document.getElementById('info_image');
     let x = document.getElementById('x');
     let y = document.getElementById('y');
     let width = document.getElementById('width');
     let height = document.getElementById('height');
-    let script = document.getElementById('script_select');
+    let role = document.getElementById('role_select');
 
     if(this.selectedGameObject != null) {
       let gameObject = this.selectedGameObject;
@@ -210,7 +211,7 @@ class CreateController {
       y.value = Math.round(position.y);
       width.value = Math.round(position.width);
       height.value = Math.round(position.height);
-      script.selectedIndex = scriptIndex[gameObject.script];
+      role.selectedIndex = roleIndex[gameObject.role];
       updateInfoPosition();
       this.info.style.visibility = 'visible';
     }

@@ -1,47 +1,37 @@
+import CreateController from './createController';
+
 const create = () => {
-  const form = document.getElementById('game_form');
-  form.addEventListener('submit', (e) => {
-    // デフォルト動作のデータ送信をキャンセル
-    e.preventDefault;
+  const gameForm = document.getElementById('game_form');
+  const gameFormObjects = document.getElementById('game_form_objects');
+  const gameFormCanvas = document.getElementById('game_form_canvas');
+  const submitButton = document.getElementById('submit_btn');
 
-    // 選択されたimg要素を取得
-    let objectData = [];
-    
-    // TODO: 1object対多positionに対応する必要あり
-    Array.from(document.getElementsByClassName('object-card')).forEach((card) => {
-      let symbolContainer = card.children[0];
-      let positionContainer = card.children[1];
-      let objectContainer = card.children[2];
-      let scriptContainer = card.children[3];
+  submitButton.addEventListener('click', (e) => {
+    console.log("CreateController.gameObjects: ", CreateController.gameObjects);
+    console.log("JSON.stringify(): ", JSON.stringify(CreateController.gameObjects));
 
-      // 入力されたsymbolの値を取得
-      let symbolInput = Array.from(symbolContainer.children).find((o) => o.id == 'symbol_input').value;
+    if(gameFormObjects) {
+      gameFormObjects.remove();
+    }
 
-      // position表示画像と値を取得
-      let positionBase64 = getImage(positionContainer).src;
-      let positions = Array.from(positionContainer.children).find((o) => o.id == 'vertices').dataset;
+    if(gameFormCanvas) {
+      gameFormCanvas.remove();
+    }
 
-      // objectの画像を取得
-      let objectBase64 = getImage(objectContainer).src;
+    let gameInput = `<input value=${JSON.stringify(CreateController.gameObjects)} type='hidden' name='game_form[objects]' id='game_form_objects'>`;
+    let canvasInput = `<input value=${JSON.stringify({width: canvas.width, height: canvas.height})} type='hidden' name='game_form[canvas]' id='game_form_canvas'>`;
+    gameForm.insertAdjacentHTML("beforeend", gameInput + canvasInput);
 
-      // scriptの値を取得
-      let script = Array.from(scriptContainer.children).find((o) => o.id == 'roll_select').value;
-
-      // JSONとして配列に加える
-      const gameObject = {symbol: symbolInput, position: {x: positions.x, y: positions.y, width: positions.width, height: positions.height, image: positionBase64}, object: objectBase64, script: script};
-      objectData.push(gameObject);
-    });
-    
-    const renderDom = document.getElementById('game_form');
-    const gameInput = `<input value=${JSON.stringify(objectData)} type='hidden' name='game_form[objects]'>`;
-    const canvasInput = `<input value=${JSON.stringify({width: canvas.width, height: canvas.height})} type='hidden' name='game_form[canvas]'>`;
-    renderDom.insertAdjacentHTML("beforeend", gameInput+canvasInput);
     // デフォルトのinputタグからname属性を削除
     document.getElementById('game_form_stage_input').removeAttribute('name');
-    document.getElementById('game_form_player_input').removeAttribute('name');
-    document.getElementById('game_form_object_input').removeAttribute('name');
+
     // データを送信
-    // document.getElementById('game_form').submit();
+    gameForm.submit();
+  });
+
+  gameForm.addEventListener('submit', (e) => {
+    // デフォルト動作のデータ送信をキャンセル
+    e.preventDefault();
   });
 }
 

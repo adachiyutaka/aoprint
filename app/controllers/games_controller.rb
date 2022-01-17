@@ -5,6 +5,7 @@ require 'google/cloud/vision'
 class GamesController < ApplicationController
 
   def index
+    @image = Image.find_by(id: 154)
     groupe_names = [{column: 'upload', index: 'アップロード'},
                     {column: 'character', index: 'キャラクター'},
                     {column: 'stage', index: 'ステージ'},
@@ -37,11 +38,11 @@ class GamesController < ApplicationController
         game_objects = []
         PresetGameObject.where(groupe: name[:column]).limit(5).each do |preset_go|
           go = preset_go.game_object
-          base64 = imageToBase64(go.image.image)
+          base64 = imageToBase64(go.images[0].image)
           type = image_type(base64)
           base64url = "data:image/" + type + ";base64," + base64
-          image = {id: go.image.id, base64url: base64url}
-          game_objects.push({symbol: go.symbol, position: {x: 0, y: 0, width: go.image.width, height: go.image.height, image: nil}, name: go.name, text: go.text, image: image, script: nil})
+          image = {id: go.images[0].id, base64url: base64url}
+          game_objects.push({symbol: go.symbol, position: {x: 0, y: 0, width: go.images[0].width, height: go.images[0].height, image: nil}, name: go.name, text: go.text, image: image, role: go.role_id, script: nil})
         end
         data.push({name: name, gameObjects: game_objects})
       end
@@ -56,9 +57,9 @@ class GamesController < ApplicationController
   end
 
   def create
-    @game = GameForm.new(game_params)
-    json = @game.objects
-    @game.save
+    game_form = GameForm.new(game_params)
+    game_form.save
+    redirect_to game_path(game_form.game)
   end
 
   def read_text
@@ -89,7 +90,7 @@ class GamesController < ApplicationController
     render json: json
   end
 
-  def image
+  def unity
     game = Game.find_by(id: params[:id])
     stage = game.stages.first
 
@@ -99,13 +100,8 @@ class GamesController < ApplicationController
     # Objectをhash化
     objects = []
     game.game_objects.each do |obj|
-      object = {symbol: obj.symbol, image: imageToBase64(obj.image)}
-      # key名がupperCamelなのは、C#クラスとの互換のため
-      object[:isObject] = true if obj.object == true
-      object[:isPlayer] = true if obj.player == true
-      object[:isEnemy] = true if obj.enemy == true
-      object[:isItem] = true if obj.item == true
-      object[:isGoal] = true if obj.goal == true
+      object = {symbol: obj.symbol, image: imageToBase64(obj.images[0].image)}
+      object[:role] = obj.role.id
       objects << object
     end
 
@@ -119,9 +115,9 @@ class GamesController < ApplicationController
     # TODO: 1object対多positionに対応する必要あり
     object_positions = []
     game.game_objects.each do |obj|
-      objpos = obj.object_position
+      objpos = obj.object_positions[0]
       # key名がupperCamelなのは、C#クラスとの互換のため
-      object_positions << {objectId: objects.index{|obj| obj[:symbol] == objpos.game_object.symbol}, positionId: positions.index{|pos| pos[:symbol] == objpos.position.symbol}}
+      object_positions << {objectId: game.game_objects.index{|obj| obj == GameObject.find_by(id: objpos.game_object_id)}, positionId: stage.positions.index{|pos| pos == Position.find_by(id: objpos.position_id)}}
     end
 
     # key名がupperCamelなのは、C#クラスとの互換のため
