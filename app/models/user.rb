@@ -4,7 +4,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
   with_options presence: true do
-    validates :name, uniqueness: { case_sensitive: true }
+    validates :name
   end
 
   validate :password_complexity
