@@ -115,14 +115,14 @@
 .submit-line{
   position: absolute;
   bottom: 0px;
-  right: 15px;
+  right: 32px;
 }
 
 .submit-btn{
   display: flex;
   align-items: center;
   justify-content: space-around;
-  height: 46px;
+  height: 40px;
   width: 120px;
   border-radius: 3px 3px 0px 0px/3px 3px 0px 0px;
   background-color: #1074c5;

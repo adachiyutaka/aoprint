@@ -1,0 +1,40 @@
+.board{
+  position: relative;
+  margin: 60px auto 0;
+  width: 480px;
+  padding: 32px 32px 64px;
+  border-radius: 3px;
+  box-shadow: 0px 4px 2px 4px rgba(0,0,0, 0.10);
+  background-color: #ffffff;
+}
+
+.board-label{
+  font-size: large;
+  margin-left: 4px;
+  margin-bottom: 4px;
+}
+
+.box{
+  width: 100%;
+  margin-top: 4px;
+  padding: 24px;
+  padding-bottom: 8px;
+  border:1px solid #333333;
+  border-radius: 6px;
+}
+
+.sign-up-field label, .sign-up-field label {
+  margin-left: 2px;
+  margin-bottom: 50px;
+}
+
+.sign-up-field input[type="text"], .sign-up-field input[type="email"], .sign-up-field input[type="password"] {
+  margin-bottom: 16px;
+  margin-top: 4px;
+  border-style: none;
+  box-sizing: border-box;
+  width: 100%;
+  height: 31px;
+  border: 1px solid #333333;
+  border-radius: 6px;
+}

@@ -5,7 +5,7 @@ require 'google/cloud/vision'
 class GamesController < ApplicationController
 
   def index
-    @image = Image.find_by(id: 154)
+    @image = Image.find_by(id: 49)
     groupe_names = [{column: 'upload', index: 'アップロード'},
                     {column: 'character', index: 'キャラクター'},
                     {column: 'stage', index: 'ステージ'},
