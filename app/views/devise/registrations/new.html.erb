@@ -8,24 +8,28 @@
 
       <div class="sign-up-field">
         <%= f.label :name, "名前" %><br />
+        <div id='user_name_warn'></div>
         <%= f.text_field :name, autofocus: true, autocomplete: "name" %>
       </div>
 
       <div class="sign-up-field">
         <%= f.label :email, "Email" %><br />
+        <div id='user_email_warn'></div>
         <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
       </div>
 
       <div class="sign-up-field">
         <%= f.label :password, "パスワード" %>
         <% if @minimum_password_length %>
-        <span>（英数記号で<%= @minimum_password_length %>文字以上）</span>
+        <span>（英数をそれぞれ1文字含む<%= @minimum_password_length %>文字以上）</span>
         <% end %><br />
+        <div id='user_password_warn'></div>
         <%= f.password_field :password, autocomplete: "new-password" %>
       </div>
 
       <div class="sign-up-field">
         <%= f.label :password_confirmation, "確認のためパスワードを再入力"%><br />
+        <div id='user_password_confirmation_warn'></div>
         <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
       </div>
 
