@@ -17,19 +17,19 @@ const signUp = () => {
                                                  'presence': null}
                  }
 
-  let rEs = {'presence' : {'re': '',
-                           'text': '入力してください'},
-             'email_re' : {'re': /^[A-Za-z0-9]{1}[A-Za-z0-9_.-]*@{1}[A-Za-z0-9_.-]{1,}.[A-Za-z0-9]{1,}$/,
-                           'text': '正しいメールアドレスを入力してください'},
-             'password_include_alphabet' : {'re': /(?=.*?[a-z])/,
-                                            'text': '1文字以上のアルファベットを含めてください'},
-             'password_include_number' : {'re': /(?=.*?[0-9])/,
-                                          'text': '1文字以上の数字を含めてください'},
-             'password_include_min' : {'re': /.{6,}/,
-                                       'text': '6文字以上入力してください'},
-             'password_confirm' : {'re': '',
-                                   'text': 'パスワードが一致しません'}
-            }
+  let validations = {'presence' : {'re': null,
+                                   'text': '入力してください'},
+                     'email_re' : {'re': /^[A-Za-z0-9]{1}[A-Za-z0-9_.-]*@{1}[A-Za-z0-9_.-]{1,}.[A-Za-z0-9]{1,}$/,
+                                   'text': '正しいメールアドレスを入力してください'},
+                     'password_include_alphabet' : {'re': /(?=.*?[a-z])/,
+                                                    'text': '1文字以上のアルファベットを含めてください'},
+                     'password_include_number' : {'re': /(?=.*?[0-9])/,
+                                                  'text': '1文字以上の数字を含めてください'},
+                     'password_include_min' : {'re': /.{6,}/,
+                                               'text': '6文字以上入力してください'},
+                     'password_confirm' : {'re': null,
+                                           'text': 'パスワードが一致しません'}
+                    }
 
   // form、inputの要素を取得
   const form = document.getElementById('new_user');
@@ -48,42 +48,45 @@ const signUp = () => {
   });
 
   const validate = (e) => {
+    Object.keys(warnings).forEach(id => {
+      let inputElement = document.getElementById(id);
+      let value = inputElement.value;
+      console.log("input value: ", value);
+
+      Object.keys(warnings[id]).forEach(validation => {
+        console.log('validation:', validation);
+
+        switch (validation) {
+          case 'presence':
+            if(value == ''){
+              resetWarm(id);
+              addWarn(id, validation);
+            }
+            else{
+              removeWarn(id, validation);
+            }
+            break;
+          case 'password_confirm':
+            if(password.value != password_confirmation.value && password_confirmation.value){
+              addWarn('user_password_confirmation', 'password_confirm');
+            }
+            else{
+              removeWarn('user_password_confirmation', 'password_confirm');
+            }
+            break;
+          default:
+            if(!value.match(validations[validation].re)){
+              addWarn(id, validation);
+            }
+            else{
+              removeWarn(id, validation);
+            }
+        }
+      });
+    });
+
     let id = e.currentTarget.id;
     let value = e.currentTarget.value;
-    console.log('input target id:', id);
-    console.log('input value:', value);
-    console.log('valid keys:', Object.keys(warnings[id]));
-
-    Object.keys(warnings[id]).forEach(validation => {
-      console.log('validation:', validation);
-
-      switch (validation) {
-        case 'presence':
-          if(value == ''){
-            resetWarm(id);
-            addWarn(id, validation);
-          }
-          else{
-            removeWarn(id, validation);
-          }
-          break;
-        case 'password_confirm':
-          if(password.value != password_confirmation.value && password_confirmation.value){
-            addWarn('user_password_confirmation', 'password_confirm');
-          }
-          else{
-            removeWarn('user_password_confirmation', 'password_confirm');
-          }
-          break;
-        default:
-          if(!value.match(rEs[validation].re)){
-            addWarn(id, validation);
-          }
-          else{
-            removeWarn(id, validation);
-          }
-      }
-    });
   }
 
   const addWarn = (id, validation) => {
@@ -92,7 +95,7 @@ const signUp = () => {
     if(warningElement == null){
       warningElement = document.createElement('div');
       warningElement.classList.add('validation-message');
-      warningElement.textContent = rEs[validation].text;
+      warningElement.textContent = validations[validation].text;
       warnings[id][validation] = warningElement;
     }
     document.getElementById(id + '_warn').appendChild(warningElement);
