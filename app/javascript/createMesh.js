@@ -486,8 +486,8 @@ const checkConvex = (src, contours) => {
 // }
 
 const searchSegment = (src, contour, segments, high = (src.rows >= src.cols)? src.rows : src.cols, low = 0, textIndex = 0, targetContour = contour) => {
-  let segmentArea = (((src.rows >= src.cols)? src.rows : src.cols) ** 2) / 100;  // 頂点の面積の下限
-  console.log("segmentArea", segmentArea, "src.rows/cols", src.rows, src.cols);
+  let maxArea = (((src.rows >= src.cols)? src.rows : src.cols) ** 2) / 100;  // 頂点の面積の上限
+  console.log("maxArea", maxArea, "src.rows/cols", src.rows, src.cols);
   textIndex++;
   let mid = (low + high) / 2;
   console.log(textIndex, "high:", high, ", low:", low, ", mid:", mid);
@@ -538,9 +538,11 @@ const searchSegment = (src, contour, segments, high = (src.rows >= src.cols)? sr
   // 一つ前の輪郭線の中に次の輪郭線（scalingContour）が見つかった場合
   for(let i = 0; i < nextContours.size(); ++i) {
     let nextContour = nextContours.get(i);
-    console.log(textIndex, i, "found")
-    // 凸包、または、面積が十分に小さい場合
-    if(cv.isContourConvex(nextContour) || cv.contourArea(nextContour) <= segmentArea){
+    let nextContourArea = cv.contourArea(nextContour);
+    console.log(textIndex, i, "found", "area", nextContourArea);
+
+    // 凸包、または、面積がmaxArea以下、または、high lowの差が小さい場合
+    if(cv.isContourConvex(nextContour) || nextContourArea <= maxArea){
       console.log("cv.isContourConvex(nextContour)", cv.isContourConvex(nextContour));
       console.log("cv.contourArea(nextContour)", cv.contourArea(nextContour));
 
@@ -561,7 +563,10 @@ const searchSegment = (src, contour, segments, high = (src.rows >= src.cols)? sr
 
 const segment = (src, segments, itr) => {
   itr++;
-  console.log(itr, "segments.length", segments.length);
+  console.log(itr, "segments.length", segments.length, "================================================================================");
+  if(itr == 4){
+    cv.imshow('output14', src);
+  }
   if(segments.length > 0){
     segments.forEach((segment) => {
       // segmentSearchできていない残りの領域を作成する
@@ -572,8 +577,12 @@ const segment = (src, segments, itr) => {
       // ビット演算ANDで、輪郭線内(=1)かつ、未登録segment(=1)の部分のみ残す
       cv.bitwise_and(src, srcMask, src);
       cv.imshow('output12', src);
+
       srcMask.delete;
     });
+  }
+  if(itr == 4){
+    cv.imshow('output15', src);
   }
 
   let segmentContours = new cv.MatVector();
@@ -582,7 +591,15 @@ const segment = (src, segments, itr) => {
   cv.findContours(src, segmentContours, segmentHierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);  // 最外部の輪郭のみ読み取る（cv.RETR_EXTERNAL）
   if(segmentContours.size() > 0){
     for(let i = 0; i < segmentContours.size(); ++i) {
-      searchSegment(src, segmentContours.get(0), segments);
+      console.log(itr, "findContour", i, "==================================");
+      searchSegment(src, segmentContours.get(i), segments);
+
+      if(i == 2 && itr == 2){
+        const img = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+        cv.drawContours(img, segmentContours, i, new cv.Scalar(255, 255, 255), 1, cv.LINE_8);
+        cv.imshow('output16', img);
+      }
+
     }
     segment(src, segments, itr);
   }
