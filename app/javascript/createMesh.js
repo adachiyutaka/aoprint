@@ -30,16 +30,127 @@ const createMesh = (img) => {
     document.getElementById('div1').appendChild(output);
   };
 
+  let src = cv.imread(img);
+
+  // 最外輪郭を取得
+  let outlineContours = getOutlineContours(src);
+
+  // 大まかな形状に分割
+  // 輪郭線でぬりつぶした画像を作成
+  let segmentSrc = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+  cv.drawContours(segmentSrc, outlineContours, -1, new cv.Scalar(255, 255, 255), -1, cv.LINE_8);
+  cv.imshow('output9', segmentSrc);
+
+  // 輪郭線取得のための2値化
+  cv.cvtColor(segmentSrc, segmentSrc, cv.COLOR_RGBA2GRAY);
+  cv.threshold(segmentSrc, segmentSrc, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU);
+
+  // 大まかな形状を取得
+  let segments = [];
+  findSegment(segmentSrc, segments);
+
+  let seedContours = new cv.MatVector();
+  segments.forEach((segment) => {
+    seedContours.push_back(segment.contour);
+  });
+  cv.drawContours(segmentSrc, seedContours, -1, new cv.Scalar(255, 255, 0), 1, cv.LINE_8);
+  cv.imshow('output11', segmentSrc);
+
+  // 凸性欠陥の検出
+
+  // テスト表示
+  let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+  // テスト表示
+
+  let maxArea = {}; // 最大の面積とその輪郭を収納するためのオブジェクト
+  getMaxArea(outlineContours, maxArea);
+  let maxAreaContour = maxArea.contour;
+  let hull = new cv.Mat();
+  let defectMat = new cv.Mat();
+  cv.convexHull(maxAreaContour, hull, false, false);
+  cv.convexityDefects(maxAreaContour, hull, defectMat);
+  defects = [];
+  console.log("defectMat.rows", defectMat.rows);
+  if(defectMat){
+    for (let i = 0; i < defectMat.rows; ++i) {
+      let defect = {};
+      defect.start = new cv.Point(maxAreaContour.data32S[defectMat.data32S[i * 4] * 2],
+                               maxAreaContour.data32S[defectMat.data32S[i * 4] * 2 + 1]);
+      defect.end = new cv.Point(maxAreaContour.data32S[defectMat.data32S[i * 4 + 1] * 2],
+                             maxAreaContour.data32S[defectMat.data32S[i * 4 + 1] * 2 + 1]);
+      defect.center = new cv.Point(defect.start.x + defect.end.x / 2,
+                                defect.start.y + defect.end.y / 2);
+      defect.far = new cv.Point(maxAreaContour.data32S[defectMat.data32S[i * 4 + 2] * 2],
+                             maxAreaContour.data32S[defectMat.data32S[i * 4 + 2] * 2 + 1]);
+      defect.depth = defectMat.data32S[i * 4 + 3];
+      defects.push(defect);
+
+      // テスト表示
+      cv.line(dst, defect.start, defect.end, new cv.Scalar(255, 255, 255), 2, cv.LINE_AA, 0);
+      cv.circle(dst, defect.far, 3, new cv.Scalar(255, 0, 0), -1);
+      // テスト表示
+    }
+  }
+
+  // 図形全体の大きさを知るため、外接矩形を取得
+  let boundingRect = cv.boundingRect(maxAreaContour);
+
+  // テスト表示
+  let point1 = new cv.Point(boundingRect.x, boundingRect.y);
+  let point2 = new cv.Point(boundingRect.x + boundingRect.width, boundingRect.y + boundingRect.height);
+  cv.rectangle(dst, point1, point2, new cv.Scalar(100, 100, 255), 2, cv.LINE_AA, 0);
+
+  // テスト表示
+
+  // 足のもっとも高い位置、最小の長さを決める
+  //  位置は足元から全長の1/2が最大、長さは全長の1/10以上
+  // const footPosition = boundingRect.y + (boundingRect.height / 2);
+  const footLength = boundingRect.height / 10;
+
+  // 凸性欠陥の開始と終了の中間点のy座標を基準にして降順ソート（中間点が低い位置にある（足らしい）凸性欠陥が一番に来る）
+  defects.sort((a, b) => b.center.y - a.center.y);
+  
+  // 足の位置が適当な凸性欠陥を探す（もっとも低い位置のcenterから、全長の1/10以内の低さにあるもの）
+  const footPosition = defects[0].center.y - boundingRect.height / 10;
+  let lowerDefects = defects.filter(defect => defect.center.y >= footPosition);
+
+  // 
+
+
+  console.log("lowerDefects", lowerDefects);
+  lowerDefects.forEach(defect => {
+    console.log("defect.center.y", defect.center.y);
+    console.log("defect.depth", defect.depth);
+  });
+  // let footDefect = defects.find(defect => defect.center.y >= footPosition && defect.depth >= footLength);
+  let footDefect = defects.find(defect => defect.depth >= footLength);
+
+  // テスト表示
+  cv.line(dst, footDefect.start, footDefect.end, new cv.Scalar(100, 255, 255), 4, cv.LINE_AA, 0);
+  cv.circle(dst, footDefect.far, 5, new cv.Scalar(100, 255, 255), -1);
+  cv.imshow('output12', dst);
+  console.log("found defect", footDefect);
+  // テスト表示
+
+  // 足がない場合
+
+
+
+  hull.delete;
+  defectMat.delete;
+
+  segmentSrc.delete;
+  src.delete;
+}
+
+// 最外部の輪郭線を取得する
+const getOutlineContours = (src) => {
   let contoursColor = new cv.Scalar(255, 0, 0);
 
-  let src = cv.imread(img);
-  // cv.imshow(output, src);
-  
   // グレースケールに変換
   const imgGray = new cv.Mat();
   cv.cvtColor(src, imgGray, cv.COLOR_RGBA2GRAY);
   cv.imshow('output1', imgGray);
-
 
   // 白い部分を膨張させる
   const imgDilated = new cv.Mat();
@@ -67,740 +178,221 @@ const createMesh = (img) => {
   cv.imshow('output5', imgClosed);
   imgBin.delete;
 
-  // オープニング処理で小さいゴミを消去
-  const imgOpened = new cv.Mat();
-  let anchor = new cv.Point(-1, -1);
-  let MOpen = cv.Mat.ones(3, 3, cv.CV_8U);
-  cv.morphologyEx(imgClosed, imgOpened, cv.MORPH_OPEN, MOpen, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-  cv.imshow('output6', imgOpened);
-  imgClosed.delete;
-  anchor.delete;
-  MOpen.delete;
+  // // オープニング処理で小さいゴミを消去
+  // const imgOpened = new cv.Mat();
+  // let anchor = new cv.Point(-1, -1);
+  // let MOpen = cv.Mat.ones(3, 3, cv.CV_8U);
+  // cv.morphologyEx(imgClosed, imgOpened, cv.MORPH_OPEN, MOpen, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+  // cv.imshow('output6', imgOpened);
+  // anchor.delete;
+  // MOpen.delete;
 
   // 中央値フィルタでゴミ取り
-  const imgFiltered = new cv.Mat();
-  cv.medianBlur(imgOpened, imgFiltered, 5);
-  cv.imshow('output7', imgFiltered);
-  imgOpened.delete;
+  // const imgFiltered = new cv.Mat();
+  // cv.medianBlur(imgOpened, imgFiltered, 5);
+  // cv.imshow('output7', imgFiltered);
+  // imgOpened.delete;
   
   // 輪郭線を取得
   let contours = new cv.MatVector();
   let hierarchy = new cv.Mat();
-  cv.findContours(imgFiltered, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);  // 最外部の輪郭のみ読み取る（cv.RETR_EXTERNAL）
-  console.log("src.cols, src.rows:", src.cols, src.rows);
+  cv.findContours(imgClosed, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);  // 最外部の輪郭のみ読み取る（cv.RETR_EXTERNAL）
   const imgContours = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
   cv.drawContours(imgContours, contours, -1, contoursColor, 1, cv.LINE_8);
   cv.imshow('output8', imgContours);
-  imgFiltered.delete;
+  // imgFiltered.delete;
+  imgClosed.delete;
 
   // 最外部（第4要素（親のID）が-1）の輪郭線を取得
   let outlineContours = new cv.MatVector();
   for (let i = 0; i < contours.size();  ++i){
     if(hierarchy.intPtr(0, i)[3] == -1) {
       outlineContours.push_back(contours.get(i));
-      console.log("rows", contours.get(i).rows);
-      console.log("cols", contours.get(i).cols);
-      console.log("dims", contours.get(i).dims);
-      console.log("depth", contours.get(i).depth());
-      console.log("channels", contours.get(i).channels());
     }
   }
+
   contours.delete;
   hierarchy.delete;
 
-  // 輪郭線でぬりつぶした画像を作成
-  let segmentSrc = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-  cv.drawContours(segmentSrc, outlineContours, -1, new cv.Scalar(255, 255, 255), -1, cv.LINE_8);
-  cv.imshow('output9', segmentSrc);
-
-  // 輪郭線取得のための2値化
-  // const srcGray = new cv.Mat();
-  cv.cvtColor(segmentSrc, segmentSrc, cv.COLOR_RGBA2GRAY);
-  // srcSegment.delete;
-
-  // const scrBin = new cv.Mat();
-  cv.threshold(segmentSrc, segmentSrc, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU);
-  // srcGray.delete;
-
-  let segments = [];
-  findSegment(segmentSrc, segments, 0);
-  // segment(segmentSrc, segments, 0);
-
-  // let seedContours = new cv.MatVector();
-  // let dst = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-  // segments.forEach((segment) => {
-  //   seedContours.push_back(segment.contour);
-  //   cv.drawContours(dst, spreadContour(src, segment.contour, segment.shrinkage + 100), -1, new cv.Scalar(0, 255, 255), 1, cv.LINE_8);
-  // });
-  // cv.drawContours(dst, seedContours, -1, new cv.Scalar(255, 255, 0), 1, cv.LINE_8);
-  // cv.drawContours(dst, outlineContours, -1, new cv.Scalar(255, 255, 255), 1, cv.LINE_8);
-  // cv.imshow('output13', dst);
-
-  // searchSegment(src, outlineContours.get(0), segments);
-  let margin = ((src.rows >= src.cols)? src.rows : src.cols) / 100;  // 膨張させる際の余白
-  let seedContours = new cv.MatVector();
-  console.log("segments size", segments.length);
-  segments.forEach((segment) => {
-    seedContours.push_back(segment.contour);
-    cv.drawContours(segmentSrc, spreadContour(src, segment.contour, segment.distance + margin), -1, new cv.Scalar(0, 0, 0), -1, cv.LINE_8);
-  });
-  cv.drawContours(segmentSrc, seedContours, -1, new cv.Scalar(255, 255, 0), 1, cv.LINE_8);
-  cv.imshow('output11', segmentSrc);
-
-  
-
-  // let segments = [];
-  // let segmentContours = new cv.MatVector();
-  // let segmentHierarchy = new cv.Mat();
-  // let seedContours = new cv.MatVector();
-  // let textItr = 0;
-  // while(segmentContours.size() > 0){
-  //   textItr++;
-  //   console.log(textItr, "segments.length", segments.length);
-  //   if(segments.length > 0){
-  //     segments.forEach((segment) => {
-  //       seedContours.push_back(segment.contour);
-  //       cv.drawContours(segmentSrc, spreadContour(src, segment.contour, segment.shrinkage + 10), -1, new cv.Scalar(0, 0, 0), -1, cv.LINE_8);
-  //     });
-  //   }
-
-  //   cv.findContours(segmentSrc, segmentContours, segmentHierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);  // 最外部の輪郭のみ読み取る（cv.RETR_EXTERNAL）
-  //   for(let i = 0; i < segmentContours.size(); ++i) {
-  //     searchSegment(src, segmentContours.get(0), segments);
-  //   }
-  // }
-
-  // cv.drawContours(segmentSrc, seedContours, -1, new cv.Scalar(255, 255, 0), 1, cv.LINE_8);
-  // cv.imshow('output11', segmentSrc);
-
-  // segmentContours.delete;
-  // segmentContours.delete;
-  // seedContours.delete;
-  // segmentSrc.delete;
-  // const imgContConvex = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-  // cv.drawContours(imgContConvex, convexContours, -1, contoursColor, 1, cv.LINE_8);
-  // cv.imshow('output9', imgContConvex);
-
-  // let shrinkContours = approxContour(shrinkContour(src, outlineContours, 20));
-
-  // const imgContShrink = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-  // cv.drawContours(imgContShrink, shrinkContours, -1, contoursColor, 1, cv.LINE_8);
-  // cv.imshow('output9', imgContShrink);
-
-
-
-  // // 大きな輪郭のみ取得し小さいゴミの輪郭を削除
-  // let contLarge = new cv.MatVector();
-  // for (let i = 0; i < contours.size(); ++i){
-  //   const min = 500;
-  //   let contour = contours.get(i); 
-  //   if (cv.contourArea(contour) >= min){
-  //     contLarge.push_back(contour);
-  //   }
-  // }
-  // // contours.delete;
-  // hierarchy.delete;
-
-  // const imgContLarge = new cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC3);
-  // cv.drawContours(imgContLarge, contLarge, -1 , contoursColor, 1, cv.LINE_8);
-  // cv.imshow('output', imgContLarge);
-
-  // // 輪郭を太く描画し切り取り時の余白を作る
-  // const imgContBold = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-  // cv.drawContours(imgContBold, contLarge, -1, new cv.Scalar(255, 255, 255), 20, cv.LINE_8);
-  // cv.imshow('output9', imgContBold);
-
-
-  // // 輪郭線取得のための2値化
-  // const imgContBoldGray = new cv.Mat();
-  // cv.cvtColor(imgContBold, imgContBoldGray, cv.COLOR_RGBA2GRAY);
-  // imgContBold.delete;
-
-  // const imgContBoldBin = new cv.Mat();
-  // cv.threshold(imgContBoldGray, imgContBoldBin, 10, 255, cv.THRESH_BINARY);
-  // cv.imshow('output10', imgContBoldBin);
-  // imgContBoldGray.delete;
-
-  // // 余白のある輪郭線を再取得
-  // let contMargin = new cv.MatVector();
-  // let hierarchyMargin = new cv.Mat();
-  // cv.findContours(imgContBoldBin, contMargin, hierarchyMargin, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE);
-  // const imgContMargin = new cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC3);
-  // cv.drawContours(imgContMargin, contMargin, -1, contoursColor, 1, cv.LINE_8);
-  // cv.imshow('output11', imgContMargin);
-
-  // 大きな輪郭のみ取得し小さいゴミの輪郭を削除
-  // let contMarginLarge = new cv.MatVector();
-  // for (let i = 0; i < contMargin.size(); ++i){
-  //   const min = 5000;
-  //   let contour = contMargin.get(i); 
-  //   if (cv.contourArea(contour) >= min){
-  //     contMarginLarge.push_back(contour);
-  //   }
-  // }
-  // console.log("contMargin.shape", contMargin.shape);
-  // imgContBoldBin.delete;
-
-  // // 頂点数を減らした輪郭を取得
-  // let contApprox = new cv.MatVector();
-  // for(let i = 0; i < contMargin.size(); ++i) {
-  //   let contour = contMargin.get(i);
-  //   let approx = new cv.Mat();
-  //   const epsilon = 0.01 * cv.arcLength(contour, true);
-  //   cv.approxPolyDP(contour, approx, epsilon, true);
-  //   contApprox.push_back(approx);
-  // }
-  // const imgContApprox = new cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC3);
-  // cv.drawContours(imgContApprox, contApprox, -1, contoursColor, 1, cv.LINE_8);    
-  // cv.imshow('output12', imgContApprox);
-
-  // contLarge.delete;
-  // contMargin.delete;
-  // hierarchyMargin.delete;
-
-  // // 凸性欠陥の検出
-  // let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-  // let hull = new cv.Mat();
-  // let defect = new cv.Mat();
-  // let cnt = contApprox.get(0);
-  // let lineColor = new cv.Scalar(255, 0, 0);
-  // let circleColor = new cv.Scalar(255, 255, 255);
-  // cv.convexHull(cnt, hull, false, false);
-  // cv.convexityDefects(cnt, hull, defect);
-  // console.log("defect.data32S")
-  // for (let i = 0; i < defect.data32S.length; ++i) {
-  //   console.log(i, ": ", defect.data32S[i]);
-  // }
-
-  // console.log("cnt.data32S")
-  // for (let i = 0; i < cnt.data32S.length; ++i) {
-  //   console.log(i, ": ", cnt.data32S[i]);
-  // }
-
-  // for (let i = 0; i < defect.rows; ++i) {
-  //     console.log("defect:", defect.data32S[i]);
-  //     // 凸状欠陥の結果は（start_index, end_index, farthest_pt_index, fixpt_depth, ...）の形で格納される
-  //     // 輪郭線は（index 0のx, index 0のy, index 1のx, ... ）の形で格納される
-  //     let start = new cv.Point(cnt.data32S[defect.data32S[i * 4] * 2],
-  //                             cnt.data32S[defect.data32S[i * 4] * 2 + 1]);
-  //     let end = new cv.Point(cnt.data32S[defect.data32S[i * 4 + 1] * 2],
-  //                           cnt.data32S[defect.data32S[i * 4 + 1] * 2 + 1]);
-  //     let far = new cv.Point(cnt.data32S[defect.data32S[i * 4 + 2] * 2],
-  //                           cnt.data32S[defect.data32S[i * 4 + 2] * 2 + 1]);
-  //     cv.line(dst, start, end, lineColor, 2, cv.LINE_AA, 0);
-  //     cv.circle(dst, far, 3, circleColor, -1);
-  // }
-  // cv.imshow('output13', dst);
-  // hull.delete(); defect.delete();
-
-
-  src.delete;
+  return outlineContours;
 }
 
-// // 一つの大きなアウトラインになるまで画像処理を調整する
-// const searchOutline = (src) => {
-//   return contour;
-// }
-const dilateContours = (contours) => {
-
-}
-
-const spreadContour = (src, contour, margin) => {
-  return scaleContour(src, contour, margin, true);
-}
-
-const shrinkContour = (src, contour, shrinkage) => {
-  return scaleContour(src, contour, shrinkage, false);
-}
-
-const scaleContour = (src, contour, width, scaleUp) => {
-
-  let scaleContours = new cv.MatVector();
-
-  // 輪郭線を一つずつ扱う
-  let contours = new cv.MatVector();
-  contours.push_back(contour);
-
-  // 輪郭を太く描画し切り取り時の余白を作る
-  const imgContBold = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-  cv.drawContours(imgContBold, contours, -1, new cv.Scalar(255, 255, 255), width, cv.LINE_8);
-  
-  // 輪郭線取得のための2値化
-  const imgContBoldGray = new cv.Mat();
-  cv.cvtColor(imgContBold, imgContBoldGray, cv.COLOR_RGBA2GRAY);
-  imgContBold.delete;
-
-  const imgContBoldBin = new cv.Mat();
-  cv.threshold(imgContBoldGray, imgContBoldBin, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU);
-  imgContBoldGray.delete;
-
-  // 余白のある輪郭線を再取得
-  let marginContours = new cv.MatVector();
-  let hierarchy = new cv.Mat();
-  cv.findContours(imgContBoldBin, marginContours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-
-  // 輪郭線が見つかった場合
-  if (marginContours.size() > 0) {
-    // 輪郭線が内側か外側か判定し、shrinkContoursに追加する
-    // scaleUp = true の場合、外側の輪郭線のみ取得する（hierarchyの第4要素が-1）
-    // scaleUp = false の場合、内側の輪郭線のみ取得する（hierarchyの第4要素が-1ではない）
-    for(let i = 0; i < marginContours.size(); ++i) {
-      if((hierarchy.intPtr(0, i)[3] == -1) == scaleUp) {
-        scaleContours.push_back(marginContours.get(i));
-      }
-    }
-  }
-  
-  contour.delete;
-  contours.delete;
-  marginContours.delete;
-  hierarchy.delete;
-  
-  // 縮んだ輪郭を返却
-  return scaleContours;
-}
-
-const approxContours = (contours, epsilon_ratio = 0.01) => {
-  let approxContours = new cv.MatVector();
-
-  // 輪郭線を単純な形にする
-  // epsilon_ratioは許容される誤差、値が大きいほど単純な形状になる
-  for(let i = 0; i < contours.size(); ++i) {
-    let contour = contours.get(i);
-    let approx = new cv.Mat();
-    const epsilon = epsilon_ratio * cv.arcLength(contour, true);
-    cv.approxPolyDP(contour, approx, epsilon, true);
-    approxContours.push_back(approx);
-
-    approx.delete;
-  }
-
-  contours.delete;
-
-  return approxContours;
-}
-
-const checkConvex = (src, contours) => {
-  convexContours = new cv.MatVector();
-  let high = src.rows >= src.cols? src.rows : src.cols;
-  let low = 0;
-  let mid = 0;
-  let i = 0;
-
-  while(high - low >= 1) {
-    i++;
-    let mid = (low + high) / 2;
-    console.log(i, "high:", high, ", low:", low, ", mid:", mid);
-
-    // 輪郭線を縮める
-    let shrinkContours = approxContours(shrinkContour(src, contours, mid))
-
-    // 縮めた輪郭線が消えてしまった場合、縮める量を減らす
-    if (shrinkContours.size() == 0){
-      console.log(i, "No contour, mid:", mid)
-      high = mid;
-      continue;
-    }
-
-    // 縮めた輪郭線それぞれについて凸包か判定
-    for(let i = 0; i < contours.size(); ++i) {
-
-      if(cv.isContourConvex(shrinkContours.get(i))) {
-        console.log(i, "isConvex, mid:", mid)
-        convexContours.push_back(shrinkContours.get(i));
-        high = mid;
-      }
-      else {
-        console.log(i, "isNotConvex, mid:", mid)
-        low = mid;
-      }
-    }
-  }
-  return approxContour(shrinkContour(src, contours, mid));
-}
-
-// const searchConvex = (contours, dstContours, high, low, oldContour, shrink = true) => {
-//   threshold = 1;  // 2分探査の閾値、値が小さいほど厳密な探査になる
-//   i++;
-//   let mid = (low + high) / 2;
-//   console.log(i, "high:", high, ", low:", low, ", mid:", mid);
-
-//   // 輪郭線を拡縮する（関数名はshrinkだが、一段階前と比べてshrinkageが小さい=広げている場合もある）
-//   let scalingContours = approxContours(shrinkContour(src, contours, mid));
-
-//   // 輪郭線が消えてしまった場合、縮める量を減らす
-//   if (scalingContours.size() == 0){
-//     console.log(i, "No contour, mid:", mid)
-//     high = mid;
-//     continue;
-//   }
-
-//   // 拡縮した輪郭線それぞれについて判定
-//   for(let i = 0; i < scalingContours.size(); ++i) {
-//     let scalingContour = scalingContours.get(i);
-
-//     // 一段階前より縮めている場合
-//     if(shrink){
-  
-//       // 一つ前の輪郭線が縮めた輪郭線を含んでいるか判定（探索している輪郭線が消えたかどうか）
-//       let point = new cv.Point(scalingContour.data32S[0], scalingContour.data32S[1]);
-//       // 一つ前の輪郭線が縮めた輪郭線を含んでいる（）
-//       if(shrink == true && cv.pointPolygonTest(oldContour, point, false)){
-        
-//       }
-//       // for (let scalingContour_i = 0; scalingContour_i < (oldContour.data32S.length / 2) - 1; ++scalingContour_i) {
-//       //   // oldContourの各点
-//       //   let point = new cv.Point(oldContour.data32S[scalingContour_i], oldContour.data32S[scalingContour_i + 1]);
-//       //   // 一つ前の輪郭線が縮めた輪郭線を含んでいる（）
-//       //   if(shrink == true && cv.pointPolygonTest(oldContour, point, false)){
-//       //     high = mid;
-
-//       //   }
-//       // }
-//       point.delete;
-//     }
-
-//     // 一段階前より拡げている場合
-//     if(!shrink){
-//       let point = new cv.Point(oldContour.data32S[0], oldContour.data32S[1]);
-  
-//       // 拡縮した輪郭線が一つ前の輪郭線を含んでいるか判定
-//       if(shrink == true && cv.pointPolygonTest(scalingContour, point, false)){
-//         high = mid;
-//       }
-//       point.delete;
-//     }
-
-//     // 凸包かどうか判定
-//     if(cv.isContourConvex(contour)) {
-//       // 凸包の場合
-//       console.log(i, "isConvex, mid:", mid)
-
-//       // 十分に2分探査ができている場合
-//       if(high - low >= threshold){
-//         // 2分探査を終了し、輪郭線と縮めた値を登録する
-//         dstContours.push({"contour": contour, "shrinkage": mid});
-//         break;
-//       }
-
-//       // 十分に2分探査ができていない場合、縮む値を小さくして（このcontourよりも広げて）探査を続ける
-//       searchConvex()
-//       high = mid;
-//     }
-//     else {
-//       // 凸包でない場合
-//       console.log(i, "isNotConvex, mid:", mid)
-//       low = mid;
-//     }
-//   }
-// }
-
-const searchSegment = (src, contour, segments, high = (src.rows >= src.cols)? src.rows : src.cols, low = 0, textIndex = 0, targetContour = contour) => {
-  let maxArea = (((src.rows >= src.cols)? src.rows : src.cols) ** 2) / 100;  // 頂点の面積の上限
-  console.log("maxArea", maxArea, "src.rows/cols", src.rows, src.cols);
-  textIndex++;
-  let mid = (low + high) / 2;
-  console.log(textIndex, "high:", high, ", low:", low, ", mid:", mid);
-
-  // 輪郭線を拡縮（関数名はshrinkだが、一段階前と比べてshrinkageが小さい=広げている場合もある）し、単純かする
-  let scalingContours = approxContours(shrinkContour(src, contour, mid));
-
-  // 輪郭線が全て消えてしまった場合、縮める量を減らす
-  if (scalingContours.size() == 0){
-    console.log(textIndex, "No contour")
-    // 縮める量を減らし(high = mid)、targetContourはそのままで再起する
-    searchSegment(src, contour, segments, mid, low, textIndex, targetContour);
-    return;
-  }
-
-  // targetContour内に含まれるscalingContourのリスト
-  let nextContours = new cv.MatVector();
-
-  // 拡縮した輪郭線それぞれについて判定
-  for(let i = 0; i < scalingContours.size(); ++i) {
-    // 一つ前の輪郭線（targetContour）が次の輪郭線（scalingContour）を含んでいるか判定
-    // 含んでいる場合は全ての点を含んでいるため、scalingContourの1点だけを判定する
-    let scalingContour = scalingContours.get(i);
-    let point = new cv.Point(scalingContour.data32S[0], scalingContour.data32S[1]);
-    if(Math.sign(cv.pointPolygonTest(targetContour, point, false)) >= 0){
-      // 一つ前の輪郭線が縮めた輪郭線を含んでいる場合、nextContoursに追加する
-      nextContours.push_back(scalingContour);
-      // 縮める量を増やす(low = mid)
-    }
-    point.delete;
-  }
-  scalingContours.delete;
-
-  const img = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-  cv.drawContours(img, nextContours, -1, new cv.Scalar(255, 255, 255), 1, cv.LINE_8);
-  cv.imshow('output10', img);
-
-  // 一つ前の輪郭線の中に次の輪郭線（scalingContour）が一つも見つからない場合
-  if(nextContours.size() == 0){
-    console.log(textIndex, "found, but no target contour")
-    // 縮める量を減らし(high = mid)、targetContourはそのままで再起する
-    searchSegment(src, contour, segments, mid, low, textIndex, targetContour);
-
-    nextContours.delete;
-    return;
-  }
-
-  // 一つ前の輪郭線の中に次の輪郭線（scalingContour）が見つかった場合
-  for(let i = 0; i < nextContours.size(); ++i) {
-    let nextContour = nextContours.get(i);
-    let nextContourArea = cv.contourArea(nextContour);
-    console.log(textIndex, i, "found", "area", nextContourArea);
-
-    // 凸包、または、面積がmaxArea以下、または、high lowの差が小さい場合
-    if(cv.isContourConvex(nextContour) || nextContourArea <= maxArea){
-      console.log("cv.isContourConvex(nextContour)", cv.isContourConvex(nextContour));
-      console.log("cv.contourArea(nextContour)", cv.contourArea(nextContour));
-
-      // segmentsに追加して処理を終える
-      segments.push({contour: nextContour, shrinkage: mid});
-
-      console.log("segments", segments);
-    }
-    // 凸包でなく、面積が大きい場合
-    else {
-    // 縮める量を増やし(low = mid)、targetContourを縮めて再起する
-      searchSegment(src, contour, segments, high, mid, textIndex, nextContour);
-    }
-  }
-
-  nextContours.delete;
-}
-
-const segment = (src, segments, itr) => {
-  itr++;
-  console.log(itr, "segments.length", segments.length, "================================================================================");
-  if(itr == 4){
-    cv.imshow('output14', src);
-  }
-  if(segments.length > 0){
-    segments.forEach((segment) => {
-      // segmentSearchできていない残りの領域を作成する
-      // segmentsに登録されているエリアのマスクを作成する（全体 = 255, 登録済みsegment = 0 のグレースケール）
-      let srcMask = new cv.Mat(src.rows, src.cols, cv.CV_8UC1, new cv.Scalar(255));
-      cv.drawContours(srcMask, spreadContour(src, segment.contour, segment.shrinkage + 100), -1, new cv.Scalar(0), -1, cv.LINE_8);
-      cv.imshow('output11', srcMask);
-      // ビット演算ANDで、輪郭線内(=1)かつ、未登録segment(=1)の部分のみ残す
-      cv.bitwise_and(src, srcMask, src);
-      cv.imshow('output12', src);
-
-      srcMask.delete;
-    });
-  }
-  if(itr == 4){
-    cv.imshow('output15', src);
-  }
-
-  let segmentContours = new cv.MatVector();
-  let segmentHierarchy = new cv.Mat();
-
-  cv.findContours(src, segmentContours, segmentHierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);  // 最外部の輪郭のみ読み取る（cv.RETR_EXTERNAL）
-  if(segmentContours.size() > 0){
-    for(let i = 0; i < segmentContours.size(); ++i) {
-      console.log(itr, "findContour", i, "==================================");
-      searchSegment(src, segmentContours.get(i), segments);
-
-      if(i == 2 && itr == 2){
-        const img = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-        cv.drawContours(img, segmentContours, i, new cv.Scalar(255, 255, 255), 1, cv.LINE_8);
-        cv.imshow('output16', img);
-      }
-
-    }
-    segment(src, segments, itr);
-  }
-
-  segmentContours.delete;
-  segmentHierarchy.delete;
-  src.delete;
-}
-const findSegment = (src, segments, itr) => {
-  let margin = ((src.rows >= src.cols)? src.rows : src.cols) / 100;  // 膨張させる際の余白
-
-  let maxDistance = new cv.Mat();
-  let distanceTransform = new cv.Mat();
-  // 2値化
-  // cv.cvtColor(src, graySrc, cv.COLOR_RGBA2GRAY, 0);
-  // cv.threshold(graySrc, src, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
-
+// 画像の分割
+// 最外輪郭線を塗りつぶした8bit画像を元に、大きな形のまとまりを探し、segmentオブジェクトにそれぞれのcontourと、そのmaskを登録して返す
+const findSegment = (src, segments) => {
   // 外周からの距離を取得する
+  let distanceTransform = new cv.Mat();
   cv.distanceTransform(src, distanceTransform, cv.DIST_L2, 5);
 
   // 最大値を取得
+  let maxDistance = new cv.Mat();
   cv.reduce(distanceTransform, maxDistance, 0, cv.REDUCE_MAX); // 行列から各列の最大値を取得し1行に
   cv.reduce(maxDistance, maxDistance, 1, cv.REDUCE_MAX); // さらにその1行から最大値を取得し1行1列に
 
   // 閾値処理のために8bitシングルチャンネルに変換
   distanceTransform.convertTo(distanceTransform, cv.CV_8U);
 
+  // もっとも大きな形のまとまりを探す
   let segment = {};
-  console.log("maxDistance", maxDistance.data32F[0]);
-  // console.log("src.depth()", src.depth());
-  // console.log("src.channels()", src.channels());
-  // console.log("distanceTransform.depth()", distanceTransform.depth());
-  // console.log("distanceTransform.channels()", distanceTransform.channels());
-  let img = src.clone();
+  greatestSegment(src, distanceTransform, maxDistance.data32F[0], segment);
 
-  // 
-  greatestConvex(distanceTransform, maxDistance.data32F[0], segment, 0);
-
-  // segmentsに
+  // 結果をsegmentsに追加
   segments.push(segment);
-
-  // もっとも大きい輪郭でマスクを作成する（マスク全体=1, 輪郭内=0）
-  let segmentContours = new cv.MatVector();
-  segmentContours.push_back(segment.contour);
-  let mask = new cv.Mat(src.rows, src.cols, cv.CV_8U, new cv.Scalar(0));
-  cv.drawContours(mask, segmentContours, -1, new cv.Scalar(255), -1, cv.LINE_8);
-  cv.drawContours(img, segmentContours, -1, new cv.Scalar(255, 100, 0), 1, cv.LINE_8);
-  console.log("max", maxDistance, "distance", Math.round(segment.distance));
-  cv.erode(mask, mask, cv.Mat.ones(3, 3, cv.CV_8U), new cv.Point(-1, -1), Math.round(segment.distance) + margin);
 
   // 元の画像から輪郭を切り抜く
   // ビット演算ANDで、元の輪郭内(=1)かつ、マスクの輪郭外(=1)の部分のみ残す
-  cv.bitwise_and(src, mask, src);
-  cv.imshow('output13', mask);
-  cv.imshow('output14', src);
-  cv.imshow('output15', img);
+  cv.bitwise_and(src, segment.mask, src);
 
+  // 切り取った後の画像に残った部分がないかを調べるため
+  // 輪郭を取得し、輪郭があった場合は再起する
   let contours = new cv.MatVector();
   let hierarchy = new cv.Mat();
   cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);  // 最外部の輪郭のみ読み取る（cv.RETR_EXTERNAL）
 
   if(contours.size() > 0){
-    findSegment(src, segments, itr)
+    findSegment(src, segments)
   }
-  else{
-    return;
-  }
-
 
   maxDistance.delete;
   distanceTransform.delete;
-  img.delete;
-  segmentContours.delete;
-
-  // // 閾値によって輪郭を縮める
-  // cv.threshold(distanceTransform, distanceTransform, maxDistance.data32F[0] * 0.5, 255, cv.THRESH_BINARY);
-  // cv.imshow('output12', distanceTransform);
-
-  // console.log("distanceTransform.depth()", distanceTransform.depth());
-  // console.log("distanceTransform.channels()", distanceTransform.channels());
-
-  // // 輪郭を取得
-  // let segmentContours = new cv.MatVector();
-  // let segmentHierarchy = new cv.Mat();
-  // cv.findContours(distanceTransform, segmentContours, segmentHierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);  // 最外部の輪郭のみ読み取る（cv.RETR_EXTERNAL）
-
+  contours.delete;
 }
 
-const greatestConvex = (distanceTransform, maxDistance, segment, testId, epsilon_ratio = 0.05, high = 1, low = 0) => {
-  const result = () => {
-
-  } 
+// cv.distanceTransformを元にもっとも大きいまとまりを探し、contourとその形のmaskをsegmentオブジェクトに登録して返す
+const greatestSegment = (src, distanceTransform, maxDistance, segment, epsilon_ratio = 0.02, high = 1, low = 0) => {
   const accuracy = 0.01; // 2分探査の精度、小さい値ほど厳密な探査になる
-
-  testId ++;
   let mid = (high + low) / 2;
-  console.log(testId, "mid", mid, "maxDistance", maxDistance, "epsilon_ratio", epsilon_ratio);
+  let minArea = src.cols * src.rows / 100000;
 
+  console.log("minArea", minArea);
+  console.log("high,low", high, low, "high - low", high - low, "accuracy", accuracy);
   // 閾値で輪郭を縮める
   let threshold = new cv.Mat();
   cv.threshold(distanceTransform, threshold, maxDistance * mid, 255, cv.THRESH_BINARY);
-  cv.imshow('output14', threshold);
 
   // 輪郭を取得
   let contours = new cv.MatVector();
   let hierarchy = new cv.Mat();
   cv.findContours(threshold, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);  // 最外部の輪郭のみ読み取る（cv.RETR_EXTERNAL）
   
-  // もっとも面積が大きい輪郭を探す
-  let contourAreas = [];
-  for(let i = 0; i < contours.size(); ++i) {
-    contourAreas.push(cv.contourArea(contours.get(i)));
-    console.log("maxAreaContour", cv.contourArea(contours.get(i)));
+  cv.imshow('output10', src);
+  cv.imshow('output11', threshold);
+
+  // 輪郭が消えてしまった場合
+  if(contours.size() == 0){
+    console.log("contours.size() = 0");
+    console.log("輪郭線を大きく（閾値を小さく、 high = mid）し、再起");
+    // 輪郭線を大きく（閾値を小さく、 high = mid）し、再起する
+    greatestSegment(src, distanceTransform, maxDistance, segment, epsilon_ratio, mid, low);
+    return;
   }
-  let maxArea = Math.max.apply(null, contourAreas);
-  console.log("contourAreas", contourAreas, "max", maxArea);
-  let maxAreaContour = contours.get(contourAreas.indexOf(maxArea));
+
+  // もっとも面積が大きい輪郭を探す
+  let maxAreaObject = {}; // 最大の面積とその輪郭を収納するためのオブジェクト
+  getMaxArea(contours, maxAreaObject);
+  let maxArea = maxAreaObject.area;
+  let maxAreaContour = maxAreaObject.contour;
 
   // 単純な形にする
   let approx = new cv.Mat();
   const epsilon = epsilon_ratio * cv.arcLength(maxAreaContour, true);
   cv.approxPolyDP(maxAreaContour, approx, epsilon, true);
 
-  // 途中経過表示
-  let img = new cv.Mat.zeros(distanceTransform.rows, distanceTransform.cols, cv.CV_8UC3);
-  let approxContours = new cv.MatVector();
-  approxContours.push_back(approx);
-  cv.drawContours(img, contours, -1, new cv.Scalar(55, 55, 55), -1, cv.LINE_8);
-  cv.drawContours(img, approxContours, -1, new cv.Scalar(255, 255, 255), 1, cv.LINE_8);
-
-  if(testId == 1){
-    cv.imshow('output15', img);
-  }else if(testId == 2){
-    cv.imshow('output16', img);
-  }else if(testId == 3){
-    cv.imshow('output17', img);
-  }else if(testId == 4){
-    cv.imshow('output18', img);
-  }
-  // 途中経過表示
-
-  console.log("max approx contour rows", approx.rows);
-
   // 単純化した輪郭の頂点数が2の場合
   if(approx.rows <= 2){
     console.log("is Line");
-
     // 頂点数が2で、さらに単純化の余地がある場合
     if(epsilon_ratio > 0.001){
       // 単純化をどれだけ許容するかの係数（epsilon_ratio）を小さくし（単純化の度合いを弱めて）再起する
-      greatestConvex(distanceTransform, maxDistance, segment, testId, epsilon_ratio / 2, high, low);
+      console.log("単純化をどれだけ許容するかの係数（epsilon_ratio）を小さくし（単純化の度合いを弱めて）再起");
+      greatestSegment(src, distanceTransform, maxDistance, segment, epsilon_ratio / 2, high, low);
     }
     // 頂点数が2だが、さらに単純化の余地がない場合、探査を終了する
     else{
       console.log("epsilon_ratio < 0.001");
-      segment.contour = approx;
-      segment.distance = Math.round(maxDistance * mid);
+      dilateContour(src, approx, maxDistance * mid, segment);
     }
   }
-  // 輪郭の最大面積が1以下の場合、探査を終了する（十分に面積を小さくしているのに cv.isContourConvex = false を返す場合があるため）
-  else if(maxArea <= 10){
-    console.log("maxArea <= 1");
-    segment.contour = approx;
-    segment.distance = Math.round(maxDistance * mid);
-  }
-  // 十分に2分探査されている場合、探査を終了し、輪郭線を返す
-  else if(high - low < accuracy){
-    console.log("high - low < 0.1");
-    segment.contour = approx;
-    segment.distance = Math.round(maxDistance * mid);
+  // 輪郭の最大面積が十分に小さい場合、探査を終了する（面積を限界まで小さくしているのに cv.isContourConvex = false を返す場合があるため）
+  else if(maxArea <= minArea){
+    console.log("maxArea <= minArea");
+    dilateContour(src, approx, maxDistance * mid, segment);
   }
   // 凸包かどうか判定する
   // 凸包の場合
   else if(cv.isContourConvex(approx)){
     console.log("is convex");
-
-    // 輪郭線を大きく（閾値を小さく、 high = mid）し、再起する
-    greatestConvex(distanceTransform, maxDistance, segment, testId, epsilon_ratio, mid, low);
+      // 十分に2分探査されている場合、探査を終了し、輪郭線を返す
+      if(high - low < accuracy){
+        console.log("high - low < 0.01");
+        dilateContour(src, approx, maxDistance * mid, segment);
+      }
+      // 探査が十分でない場合
+      else{
+        console.log("輪郭線を大きく（閾値を小さく、 high = mid）し、再起");
+        // 輪郭線を大きく（閾値を小さく、 high = mid）し、再起する
+        greatestSegment(src, distanceTransform, maxDistance, segment, epsilon_ratio, mid, low);
+      }
   }
   // 凸包でない場合
   else{
     console.log("is not convex");
-    // 輪郭線を小さく（閾値を大きく, low = mid）し、再起する
-    greatestConvex(distanceTransform, maxDistance, segment, testId, epsilon_ratio, high, mid);
+    // 十分に2分探査されている場合、探査を終了し、輪郭線を返す
+    if(high - low < accuracy){
+      console.log("high - low < 0.01");
+      dilateContour(src, approx, maxDistance * mid, segment);
+    }
+    // 探査が十分でない場合
+    else{
+      console.log("輪郭線を小さく（閾値を大きく, low = mid）し、再起");
+      // 輪郭線を小さく（閾値を大きく, low = mid）し、再起する
+      greatestSegment(src, distanceTransform, maxDistance, segment, epsilon_ratio, high, mid);
+    }
   }
 
-  img.delete;
-  approxContours.delete;
   contours.delete;
   hierarchy.delete;
+  maxAreaContour.delete;
   threshold.delete;
+}
+
+// 形のまとまりのcontourと、最初の輪郭線との距離の差(distance)をもとに、拡張したcontourとその形のmaskをsegmentオブジェクトに登録して返す
+const dilateContour = (src, contour, distance, segment) => {
+  // 全体=0, 輪郭=255 のマスクを作成する
+  let mask = new cv.Mat(src.rows, src.cols, cv.CV_8U, new cv.Scalar(0));
+  let contours = new cv.MatVector();
+  contours.push_back(contour);
+  cv.drawContours(mask, contours, -1, new cv.Scalar(255), -1, cv.LINE_8);
+
+  // 白い部分を膨張させる
+  let margin = ((src.rows >= src.cols)? src.rows : src.cols) / 100;  // 膨張させる際の余白
+  cv.dilate(mask, mask, cv.Mat.ones(3, 3, cv.CV_8U), new cv.Point(-1, -1), Math.round(distance) + margin);
+
+  // 輪郭を再取得する
+  let hierarchy = new cv.Mat();
+  cv.findContours(mask, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);  // 最外部の輪郭のみ読み取る（cv.RETR_EXTERNAL）
+
+  // マスクの白黒を反転させる
+  cv.bitwise_not(mask, mask);
+
+  // segmentに登録する
+  segment.contour = contours.get(0);
+  segment.mask = mask;
+
+  // mask.delete;
+  contours.delete;
+  hierarchy.delete;
+}
+
+const getMaxArea = (contours, maxAreaObject) => {
+  let contourAreas = [];
+  for(let i = 0; i < contours.size(); ++i) {
+    contourAreas.push(cv.contourArea(contours.get(i)));
+  }
+  maxAreaObject.area = Math.max.apply(null, contourAreas);
+  maxAreaObject.contour = contours.get(contourAreas.indexOf(maxAreaObject.area));
+
+  console.log("areas", contourAreas);
 }
 
 window.addEventListener('load', inputMesh);
