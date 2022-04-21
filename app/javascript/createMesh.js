@@ -166,6 +166,7 @@ const createMesh = (img) => {
   const hipPosition = bodyRect.y + bodyRect.height - bodyRect.height / 2;
   let lowerDefects = defects.filter(defect => defect.center.point.y >= footPosition && defect.far.point.y >= hipPosition);
 
+  // もっとも depth が大きい defect を足にする
   lowerDefects.sort((a, b) => b.depth - a.depth);
   let footDefect = lowerDefects[0];
 
@@ -178,7 +179,7 @@ const createMesh = (img) => {
   // 足がない場合
 
   // 腕を判定する
-  // bodyの左右にあるdepthが最大のもの
+  // bodyの左右にある defect を探す
   const leftArmX = bodyRect.x + bodyRect.width / 2;
   const rightArmX = bodyRect.x + bodyRect.width - bodyRect.width / 2;
   const armHeightMax = bodyRect.y + bodyRect.height;
@@ -186,53 +187,37 @@ const createMesh = (img) => {
   let leftDefects = defects.filter(defect => defect.far.point.x <= leftArmX && defect.far.point.y >= armHeightMin && defect.far.point.y <= armHeightMax);
   let rightDefects = defects.filter(defect => defect.far.point.x >= rightArmX && defect.far.point.y >= armHeightMin && defect.far.point.y <= armHeightMax);
 
-  leftDefects.sort((a, b) => b.depth - a.depth);
-  rightDefects.sort((a, b) => b.depth - a.depth);
-  leftDefects.forEach((defect) => {
-    cv.circle(dst, defect.far.point, 3, new cv.Scalar(0, 255, 0), -1);
-  });
-  let leftArmDefect = leftDefects[0];
-  let rightArmDefect = rightDefects[0];
-  console.log("leftArmDefects", leftDefects.length);
-  let leftArmEdges = [];
-  leftArmEdges[0] = {};
-  leftArmEdges[1] = {};
-  if(leftDefects[0].far.point.y <= leftDefects[1].far.point.y){
-    leftArmEdges[0].separatePoint = leftDefects[0].far.point;
-    leftArmEdges[1].separatePoint = leftDefects[1].far.point;
-    leftArmEdges[0].oneBeforeId = leftDefects[0].far.id;
-    leftArmEdges[1].oneBeforeId = leftDefects[1].far.id;
-  }else{
-    leftArmEdges[0].separatePoint = leftDefects[1].far.point;
-    leftArmEdges[1].separatePoint = leftDefects[0].far.point;
-    leftArmEdges[0].oneBeforeId = leftDefects[1].far.id;
-    leftArmEdges[1].oneBeforeId = leftDefects[0].far.id;
-  }
-
+  // 腕の輪郭線を切り取る
   let leftArmContour = new cv.Mat();
-  separateContour(maxAreaContour, leftArmEdges, leftArmContour);
+  let rightArmContour = new cv.Mat();
+  separateArmContour(maxAreaContour, leftDefects, leftArmContour, boundingRect);
+  separateArmContour(maxAreaContour, rightDefects, rightArmContour, boundingRect, false);
 
-  let leftArm = {};
-  let rightArm = {};
-  let leftArmTip = leftArmDefect.start.point.x <= leftArmDefect.end.point.x ? leftArmDefect.start : leftArmDefect.end;
-  let rightArmTip = rightArmDefect.start.point.x >= rightArmDefect.end.point.x ? rightArmDefect.start : rightArmDefect.end;
-  cv.circle(dst, rightArmTip.point, 10, new cv.Scalar(0, 200, 150), -1);
-  findSeparatePoints(maxAreaContour, leftArmTip, 1, 0, -leftArmDefect.far.point.x, dst, leftArm);
-  findSeparatePoints(maxAreaContour, rightArmTip, 1, 0, -rightArmDefect.far.point.x, dst, rightArm);
+
+  // let leftArm = {};
+  // let rightArm = {};
+  // let leftArmTip = leftArmDefect.start.point.x <= leftArmDefect.end.point.x ? leftArmDefect.start : leftArmDefect.end;
+  // let rightArmTip = rightArmDefect.start.point.x >= rightArmDefect.end.point.x ? rightArmDefect.start : rightArmDefect.end;
+  // cv.circle(dst, rightArmTip.point, 10, new cv.Scalar(0, 200, 150), -1);
+  // findSeparatePoints(maxAreaContour, leftArmTip, 1, 0, -leftArmDefect.far.point.x, dst, leftArm);
+  // findSeparatePoints(maxAreaContour, rightArmTip, 1, 0, -rightArmDefect.far.point.x, dst, rightArm);
 
   let separatedContours = new cv.MatVector();
-  separatedContours.push_back(leftFoot.contour);
-  separatedContours.push_back(rightFoot.contour);
-  // separatedContours.push_back(leftArm.contour);
+  // separatedContours.push_back(leftFoot.contour);
+  // separatedContours.push_back(rightFoot.contour);
   separatedContours.push_back(leftArmContour);
-  separatedContours.push_back(rightArm.contour);
-  cv.drawContours(dst, separatedContours, -1, new cv.Scalar(200, 255, 255), 1, cv.LINE_8);
+  cv.drawContours(dst, separatedContours, -1, new cv.Scalar(100, 155, 155), 1, cv.LINE_8);
   cv.imshow('output14', dst);
+
+  separatedContours.push_back(rightArmContour);
+  cv.drawContours(dst, separatedContours, -1, new cv.Scalar(200, 255, 255), 1, cv.LINE_8);
+  cv.imshow('output15', dst);
 
 
   hull.delete;
   defectMat.delete;
-
+  leftArmContour.delete;
+  rightArmContour.delete;
   segmentSrc.delete;
   src.delete;
 }
@@ -669,6 +654,53 @@ const mergeXY = (xArray, yArray, dstContour) => {
   y.delete;
   xy.delete;
   separatePoint.delete;
+}
+
+// 腕の defect 候補の中からもっとも depth の大きい2点で輪郭線を切り取る
+const separateArmContour = (contour, defects, dstContour, boundingRect, left = true) => {
+
+  let start = 0;
+  let end = 1;
+
+  if(left){
+    // star, endのどちらかが小さい方を小さい順にソートする（左側にある順に）
+    defects.sort((a, b) => Math.min(a.start.point.x, a.end.point.x) - Math.min(b.start.point.x, b.end.point.x));
+    // 一定以上左端にあるもののみ選ぶ
+    let leftArmPosition =  Math.min(defects[0].start.point.x, defects[0].end.point.x) + boundingRect.width / 10;
+    defects = defects.filter(defects => Math.min(defects.start.point.x, defects.end.point.x) <= leftArmPosition);
+  } else {
+    // star, endのどちらかが大きい方を大きい順にソートする（右側にある順に）
+    defects.sort((a, b) => Math.max(b.start.point.x, b.end.point.x) - Math.max(a.start.point.x, a.end.point.x));
+    // 一定以上右端にあるもののみ選ぶ
+    let rightArmPosition =  Math.max(defects[0].start.point.x, defects[0].end.point.x) - boundingRect.width / 10;
+    defects = defects.filter(defects => Math.max(defects.start.point.x, defects.end.point.x) >= rightArmPosition);
+    // 右側（右腕）を切り取る場合、切り取る始点と終点を逆にする
+    start = 1;
+    end = 0;
+  }
+  
+  // depthが大きい順にソートする
+  defects.sort((a, b) => b.depth- a.depth);
+
+  // depth が1番目と2番目の far を腕の付け根とする
+  let edges = [];
+  edges[0] = {};
+  edges[1] = {};
+
+  // 左腕を判定しているので、far の地点が上にある方を edges の1番目（切り取りの始点）、下にある方を2番目（切り取りの終点）とする
+  if(defects[0].far.point.y <= defects[1].far.point.y){
+    edges[start].separatePoint = defects[0].far.point;
+    edges[end].separatePoint = defects[1].far.point;
+    edges[start].oneBeforeId = defects[0].far.id;
+    edges[end].oneBeforeId = defects[1].far.id;
+  }else{
+    edges[end].separatePoint = defects[0].far.point;
+    edges[start].separatePoint = defects[1].far.point;
+    edges[end].oneBeforeId = defects[0].far.id;
+    edges[start].oneBeforeId = defects[1].far.id;
+  }
+
+  separateContour(contour, edges, dstContour);
 }
 
 window.addEventListener('load', inputMesh);
