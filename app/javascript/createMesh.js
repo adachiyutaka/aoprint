@@ -1,10 +1,14 @@
 const e = require("turbolinks");
 
 const inputMesh = () => { 
-    // storage = cv.CreateMemStorage(0);
-    // rect=(0, 0, 100, 100);
-    // subdiv = cv.CreateSubdivDelaunay2D( rect, storage );
-    // console.log(subdiv);
+  const months = ['Jan', 'March', 'April', 'June'];
+  months.splice(1, 0, 'Feb');
+  // inserts at index 1
+  console.log("months", months);
+  let test = null;
+  months.splice(1, 0, null);
+  console.log("null", months);
+
 
   const input = document.createElement('input');
   input.type = 'file';
@@ -66,38 +70,38 @@ const createMesh = (img) => {
 
   let maxArea = {}; // 最大の面積とその輪郭を収納するためのオブジェクト
   getMaxArea(outlineContours, maxArea);
-  let maxAreaContour = maxArea.contour;
+  let outlineContour = maxArea.contour;
+  let outlineArray = [];
+  for(i = 0; i < outlineContour.rows; i++ ){
+    outlineArray.push(new cv.Point(outlineContour.data32S[i * 2], outlineContour.data32S[i * 2 + 1]));
+  }
   let hull = new cv.Mat();
   let defectMat = new cv.Mat();
-  cv.convexHull(maxAreaContour, hull, false, false);
-  cv.convexityDefects(maxAreaContour, hull, defectMat);
+  cv.convexHull(outlineContour, hull, false, false);
+  cv.convexityDefects(outlineContour, hull, defectMat);
   defects = [];
   console.log("defectMat.rows", defectMat.rows);
   // 凸性欠陥の結果をxy座標に置き換え
   if(defectMat){
     for (let i = 0; i < defectMat.rows; ++i) {
-      let defect = {};
-      let start = {};
-      let end = {};
-      let center = {};
-      let far = {};
-      start.point = new cv.Point(maxAreaContour.data32S[defectMat.data32S[i * 4] * 2],
-                               maxAreaContour.data32S[defectMat.data32S[i * 4] * 2 + 1]);
-      start.id = defectMat.data32S[i * 4];
-      end.point = new cv.Point(maxAreaContour.data32S[defectMat.data32S[i * 4 + 1] * 2],
-                             maxAreaContour.data32S[defectMat.data32S[i * 4 + 1] * 2 + 1]);
-      end.id = defectMat.data32S[i * 4 + 1];
-      center.point = new cv.Point(start.point.x + end.point.x / 2,
-                                  start.point.y + end.point.y / 2);
-      far.point = new cv.Point(maxAreaContour.data32S[defectMat.data32S[i * 4 + 2] * 2],
-                             maxAreaContour.data32S[defectMat.data32S[i * 4 + 2] * 2 + 1]);
-      far.id = defectMat.data32S[i * 4 + 2];
+      let start = {point: new cv.Point(outlineContour.data32S[defectMat.data32S[i * 4] * 2],
+                                       outlineContour.data32S[defectMat.data32S[i * 4] * 2 + 1]),
+                   id: defectMat.data32S[i * 4]};
+      let end = {point: new cv.Point(outlineContour.data32S[defectMat.data32S[i * 4 + 1] * 2],
+                                     outlineContour.data32S[defectMat.data32S[i * 4 + 1] * 2 + 1]),
+                 id: defectMat.data32S[i * 4 + 1]};
+      let center = {point: new cv.Point(start.point.x + end.point.x / 2,
+                                        start.point.y + end.point.y / 2)};
+      let far = {point: new cv.Point(outlineContour.data32S[defectMat.data32S[i * 4 + 2] * 2],
+                                     outlineContour.data32S[defectMat.data32S[i * 4 + 2] * 2 + 1]),
+                id: defectMat.data32S[i * 4 + 2]};
 
-      defect.depth = defectMat.data32S[i * 4 + 3];
-      defect.start = start;
-      defect.end = end;
-      defect.center = center;
-      defect.far = far;
+      defect = {depth: defectMat.data32S[i * 4 + 3],
+                start: start,
+                end: end,
+                center: center,
+                far: far};
+      
       defects.push(defect);
 
       // テスト表示
@@ -108,7 +112,7 @@ const createMesh = (img) => {
   }
 
   // 図形全体の大きさを知るため、外接矩形を取得
-  let boundingRect = cv.boundingRect(maxAreaContour);
+  let boundingRect = cv.boundingRect(outlineContour);
 
   // 長いdepthの値をたくさん持っているセグメントを胴体とする
   // centerの位置が低く、farが胴体より下側のものを足
@@ -129,9 +133,9 @@ const createMesh = (img) => {
   });
   // もっともdefectDepthの値が大きいsegmentを胴体とする
   segments.sort((a, b) => b.defectDepthSum - a.defectDepthSum);
-  let body = segments[0];
-  let bodyRect = cv.boundingRect(body.contour);
-  console.log("body depth", body.defectDepthSum)
+  let bodySegment = segments[0];
+  let bodyRect = cv.boundingRect(bodySegment.contour);
+  console.log("body depth", bodySegment.defectDepthSum)
   let bodyPoint1 = new cv.Point(bodyRect.x, bodyRect.y);
   let bodyPoint2 = new cv.Point(bodyRect.x + bodyRect.width, bodyRect.y + bodyRect.height);
   cv.rectangle(dst, bodyPoint1, bodyPoint2, new cv.Scalar(230, 230, 200), 2, cv.LINE_AA, 0);
@@ -166,15 +170,17 @@ const createMesh = (img) => {
   const hipPosition = bodyRect.y + bodyRect.height - bodyRect.height / 2;
   let lowerDefects = defects.filter(defect => defect.center.point.y >= footPosition && defect.far.point.y >= hipPosition);
 
-  // もっとも depth が大きい defect を足にする
+  // もっとも depth が大きい defect を股下とする
   lowerDefects.sort((a, b) => b.depth - a.depth);
   let footDefect = lowerDefects[0];
 
-  // 輪郭線を伝って右足、左足の輪郭線を指定する
+  // 股下の点（footDefect.far）を通る水平線で左右の足を切り取る
+  let body = {};
   let leftFoot = {};
   let rightFoot = {};
-  findSeparatePoints(maxAreaContour, footDefect.start, 0, 1, -footDefect.far.point.y, dst, leftFoot);
-  findSeparatePoints(maxAreaContour, footDefect.end, 0, 1, -footDefect.far.point.y, dst, rightFoot);
+  let separatePoints = [];
+  separateByLine(outlineArray, footDefect.start, 0, 1, -footDefect.far.point.y, dst, leftFoot, body, separatePoints);
+  separateByLine(outlineArray, footDefect.end, 0, 1, -footDefect.far.point.y, dst, rightFoot, body, separatePoints);
 
   // 足がない場合
 
@@ -188,36 +194,66 @@ const createMesh = (img) => {
   let rightDefects = defects.filter(defect => defect.far.point.x >= rightArmX && defect.far.point.y >= armHeightMin && defect.far.point.y <= armHeightMax);
 
   // 腕の輪郭線を切り取る
+  let leftArm = {};
+  let rightArm = {};
   let leftArmContour = new cv.Mat();
   let rightArmContour = new cv.Mat();
-  separateArmContour(maxAreaContour, leftDefects, leftArmContour, boundingRect);
-  separateArmContour(maxAreaContour, rightDefects, rightArmContour, boundingRect, false);
+  separateArm(outlineContour, leftDefects, leftArm, boundingRect);
+  separateArm(outlineContour, rightDefects, rightArm, boundingRect, false);
 
+  console.log("dstContour.rows", leftArm.contour.rows);
+  for (let i = 0; i < leftArm.contour.rows; ++i) {
+    console.log("dstContour", leftArm.contour.data32S[i*2], leftArm.contour.data32S[i*2 + 1]);
+  }
 
-  // let leftArm = {};
-  // let rightArm = {};
-  // let leftArmTip = leftArmDefect.start.point.x <= leftArmDefect.end.point.x ? leftArmDefect.start : leftArmDefect.end;
-  // let rightArmTip = rightArmDefect.start.point.x >= rightArmDefect.end.point.x ? rightArmDefect.start : rightArmDefect.end;
-  // cv.circle(dst, rightArmTip.point, 10, new cv.Scalar(0, 200, 150), -1);
-  // findSeparatePoints(maxAreaContour, leftArmTip, 1, 0, -leftArmDefect.far.point.x, dst, leftArm);
-  // findSeparatePoints(maxAreaContour, rightArmTip, 1, 0, -rightArmDefect.far.point.x, dst, rightArm);
+  // 頭の輪郭線を切り取る
+  let head = {};
+  let headContour = new cv.Mat();
+  head.edge = [];
+  head.edge[0] = {};
+  head.edge[1] = {};
+
+  // 頭の視点は右手の終点、頭の終点は左手の始点にする
+  // 始点、終点を中心に、逆側にひとつずらした点をひとつ前の点とするため、idを二つずらす
+  head.edge[0].separatePoint = rightArm.edge[1].separatePoint;
+  head.edge[0].oneBeforeId = rightArm.edge[1].oneBeforeId + 2;
+  head.edge[1].separatePoint = leftArm.edge[0].separatePoint;
+  head.edge[1].oneBeforeId = leftArm.edge[0].oneBeforeId - 2;
+  separateByEdge(outlineContour, head.edge, headContour);
+  head.contour = headContour;
+
+  // 体の輪郭線を切り取る
+  
+  // contourを x, y それぞれ1チャンネルの Mat に分離する
+  let splitContour = new cv.MatVector();
+  cv.split(outlineContour, splitContour);
+  let bodyContourId = [];
+  for (i = 0; i < outlineContour.rows; i++ ){
+    bodyContourId.push(i);
+  }
+  outlineContour.data32S[bodyContourId.indexOf(leftFoot.edge[0].oneBeforeId) * 2];
+  outlineContour.data32S[bodyContourId.indexOf(leftFoot.edge[0].oneBeforeId) * 2 + 1];
+ 
+  leftFoot.edge[1].oneBeforeId
+
+  splitContour.delete;
 
   let separatedContours = new cv.MatVector();
-  // separatedContours.push_back(leftFoot.contour);
-  // separatedContours.push_back(rightFoot.contour);
-  separatedContours.push_back(leftArmContour);
-  cv.drawContours(dst, separatedContours, -1, new cv.Scalar(100, 155, 155), 1, cv.LINE_8);
-  cv.imshow('output14', dst);
+  separatedContours.push_back(leftFoot.contour);
+  separatedContours.push_back(rightFoot.contour);
+  separatedContours.push_back(leftArm.contour);
+  separatedContours.push_back(rightArm.contour);
+  separatedContours.push_back(head.contour);
 
-  separatedContours.push_back(rightArmContour);
   cv.drawContours(dst, separatedContours, -1, new cv.Scalar(200, 255, 255), 1, cv.LINE_8);
   cv.imshow('output15', dst);
 
-
+  outlineContour.delete;
   hull.delete;
   defectMat.delete;
   leftArmContour.delete;
   rightArmContour.delete;
+  headContour.delete;
   segmentSrc.delete;
   src.delete;
 }
@@ -474,26 +510,34 @@ const getMaxArea = (contours, maxAreaObject) => {
   console.log("areas", contourAreas);
 }
 
-  // 直線方程式で輪郭線を分割する
-const findSeparatePoints = (contour, tip, a, b, c, img, dstObject) => {
+// 直線方程式で輪郭線を分割する
+const separateByLine = (contourArray, tip, a, b, c, img, tipPortionArray, anotherPortionArray, separatePoints) => {
   // tip は分割の際に探査の基準とする点（手足の先端など）
   // a, b, c は ax + by + c = 0 の直線方程式の係数
-  console.log("contour.rows", contour.rows);
-  console.log("contour.cols", contour.cols);
 
   // 分割する点を算出する
   let edges = [];
+
+  // 輪郭線のidとcontourArrayのidがずれる場合があるため、contourArrayでのidに変換する
+  let tipId = contourArray.indexOf(tip.point);
 
   // 末端の点からContourの順に時計回り、反時計回りに2回探査する
   for (let j = -1; j < 2; j += 2) {
     let tipSign;
     let separatePoint;
     let oneBeforeId;
-    for (let i = 0; i < contour.rows; ++i) {
+    let insertNewPoint;
+    let edge;
+
+    for (let i = 0; i < contourArray.length; ++i) {
       let sign;
-      let id = (contour.rows + tip.id + j * i) % (contour.rows); // jで時計回り、反時計回りを指定する
-      let x = contour.data32S[id * 2];
-      let y = contour.data32S[id * 2 + 1];
+      // let id = (contour.rows + tip.id + j * i) % (contour.rows); // jで時計回り、反時計回りを指定する
+      // let x = contour.data32S[id * 2];
+      // let y = contour.data32S[id * 2 + 1];
+      let id = (contourArray.length + tipId + j * i) % (contourArray.length); // jで時計回り、反時計回りを指定する
+      let point = contourArray[id];
+      let x = contourArray[id].x;
+      let y = contourArray[id].y;
 
       // 分割のための直線方程式と各点の差を算出し、符号をチェックする
       if(b == 0){
@@ -512,7 +556,8 @@ const findSeparatePoints = (contour, tip, a, b, c, img, dstObject) => {
         console.log("tipSign", tipSign);
       }else if(sign == 0){
         // 符号が0になった場合（たまたま、輪郭の点が分割のための直線の上にある）
-        separatePoint = new cv.Point(x, y);
+        insertNewPoint = false;
+        separatePoint = point;
         cv.circle(img, separatePoint, 5, new cv.Scalar(255, 0, 255), -1);  
         console.log("sign == 0", tipSign);
         console.log("separatePoint", separatePoint.x, separatePoint.y)
@@ -522,8 +567,10 @@ const findSeparatePoints = (contour, tip, a, b, c, img, dstObject) => {
         // その前後の2点の間に、新しい分割用の点（2点を結ぶ直線と、分割のための直線の交点）を作成する
         console.log("id", id);
         console.log("tipSign != sign x, y:", x, y);
+        insertNewPoint = true;
         // 初めてまたいだ点の一つ前の点を算出する
-        let oneBeforePoint = new cv.Point(contour.data32S[oneBeforeId * 2], contour.data32S[oneBeforeId * 2 + 1]); // 一つ前の点
+        let oneBeforePoint = contourArray[oneBeforeId]; // 一つ前の点
+        // let oneBeforePoint = new cv.Point(contour.data32S[oneBeforeId * 2], contour.data32S[oneBeforeId * 2 + 1]); // 一つ前の点
         if(x == oneBeforePoint.x){
           // 2点を結ぶ直線が垂直になる場合
           console.log("2点を結ぶ直線が垂直になる場合");
@@ -568,76 +615,154 @@ const findSeparatePoints = (contour, tip, a, b, c, img, dstObject) => {
       cv.circle(img, new cv.Point(x ,y), 2, new cv.Scalar(200, 0, 155), -1);
       console.log("x, y:", x, y);
     }
-    let edge = {};
-    edge.separatePoint = separatePoint;
-    edge.oneBeforeId = oneBeforeId;
+    edge = {separatePoint: separatePoint, oneBeforeId: oneBeforeId, insertNewPoint: insertNewPoint};
     edges.push(edge);
   }
   cv.imshow('output13', img);
 
-  let separatedContour = new cv.Mat();
-  separateContour(contour, edges, separatedContour);
-  
-  // tipPoint rootPoint separatePointと切り取ったContourをまとめたオブジェクトを作成する
-
-  dstObject.edge = edges;
-  dstObject.contour = separatedContour;
-
-  separatedContour.delete;
+  separateByEdge(contourArray, edges, tipPortionArray, anotherPortionArray);
+  separatePoints = [edges[0].separatePoint, edges[1].separatePoint];
 }
 
-// 輪郭線を与えられた2点（edges）をもとに切り取る
-const separateContour = (contour, edges, dstContour) => {
+// 与えられた2つの端（edges）をもとに輪郭線を切り取る
+const separateByEdge = (contourArray, edges, tipPortionArray, anotherPortionArray) => {
   // edges = [
   //           {
   //             separatePoint : cv.Point,
   //             oneBeforeId : int
+  //             insertNewPoint : bool
   //           },
   //           {
   //             separatePoint : cv.Point,
   //             oneBeforeId : int
+  //             insertNewPoint : bool
   //           }
   //          ]
 
-  console.log("contour.channels()", contour.channels());
-  let separateContour = new cv.Mat();
-  if(edges[0].oneBeforeId > edges[1].oneBeforeId){
-    mergeContours(contour.rowRange(edges[0].oneBeforeId, contour.rows), contour.rowRange(0, edges[1].oneBeforeId + 1), separateContour);
-  }else{
-    separateContour = contour.rowRange(edges[0].oneBeforeId, edges[1].oneBeforeId + 1);
+  let start = edges[0];
+  let end = edges[1];
+  let startId = (startId - 1) % contourArray.length;
+  let endId = (endId + 1) % contourArray.length;
+
+  if(start.insertNewPoint){
+    contourArray.splice(startId, 0, start.separatePoint);
+    endId ++;
   }
-  let separatePoint1 = new cv.Mat();
-  let separatePoint2 = new cv.Mat();
-  mergeXY([edges[0].separatePoint.x], [edges[0].separatePoint.y], separatePoint1);
-  mergeXY([edges[1].separatePoint.x], [edges[1].separatePoint.y], separatePoint2);
-  mergeContours(separatePoint1 ,separateContour, dstContour);
-  mergeContours(dstContour, separatePoint2, dstContour);
+
+  if(end.insertNewPoint){
+    contourArray.splice(endId, 0, end.separatePoint);
+  }
+
+  // 始点と終点が id:0 をまたいでいるか判定
+  if(startId > endId){
+    // 始点から終点までが id:0 をまたいでいる場合
+    // 末端側の配列は、始点からidの最後、id:0 から終点、の二つの輪郭線を合成して作成
+    tipPortionArray = contourArray.slice(startId).concat(contourArray.slice(0, endId + 1));
+    // 逆側の配列は、終点から視点で切り取る
+    anotherPortionArray = contourArray.slice(endId, startId + 1);
+    // mergeContours(contour.rowRange(startId, contour.rows), contour.rowRange(0, endId + 1), separateContour);
+  }else{
+    // 始点から終点までが id:0 をまたいでいない場合
+    // 末端側の配列は、始点から終点の輪郭線を切り取る
+    tipPortionArray = contourArray.slice(startId, endId + 1);
+    // 逆側の配列は、始点からidの最後、id:0 から終点、の二つの輪郭線を合成して作成
+    anotherPortionArray = contourArray.slice(endId).concat(contourArray.slice(0, startId + 1));
+    // separateContour = contour.rowRange(startId, endId + 1);
+  }
+
+  // tipPortion = {edge: edges, array: tipArray};
+  // anotherPortion = {edge: edges, array: anotherArray};
+  // // oneBeforeIdの2点で輪郭線を切り取る
+  // let separateContour = new cv.Mat();
+  // separateByPoint(contour, edges[0].oneBeforeId, edges[1].oneBeforeId, separateContour);
+
+  // // separatePointをContourの形のMat型にする
+  // let separatePoint1 = new cv.Mat();
+  // let separatePoint2 = new cv.Mat();
+  // mergeXY([edges[0].separatePoint.x], [edges[0].separatePoint.y], separatePoint1);
+  // mergeXY([edges[1].separatePoint.x], [edges[1].separatePoint.y], separatePoint2);
+
+  // // 切り取った輪郭線の前後にseparatePoint1と2を連結する
+  // mergeContours(separatePoint1 ,separateContour, dstContour);
+  // mergeContours(dstContour, separatePoint2, dstContour);
+
+  // separateContour.delete;
+  // separatePoint1.delete;
+  // separatePoint2.delete;
+  // contour.delete;
+}
+
+// // 与えられた2つの端（edges）をもとに輪郭線を切り取る
+// const separateByEdge = (contour, edges, dstContour) => {
+//   // edges = [
+//   //           {
+//   //             separatePoint : cv.Point,
+//   //             oneBeforeId : int
+//   //           },
+//   //           {
+//   //             separatePoint : cv.Point,
+//   //             oneBeforeId : int
+//   //           }
+//   //          ]
+
+//   // oneBeforeIdの2点で輪郭線を切り取る
+//   let separateContour = new cv.Mat();
+//   separateByPoint(contour, edges[0].oneBeforeId, edges[1].oneBeforeId, separateContour);
+
+//   // separatePointをContourの形のMat型にする
+//   let separatePoint1 = new cv.Mat();
+//   let separatePoint2 = new cv.Mat();
+//   mergeXY([edges[0].separatePoint.x], [edges[0].separatePoint.y], separatePoint1);
+//   mergeXY([edges[1].separatePoint.x], [edges[1].separatePoint.y], separatePoint2);
+
+//   // 切り取った輪郭線の前後にseparatePoint1と2を連結する
+//   mergeContours(separatePoint1 ,separateContour, dstContour);
+//   mergeContours(dstContour, separatePoint2, dstContour);
+
+//   separateContour.delete;
+//   separatePoint1.delete;
+//   separatePoint2.delete;
+//   contour.delete;
+// }
+
+// 与えられた2つの点をもとに輪郭線を切り取る
+const separateByPoint = (contour, startId, endId, dstContour) => {
+
+  let separateContour = new cv.Mat();
+
+  // 始点と終点が id:0 をまたいでいるか判定
+  if(startId > endId){
+    // 始点からidの最後、id:0 から終点、の二つの輪郭線を合成する
+    mergeContours(contour.rowRange(startId, contour.rows), contour.rowRange(0, endId + 1), separateContour);
+  }else{
+    // 始点から終点の輪郭線を切り取る
+    separateContour = contour.rowRange(startId, endId + 1);
+  }
+
+  // clone()だとうまくコピーできない
+  separateContour.copyTo(dstContour);
 
   separateContour.delete;
-  separatePoint1.delete;
-  separatePoint2.delete;
   contour.delete;
 }
 
 // contour1の後にcontour2をつなげる
 const mergeContours = (contour1, contour2, dstContour) => {
   // contourを x, y それぞれ1チャンネルの Mat に分離する
-  let separatedContour1 = new cv.MatVector();
-  cv.split(contour1, separatedContour1);
-  let separatedContour2 = new cv.MatVector();
-  cv.split(contour2, separatedContour2);
+  let splitContour1 = new cv.MatVector();
+  cv.split(contour1, splitContour1);
+  let splitContour2 = new cv.MatVector();
+  cv.split(contour2, splitContour2);
   // Mat から Array に変換し、contour1, 2 をつなげる（x, y それぞれ別に処理を行う）
-  let separatedContour12 = new cv.MatVector();
-  let x = Array.from(separatedContour1.get(0).data32S).concat(Array.from(separatedContour2.get(0).data32S));
-  let y = Array.from(separatedContour1.get(1).data32S).concat(Array.from(separatedContour2.get(1).data32S));
+  let x = Array.from(splitContour1.get(0).data32S).concat(Array.from(splitContour2.get(0).data32S));
+  let y = Array.from(splitContour1.get(1).data32S).concat(Array.from(splitContour2.get(1).data32S));
   // Array から Mat に戻し、x, yを一つの Mat（2チャンネル）に合成する
   mergeXY(x, y, dstContour);
 
   contour1.delete;
   contour2.delete;
-  separatedContour1.delete;
-  separatedContour2.delete;
-  separatedContour12.delete;
+  splitContour1.delete;
+  splitContour2.delete;
 }
 
 // x, y座標の配列を2チャンネルを持つ一つの Mat に合成する
@@ -657,10 +782,11 @@ const mergeXY = (xArray, yArray, dstContour) => {
 }
 
 // 腕の defect 候補の中からもっとも depth の大きい2点で輪郭線を切り取る
-const separateArmContour = (contour, defects, dstContour, boundingRect, left = true) => {
+const separateArm = (contour, defects, endPiece, boundingRect, left = true) => {
 
   let start = 0;
   let end = 1;
+  let oneBefore = 1;
 
   if(left){
     // star, endのどちらかが小さい方を小さい順にソートする（左側にある順に）
@@ -674,33 +800,47 @@ const separateArmContour = (contour, defects, dstContour, boundingRect, left = t
     // 一定以上右端にあるもののみ選ぶ
     let rightArmPosition =  Math.max(defects[0].start.point.x, defects[0].end.point.x) - boundingRect.width / 10;
     defects = defects.filter(defects => Math.max(defects.start.point.x, defects.end.point.x) >= rightArmPosition);
-    // 右側（右腕）を切り取る場合、切り取る始点と終点を逆にする
+    // 右側（右腕）を切り取る場合
+    // 切り取る始点と終点
+    // ひとつ前の id の符号を逆転する
     start = 1;
     end = 0;
+    oneBefore = -1;
   }
   
   // depthが大きい順にソートする
-  defects.sort((a, b) => b.depth- a.depth);
+  defects.sort((a, b) => b.depth - a.depth);
 
   // depth が1番目と2番目の far を腕の付け根とする
   let edges = [];
   edges[0] = {};
   edges[1] = {};
 
-  // 左腕を判定しているので、far の地点が上にある方を edges の1番目（切り取りの始点）、下にある方を2番目（切り取りの終点）とする
+  // far の地点が上にある方を edges の1番目（切り取りの始点）、下にある方を2番目（切り取りの終点）とする
+  // 右手側の場合、startとend、ひとつ前の id の符号を逆転させている
   if(defects[0].far.point.y <= defects[1].far.point.y){
     edges[start].separatePoint = defects[0].far.point;
     edges[end].separatePoint = defects[1].far.point;
-    edges[start].oneBeforeId = defects[0].far.id;
-    edges[end].oneBeforeId = defects[1].far.id;
+    edges[start].oneBeforeId = defects[0].far.id + oneBefore;
+    edges[end].oneBeforeId = defects[1].far.id - oneBefore;
   }else{
     edges[end].separatePoint = defects[0].far.point;
     edges[start].separatePoint = defects[1].far.point;
-    edges[end].oneBeforeId = defects[0].far.id;
-    edges[start].oneBeforeId = defects[1].far.id;
+    edges[end].oneBeforeId = defects[0].far.id - oneBefore;
+    edges[start].oneBeforeId = defects[1].far.id + oneBefore;
   }
 
-  separateContour(contour, edges, dstContour);
+  console.log("left", left);
+  console.log("edges", edges);
+  console.log("edges[0].oneBeforeId pos", contour.data32S[edges[0].oneBeforeId * 2], contour.data32S[edges[0].oneBeforeId * 2 + 1]);
+  console.log("edges[1].oneBeforeId pos", contour.data32S[edges[1].oneBeforeId * 2], contour.data32S[edges[1].oneBeforeId * 2 + 1]);
+
+  let armContour = new cv.Mat();
+  separateByEdge(contour, edges, armContour);
+  endPiece.edge = edges;
+  endPiece.contour = armContour;
+
+  armContour.delete;
 }
 
 window.addEventListener('load', inputMesh);
