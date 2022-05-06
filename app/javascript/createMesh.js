@@ -1,5 +1,7 @@
 const e = require("turbolinks");
-v
+
+let dst;
+
 const inputMesh = () => { 
   const input = document.createElement('input');
   input.type = 'file';
@@ -33,7 +35,7 @@ const createMesh = (img) => {
 
 
   // テスト表示
-  let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+  dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
   // テスト表示
 
   
@@ -151,22 +153,27 @@ const createMesh = (img) => {
 
   // 股下の点（legDefect.far）を通る水平線で左右の足を切り取る
   let leftLeg = {};
-  separateByLine(outlineArray, legDefect.start, 0, 1, -legDefect.far.y, leftLeg, body, dst);
+  separateByLine(outlineArray, 0, 1, -legDefect.far.y, leftLeg, body, legDefect.start);
+
   let leftUpperLeg = {};
   let leftLowerLeg = {};
   const leftLegTip = findFarthest(leftLeg.array, leftLeg.separatePoints.center);
   separateByRatio(leftLeg.array, leftLeg.separatePoints, leftLegTip, 4/10, leftLowerLeg, leftUpperLeg);
+
   let leftFoot = {};
   separateByRatio(leftLowerLeg.array, leftLowerLeg.separatePoints, leftLegTip, 4/6, leftFoot, leftLowerLeg);
 
   let rightLeg = {};
-  separateByLine(body.array, legDefect.end, 0, 1, -legDefect.far.y, rightLeg, body, dst);
+  separateByLine(body.array, 0, 1, -legDefect.far.y, rightLeg, body, legDefect.end);
+
   let rightUpperLeg = {};
   let rightLowerLeg = {};
   const rightLegTip = findFarthest(rightLeg.array, rightLeg.separatePoints.center);
   separateByRatio(rightLeg.array, rightLeg.separatePoints, rightLegTip, 4/10, rightLowerLeg, rightUpperLeg);
+
   let rightFoot = {};
   separateByRatio(rightLowerLeg.array, rightLowerLeg.separatePoints, rightLegTip, 4/6, rightFoot, rightLowerLeg);
+
   // 足がない場合
 
   // 腕を判定する
@@ -201,8 +208,9 @@ const createMesh = (img) => {
   separateByPoint(body.array, headSeparatePoints, neckAndHead, body);
   let neck = {};
   let head = {};
-  const headTip = findFarthest(neckAndHead.array, neckAndHead.separatePoints.center);
-  separateByRatio(neckAndHead.array, neckAndHead.separatePoints, headTip, 1/10, neck, head, true);
+  const headTip = findFarthest(neckAndHead.array, neckAndHead.separatePoints.center);  
+
+  separateByRatio(neckAndHead.array, neckAndHead.separatePoints, headTip, 1/10, head, neck, true);
 
   // 胴体を切り取る
   let chest = {};
@@ -259,22 +267,22 @@ const createMesh = (img) => {
   // separatedContours.push_back(leftArmContour);
   // separatedContours.push_back(rightArmContour);
   // separatedContours.push_back(bodyContour);
-  separatedContours.push_back(leftUpperLegContour);
+  // separatedContours.push_back(leftUpperLegContour);
   separatedContours.push_back(leftLowerLegContour);
-  separatedContours.push_back(leftFootContour);
-  separatedContours.push_back(rightUpperLegContour);
+  // separatedContours.push_back(leftFootContour);
+  // separatedContours.push_back(rightUpperLegContour);
   separatedContours.push_back(rightLowerLegContour);
-  separatedContours.push_back(rightFootContour);
-  separatedContours.push_back(leftUpperArmContour);
+  // separatedContours.push_back(rightFootContour);
+  // separatedContours.push_back(leftUpperArmContour);
   separatedContours.push_back(leftLowerArmContour);
-  separatedContours.push_back(leftHandContour);
-  separatedContours.push_back(rightUpperArmContour);
+  // separatedContours.push_back(leftHandContour);
+  // separatedContours.push_back(rightUpperArmContour);
   separatedContours.push_back(rightLowerArmContour);
-  separatedContours.push_back(rightHandContour);
+  // separatedContours.push_back(rightHandContour);
   separatedContours.push_back(headContour);
-  separatedContours.push_back(neckContour);
+  // separatedContours.push_back(neckContour);
   separatedContours.push_back(chestContour);
-  separatedContours.push_back(hipContour);
+  // separatedContours.push_back(hipContour);
 
   cv.drawContours(dst, separatedContours, -1, new cv.Scalar(200, 255, 255), 1, cv.LINE_8);
   cv.imshow('output15', dst);
@@ -562,7 +570,7 @@ const getMaxArea = (contours, maxAreaObject) => {
 }
 
 // 直線方程式で輪郭線を分割する
-const separateByLine = (originalContourArray, tip, a, b, c, tipPortion, anotherPortion) => {
+const separateByLine = (originalContourArray, a, b, c, tipPortion, anotherPortion, tip, root = null) => {
   // tip は手足の先端など分割の際に探査の基準とする位置（cv.Point）
   // a, b, c は ax + by + c = 0 の直線方程式の係数
 
@@ -572,92 +580,133 @@ const separateByLine = (originalContourArray, tip, a, b, c, tipPortion, anotherP
   // spliceで挿入するため、元の配列が変更されないようにコピーする
   contourArray = originalContourArray.slice();
 
-  // 末端の点からContourの順に時計回り、反時計回りに2回探査する
-  for (let j = -1; j < 2; j += 2) {
-    // 輪郭線のidとcontourArrayのidがずれる場合があるため、contourArrayでのidに変換する
-    let tipId = findArrayIndex(contourArray, tip);
-    let tipSign;
-    let separatePoint;
-    let id;
-    let oneBeforeId;
-
-    for (let i = 0; i < contourArray.length; ++i) {
-      let sign;
-      // jで時計回り、反時計回りを指定する
-      // 途中でidがマイナスになる場合に対応するため、配列の長さ + id とする
-      id = (contourArray.length + tipId + j * i) % contourArray.length;
-      let point = contourArray[id];
-      let x = point.x;
-      let y = point.y;
-      let x2;
-      let y2;
-
-      // 分割のための直線方程式と各点の差を算出し、符号をチェックする
-      if(b == 0){
-        // 垂直線で左右に分ける場合(b == 0 , 直線方程式が x = -c/a の場合)
-        sign = Math.sign(x + c / a);
-        // sign = Math.sign(x + (b * y + c) / a); こちらでもいいが b == 0 の場合のみなので、b * y を省略
-      }else{
-        // 垂直以外で上下に分ける場合（b != 0 , 直線方程式が y = -(ax+c)/b の場合）
-        sign = Math.sign(y + (a * x + c) / b);
-      }
-
-      if(i == 0){
-        // スタート地点（tip）の符号を保存する
-        tipSign = sign;
-      }else if(sign == 0){
-        // 符号が0になった場合（たまたま、輪郭の点が分割のための直線の上にある）
-        separatePoint = point;
-        break;
-      }else if(tipSign != sign){
-        // スタート地点の符号と異なる符号になった場合（輪郭線が直線をはじめてまたいだ）
-        // その前後の2点の間に、新しい分割用の点（2点を結ぶ直線と、分割のための直線の交点）を作成する
-        // 初めてまたいだ点の一つ前の点を算出する
-        let oneBeforePoint = contourArray[oneBeforeId]; // 一つ前の点
-        // let oneBeforePoint = new cv.Point(contour.data32S[oneBeforeId * 2], contour.data32S[oneBeforeId * 2 + 1]); // 一つ前の点
-        if(x == oneBeforePoint.x){
-          // 2点を結ぶ直線が垂直になる場合
-          separatePoint = new cv.Point(x, - a / b * x - c / b);
-        }else{
-          // 2点を結ぶ直線が垂直にならない場合
-          // 初めてまたいだ点(x, y)と、その一つ前の点(x2, y2)を結ぶ直線方程式(y = a2x + b2)の係数を算出する
-          x2 = oneBeforePoint.x;
-          y2 = oneBeforePoint.y;
-          let a2 = (y2 - y)/(x2 - x);
-          let b2 = (y * x2 - y2 * x) / (x2 - x);
-
-          if(b == 0){
-            // 分割のための直線が垂直の場合
-            let x3 = -c/a; // 垂直の直線方程式 ax = -c の変形
-            separatePoint = new cv.Point(x3, a2 * x3 + b2); // y = a2 * x + b2 に代入
-          }else{
-            // ax + by + c = 0 の方程式を y = a1x + b1 の形に置き換える
-            let a1 = - a / b;
-            let b1 = - c / b;
-            // 2点を結ぶ直線と分割のための直線の交点を計算する
-            separatePoint = new cv.Point((b2 - b1)/(a1 - a2), (a1 * b2 - b1 * a2)/(a1 - a2));
-          }
-        }
-        // 小数点以下を四捨五入し、前後の点と被らなかった場合、新たに追加する
-        separatePoint.x = Math.round(separatePoint.x);
-        separatePoint.y = Math.round(separatePoint.y);
-        let sameNextPoint = separatePoint.x == x && separatePoint.y == y;
-        let sameBeforePoint = separatePoint.x == x2 && separatePoint.y == y2;
-        if(!sameNextPoint && !sameBeforePoint){
-          // 初めて跨いだ点の位置に、新たな点を挿入する
-          if (j == -1){
-            // idを降順（3,2,1...などの順）にたどっている場合、現在のidではなく、一つ前のidが挿入位置になる
-            contourArray.splice(oneBeforeId, 0, separatePoint);
-          } else {
-            contourArray.splice(id, 0, separatePoint);
-          }
-        }
-        break;
-      }
-      oneBeforeId = id;
-    }
-    separatePoints.push(separatePoint);
+  // 輪郭線のidとcontourArrayのidがずれる場合があるため、contourArrayでのidに変換する
+  let tipId = findArrayIndex(contourArray, tip);
+  let rootId;
+  if(root){
+    rootId = findArrayIndex(contourArray, root);
+  }else{
+    rootId = findArrayIndex(contourArray, findFarthest(contourArray, tip));
   }
+  let tipSign;
+  let separatePoint;
+  let id;
+  let onePreviousId;
+
+  for (let i = 0; i < contourArray.length + 1; ++i) {
+    let sign;
+    // jで時計回り、反時計回りを指定する
+    // 途中でidがマイナスになる場合に対応するため、配列の長さ + id とする
+    // id = (contourArray.length + tipId + j * i) % contourArray.length;
+    id = (tipId + i) % contourArray.length;
+    let point = contourArray[id];
+    let x = point.x;
+    let y = point.y;
+    let x2;
+    let y2;
+
+    // 分割のための直線方程式と各点の差を算出し、符号をチェックする
+    if(b == 0){
+      // 垂直線で左右に分ける場合(b == 0 , 直線方程式が x = -c/a の場合)
+      sign = Math.sign(x + c / a);
+      // sign = Math.sign(x + (b * y + c) / a); こちらでもいいが b == 0 の場合のみなので、b * y を省略
+    }else{
+      // 垂直以外で上下に分ける場合（b != 0 , 直線方程式が y = -(ax+c)/b の場合）
+      sign = Math.sign(y + (a * x + c) / b);
+    }
+    
+    if(i == 0){
+      // スタート地点（tip）の符号を保存する
+      tipSign = sign;
+      onePreviousId = id;
+      continue;
+    }
+
+    if(tipSign == sign){
+      onePreviousId = id;
+      continue;
+    }else if(sign == 0){
+      // 符号が0になった場合（たまたま、輪郭の点が分割のための直線の上にある）
+      separatePoint = point;
+      // break;
+    }else if(tipSign != sign){
+      // スタート地点の符号と異なる符号になった場合（輪郭線が直線をはじめてまたいだ）
+      // その前後の2点の間に、新しい分割用の点（2点を結ぶ直線と、分割のための直線の交点）を作成する
+      // 初めてまたいだ点の一つ前の点を算出する
+      let onePreviousPoint = contourArray[onePreviousId]; // 一つ前の点
+      // let onePreviousPoint = new cv.Point(contour.data32S[onePreviousId * 2], contour.data32S[onePreviousId * 2 + 1]); // 一つ前の点
+      if(x == onePreviousPoint.x){
+        // 2点を結ぶ直線が垂直になる場合
+        separatePoint = new cv.Point(x, - a / b * x - c / b);
+      }else{
+        // 2点を結ぶ直線が垂直にならない場合
+        // 初めてまたいだ点(x, y)と、その一つ前の点(x2, y2)を結ぶ直線方程式(y = a2x + b2)の係数を算出する
+        x2 = onePreviousPoint.x;
+        y2 = onePreviousPoint.y;
+        let a2 = (y2 - y)/(x2 - x);
+        let b2 = (y * x2 - y2 * x) / (x2 - x);
+
+        if(b == 0){
+          // 分割のための直線が垂直の場合
+          let x3 = -c/a; // 垂直の直線方程式 ax = -c の変形
+          separatePoint = new cv.Point(x3, a2 * x3 + b2); // y = a2 * x + b2 に代入
+        }else{
+          // ax + by + c = 0 の方程式を y = a1x + b1 の形に置き換える
+          let a1 = - a / b;
+          let b1 = - c / b;
+          // 2点を結ぶ直線と分割のための直線の交点を計算する
+          separatePoint = new cv.Point((b2 - b1)/(a1 - a2), (a1 * b2 - b1 * a2)/(a1 - a2));
+        }
+      }
+    }
+    separatePoints.push({point: separatePoint, id: id, sign: sign});
+    tipSign *= -1;
+  }
+
+  // 直線をまたいだ点が2つ以上あった場合、2つにしぼる
+  if(separatePoints.length > 2){
+    separatePoints.sort((a ,b) => a.id - b.id);
+    minId = separatePoints[0].id;
+    separatePoints.sort((a ,b) => b.id - a.id);
+    maxId = separatePoints[0].id;
+
+    const bothSidePoints = (separatePoints, minId, maxId, checkId) => {
+      let bothSideId = [];
+      if(checkId < minId || maxId < checkId){
+        bothSideId = [minId, maxId]
+      }else{
+        separatePoints.sort((a, b) => (a.id - checkId) - (b.id - checkId));
+        let nextId = separatePoints.filter(point => point.id - checkId > 0)[0].id;
+        let previousId = separatePoints.filter(point => point.id - checkId < 0).pop().id;
+        bothSideId = [nextId, previousId];
+      }
+      return [separatePoints.find(separatePoint => separatePoint.id == bothSideId[0]), separatePoints.find(separatePoint => separatePoint.id == bothSideId[1])];
+    }
+
+    let tipBothSidePoints = bothSidePoints(separatePoints, minId, maxId, tipId);
+    let rootBothSidePoints = bothSidePoints(separatePoints, minId, maxId, rootId);;
+
+    separatePoints = distance(tipBothSidePoints[0].point, tipBothSidePoints[1].point) <= distance(rootBothSidePoints[0].point, rootBothSidePoints[1].point)? tipBothSidePoints : rootBothSidePoints  
+  }
+
+  separatePoints.forEach(separatePoint => {
+    if(separatePoint.sign != 0){
+      // 小数点以下を四捨五入し、前後の点と被らなかった場合、新たに追加する
+      separatePoint.point.x = Math.round(separatePoint.point.x);
+      separatePoint.point.y = Math.round(separatePoint.point.y);
+      let dupPoint = findArrayIndex(contourArray, separatePoint);
+      if(dupPoint == -1){
+        contourArray.splice(separatePoint.id, 0, separatePoint.point);
+      }
+    }
+  });
+
+  separatePoints.sort((a, b) => a.id - b.id);
+  if(tipId < separatePoints[0].id || separatePoints[1].id < tipId){
+    separatePoints.sort((a, b) => b.id - a.id);
+  }
+
+  separatePoints = separatePoints.map(separatePoint => separatePoint.point);
 
   // 指定した点で輪郭を切り取る
   separateByPoint(contourArray, separatePoints, tipPortion, anotherPortion);
@@ -671,12 +720,6 @@ const separateByPoint = (contourArray, separatePoints, tipPortion, anotherPortio
   let endId = findArrayIndex(contourArray, end);
   let tipPortionArray;
   let anotherPortionArray;
-
-  console.log("contourArray", contourArray);
-  console.log("separatePoints", separatePoints);
-  console.log("startId", startId);
-  console.log("endId", endId);
-
 
   // 始点と終点が id:0 をまたいでいるか判定
   if(startId > endId){
@@ -775,27 +818,28 @@ const separateArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, 
 }
 
 // 手足の根元と先端を指定し、割合で切り取る
-const separateByRatio = (contourArray, root, tip, ratio, tipPortion, anotherPortion, parallel = false) => {
+const separateByRatio = (contourArray, rootPoints, tip, ratio, tipPortion, anotherPortion, parallel = false) => {
   // ratioは先端側と根本側の比率（0.7の場合、根本側が7割）
+  // parallel = true にした場合、rootPointsによる線分と並行な線で切り取る
 
   // 付け根と先端を結ぶ線分上にある、指定された比率の地点を通り、線分と直行する直線方程式の係数(ay + bx + c = 0)を算出
   let a;
   let b;
   let c;
-  let x = root.center.x;
-  let y = root.center.y;
+  let x = rootPoints.center.x;
+  let y = rootPoints.center.y;
   let x1 = tip.x;
   let y1 = tip.y;
 
   if(parallel){
     // 切り取る線分が並行とする場合
-    if(root.start.y == root.end.y){
+    if(rootPoints.start.y == rootPoints.end.y){
         // rootの線分が水平になる場合
         a = 1;
         b = 0;
         c = (y1 - y) * ratio + y;
     }else{
-      let slope = (root.start.y - root.end.y)/(root.start.x - root.end.x);
+      let slope = (rootPoints.start.y - rootPoints.end.y)/(rootPoints.start.x - rootPoints.end.x);
 
       // 付け根と先端を結ぶ線分上にある、指定された比率の地点を算出（ratio = 0.5であれば中点）
       let ratioPoint = new cv.Point((x1 - x) * ratio + x, (y1 - y) * ratio + y); 
@@ -831,9 +875,7 @@ const separateByRatio = (contourArray, root, tip, ratio, tipPortion, anotherPort
   }
 
   // 算出した直線で切り取る
-  console.log("separateByLine---");
-  separateByLine(contourArray, tip, a, b, c, tipPortion, anotherPortion);
-  console.log("---separateByLine");
+  separateByLine(contourArray, a, b, c, tipPortion, anotherPortion, tip, rootPoints.start);
 }
 
 // Point配列の中から指定した点と同じ値のindexを返す
