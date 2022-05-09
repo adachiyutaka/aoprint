@@ -49,7 +49,7 @@ const imageList = () => {
   // イメージ選択モーダルのsubmitボタンの処理
   const submit = () => {
     if (currentMode == mode.updateImage){
-      CreateController.updateInfoImage(document.getElementsByClassName('gameobject-image selected')[0].src);
+      CreateController.updateImage(document.getElementsByClassName('gameobject-image selected')[0].src);
     }
     else if (currentMode == mode.newGameObject){
       makePreviewObject(currentGameObject);
@@ -186,7 +186,7 @@ const imageList = () => {
       images.forEach((image) => {
         console.log("images.forEach splitImage:", image);
 
-        // OpenCVに読み込んだ画像ファイルを再び画像ファイルとして扱うためにimg要素を生成し、トリミングした画像を設定
+        // OpenCVに読み込んでMat型になった画像を再び画像ファイルとして扱うためにimg要素を生成し、トリミングした画像を設定
         cv.imshow(canvas, image['image']);
         let base64url = canvas.toDataURL();
 
@@ -271,14 +271,14 @@ const selectPreviewImage = (element) => {
 }
 
 // Preview画面にGameObjectを作成する
-const makePreviewObject = (go) => {
+const makePreviewObject = (gameobject) => {
 
-  CreateController.addGameObject(go);
+  CreateController.addGameObject(gameobject);
 
   // 各データに対応するimg要素とGameObjectを生成する
   // img要素を生成し、分割した画像を設定
   let previewImg = document.createElement('img');
-  previewImg.src = go.image.base64url;
+  previewImg.src = gameobject.image.base64url;
 
   // 生成したimg要素のサイズ、位置、idを設定
   previewImg.style.position = "absolute";

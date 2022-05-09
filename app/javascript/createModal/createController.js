@@ -1,5 +1,8 @@
 import updateInfoPosition from "./updateInfoPosition";
 import GameObject from './gameObject.js';
+import bone from "./bone";
+
+const roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 4};
 
 class CreateController {
   constructor() {
@@ -63,27 +66,32 @@ class CreateController {
   // info欄に入力された値を更新する
   updateInfoValue(e) {
     console.log("updateInfoValue");
-    let value = e.currentTarget.value;
+    let property = e.currentTarget;
+    let value =  parseFloat(property.value);
     let gameObject = this.selectedGameObject;
     let position = gameObject.position;
 
     // どの要素が更新されたかidで判定する
     // 更新された要素に合わせてgameObjectの値を更新する
-    switch(e.currentTarget.id){
+    switch(property.id){
       case 'x':
-        position.x = parseFloat(value);
+        position.x = value;
         break
       case 'y':
-        position.y = parseFloat(value);
+        position.y = value;
         break
       case 'width':
-        position.width = parseFloat(value);
+        position.width = value;
         break
       case 'height':
-        position.height = parseFloat(value);
+        position.height = value;
         break
       case 'role_select':
-        gameObject.role = value;
+        gameObject.role = property.selectedIndex;
+        if(gameObject.role == roleIndex.player){
+          console.log("updateInfoValue make bone");
+          bone(gameObject.image.base64url);
+        }
         break
     }
 
@@ -91,8 +99,12 @@ class CreateController {
     this.updatePreview();
   }
 
-  updateInfoImage(base64url) {
+  updateImage(base64url) {
     this.selectedGameObject.image.base64url = base64url;
+    if(this.selectedGameObject.role == roleIndex.player){
+      console.log("updateImage make bone");
+      bone(base64url);
+    }
     this.updatePreview();
     this.updateInfoInput();
   }
@@ -192,8 +204,6 @@ class CreateController {
 
   updateInfoInput() {
     // info欄の更新
-    let roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 3};
-
     let image = document.getElementById('info_image');
     let x = document.getElementById('x');
     let y = document.getElementById('y');
@@ -211,7 +221,9 @@ class CreateController {
       y.value = Math.round(position.y);
       width.value = Math.round(position.width);
       height.value = Math.round(position.height);
-      role.selectedIndex = roleIndex[gameObject.role];
+      // role.selectedIndex = roleIndex[gameObject.role];
+      // role.selectedIndex = gameObject.role;
+      role.selectedIndex = gameObject.role;
       updateInfoPosition();
       this.info.style.visibility = 'visible';
     }

@@ -1,6 +1,15 @@
-const splitImageCV = (img) => {
+const splitImageCV = (img, splitInside = false) => {
   const canvas = document.getElementById('canvas');
   const context = canvas.getContext('2d');
+  
+  for (let i = 1; i < 40; i++) {
+    const output = document.createElement('canvas');
+    output.id = "output" + i;
+    output.setAttribute('width', img.naturalWidth);
+    output.setAttribute('height', img.naturalHeight);
+    document.getElementById('textContainer').appendChild(output);
+    // document.getElementById('div1').appendChild(output);
+  };
 
   // 画像ファイルと同じ大きさのcanvasに画像を貼り、png画像のbase64データに加工
   let dx = 0;
@@ -19,11 +28,45 @@ const splitImageCV = (img) => {
   output.setAttribute('width', img.naturalWidth);
   output.setAttribute('height', img.naturalHeight);
   const kernel = cv.getStructuringElement(cv.MORPH_RECT,new cv.Size(5,5));
+
   // 輪郭線の色指定（赤）
   let contoursColor = new cv.Scalar(255, 0, 0);
 
   let src = cv.imread(img);
   // cv.imshow(output, src);
+  // let src = cv.imread('imageCanvasInput');
+  // let logo = cv.imread('logoCanvasInput');
+  // let dst = new cv.Mat();
+  // let roi = new cv.Mat();
+  // let mask = new cv.Mat();
+  // let maskInv = new cv.Mat();
+  // let imgBg = new cv.Mat();
+  // let imgFg = new cv.Mat();
+  // let sum = new cv.Mat();
+  // let rect = new cv.Rect(0, 0, logo.cols, logo.rows);
+  
+  // // I want to put logo on top-left corner, So I create a ROI
+  // roi = src.roi(rect);
+  
+  // // Create a mask of logo and create its inverse mask also
+  // cv.cvtColor(logo, mask, cv.COLOR_RGBA2GRAY, 0);
+  // cv.threshold(mask, mask, 100, 255, cv.THRESH_BINARY);
+  // cv.bitwise_not(mask, maskInv);
+  
+  // // Black-out the area of logo in ROI
+  // cv.bitwise_and(roi, roi, imgBg, maskInv);
+  
+  // // Take only region of logo from logo image
+  // cv.bitwise_and(logo, logo, imgFg, mask);
+  
+  // let mask = new cv.Mat(src.rows, src.cols, cv.CV_8U, new cv.Scalar(255));
+  // cv.imshow(output1, src);
+  // // cv.drawContours(mask, contApprox, i, new cv.Scalar(255), -1, cv.LINE_8);
+  // cv.imshow(output2, mask);
+  // cv.bitwise_and(src, src, src, mask);
+
+  // let dst = new cv.Mat();
+  // cv.bitwise_and(src, src, dst, mask);
 
   // グレースケールに変換
   const imgGray = new cv.Mat();
@@ -135,79 +178,91 @@ const splitImageCV = (img) => {
     console.log("0, ", i, ": ", hierarchyMargin.intPtr(0, i));      
   }
   // オブジェクトのヒエラルキーを表示
+  let maskColor255 = new cv.Scalar(255, 255, 255, 255);
+  let maskColor0 = new cv.Scalar(0, 0, 0, 0);
 
-  let outerMask = cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC3);
-  let imgStageOuter = cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC4);
+  let outerMask = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC4);
+
+  let imgStageOuter = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC4);
   // let dst = cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC3);
 
-  let color = new cv.Scalar(255, 255, 255);
 
-  for(let i = 0; i < contApprox.size(); ++i) {
-    // 最外部（第4要素（親のID）が-1）の階層を指定
-    if(hierarchyMargin.intPtr(0, i)[3] == -1) {
-      // 最外部より一つ内側の階層（第3要素（子のID））を指定し、白で塗りつぶし
-      let firstChildIndex = hierarchyMargin.intPtr(0, i)[2];
-      cv.drawContours(outerMask, contApprox, firstChildIndex, color, cv.FILLED);
-      // 輪郭の内側を透明化し、配列に加える
-      let m = clipInside(src, outerMask)
-      images.push(m);
 
-      // オブジェクトを切り出す処理
-      // 最外部より二つ内側の階層（第4引数（親要素）が firstChildIndex）の階層を指定
-      for(let j = 0; j < contApprox.size(); ++j) {
-        if(hierarchyMargin.intPtr(0, j)[3] == firstChildIndex) {
-          // 最外部より二つ内側の階層（第3要素（子のID））を指定し、白で塗りつぶし
-          let mask = cv.Mat.ones(src.rows, src.cols,cv.CV_8UC3);
-          cv.drawContours(mask, contApprox, j, color, cv.FILLED);
-          // 輪郭の外側を透明化し、切り抜き、配列に加える
-          // images.push(clipOutside(src, mask));
-          let a = clipOutside(src, mask)
-          images.push(a);
+  // 輪郭線に沿って画像を切り取る
+  // hierarchyの内容: [Next, Previous, First_Child, Parent]
+  if(splitInside){
+    console.log("splitInside");
+    // 複数の画像を一気に切り抜く場合
+    for(let i = 0; i < contApprox.size(); ++i) {
+      // 最外部の画像の内側を切り抜く
+      // 最外部（第4要素（親のID）が-1）の階層を指定
+      if(hierarchyMargin.intPtr(0, i)[3] == -1) {
+        // 最外部より一つ内側の階層（第3要素（子のID））を指定し、白で塗りつぶし
+        let firstChildIndex = hierarchyMargin.intPtr(0, i)[2];
+        let outerMask = new cv.Mat(src.rows, src.cols, cv.CV_8UC4, maskColor0);
+        cv.drawContours(outerMask, contApprox, firstChildIndex, maskColor255, cv.FILLED);
+        // 輪郭の内側を透明化し、配列に加える
+        images.push(removeInside(src, outerMask));
+        outerMask.delete;
+  
+        // 最外部よりも一つ下の画層の外側を切り抜く
+        // 最外部より二つ内側の階層（第4引数（親要素）が firstChildIndex）の階層を指定
+        for(let j = 0; j < contApprox.size(); ++j) {
+          if(hierarchyMargin.intPtr(0, j)[3] == firstChildIndex) {
+            // 最外部より二つ内側の階層（第3要素（子のID））を指定し、白で塗りつぶし
+            let innerMask = new cv.Mat(src.rows, src.cols, cv.CV_8UC4, maskColor0);
+            cv.drawContours(innerMask, contApprox, j, maskColor255, cv.FILLED);
+            // 輪郭の外側を透明化し、切り抜き、配列に加える
+            images.push(removeOutside(src, innerMask));
+            innerMask.delete;
+          }
         }
       }
     }
+  }else{
+    console.log("splitOutside");
+    // 最外部の輪郭線のみ切り抜く場合
+    for(let i = 0; i < contApprox.size(); ++i) {
+      // 最外部の画像の内側を切り抜く
+      // 最外部（第4要素（親のID）が-1）の階層を指定
+      if(hierarchyMargin.intPtr(0, i)[3] == -1) {
+        // 最外部（第4要素（親のID）が-1）の階層を指定し、白(255)で塗りつぶす
+        // マスクも元の画像と同じく透明色を含めた4チャンネル（BGRA）で作成すると、ビット演算時に0の箇所が透明になる
+        let mask = new cv.Mat(src.rows, src.cols, cv.CV_8UC4, maskColor0);
+        cv.drawContours(mask, contApprox, i, maskColor255, -1, cv.LINE_8);
+
+        // マスク以外を透明にし、配列に加える
+        images.push(removeOutside(src, mask));
+        mask.delete;
+      }
+    }
   }
+
   return images;
 };
 
-const clipOutside = (src, mask, inside = true) => {
-  let dst = cv.Mat.zeros(src.rows, src.cols,cv.CV_8UC4);
-  // マスク範囲に従って画像を透明にする
-  for (var i = 0; i < src.rows; i++) {
-      for (var j = 0; j < src.cols; j++) {
-          // insideがfalseの場合はクリッピングする部分を反転させる
-          let clippingArea = mask.ucharPtr(i, j)[0] == 255
-          if (!inside) clippingArea =! clippingArea;
+// マスクの白い部分を残して切り取る
+const removeOutside = (src, mask, inside = false) => {
 
-          // クリッピングする部分は元画像の情報をそのままコピーする
-          if (clippingArea) {
-            dst.ucharPtr(i, j)[0] = src.ucharPtr(i, j)[0];
-            dst.ucharPtr(i, j)[1] = src.ucharPtr(i, j)[1];
-            dst.ucharPtr(i, j)[2] = src.ucharPtr(i, j)[2];
-            dst.ucharPtr(i, j)[3] = src.ucharPtr(i, j)[3];
-          }
-          else {
-          // クリッピングする部分以外は透明にする
-            dst.ucharPtr(i, j)[3] = 0;
-          }
-      }
+  // マスクされた内側を切り抜く場合は、マスクを反転させる
+  if(inside) {
+    cv.bitwise_not(mask, mask);
   }
+
+  // 元の画像から輪郭を切り抜く
+  // ビット演算ANDでマスクされた部分(=255)のみ残す
+  cv.bitwise_and(src, mask, src);
+
   // 不要な部分をトリミングする
-  let rect;
-  if (inside)
-  {
-    cv.cvtColor(mask, mask, cv.COLOR_RGBA2GRAY);
-    rect = cv.boundingRect(mask);
-    dst = dst.roi(rect);
-  }
-  else {
-    rect = new cv.Rect(0, 0, src.cols, src.rows);
-  }
-  return {'image': dst, 'vertices': {'x': rect.x, 'y': rect.y, 'width': rect.width, 'height': rect.height}};
+  cv.cvtColor(mask, mask, cv.COLOR_RGBA2GRAY);
+  let rect = cv.boundingRect(mask);
+  src = src.roi(rect);
+
+  return {'image': src, 'vertices': {'x': rect.x, 'y': rect.y, 'width': rect.width, 'height': rect.height}};
 }
 
-const clipInside = (src, mask) => {
-  return clipOutside(src, mask, false);
+const removeInside = (src, mask) => {
+  return removeOutside(src, mask, true);
 }
 
 export default splitImageCV;

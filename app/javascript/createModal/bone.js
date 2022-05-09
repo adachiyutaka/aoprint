@@ -1,43 +1,17 @@
-const e = require("turbolinks");
-
 let dst;
 
-const inputMesh = () => { 
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.id = 'mesh';
-  document.getElementById('div1').appendChild(input);
+const bone = (base64url) => {
 
-  input.addEventListener('change', (e) => {
-    // ユーザーがセットしたファイルから画像ファイルを読み取り
-    
-    const file = e.target.files[0];
-    const img = new Image();
-    img.src = window.URL.createObjectURL(file);
-    img.onload = () => {
-      createMesh(img);
-    }
-  });
-}
-
-const createMesh = (img) => {
-  for (let i = 1; i < 40; i++) {
-    const output = document.createElement('canvas');
-    output.id = "output" + i;
-    output.setAttribute('width', img.naturalWidth);
-    output.setAttribute('height', img.naturalHeight);
-    document.getElementById('div1').appendChild(output);
-  };
+  const img = new Image();
+  img.src = base64url;
 
   // 最外輪郭を取得
   let src = cv.imread(img);
   let outlineContours = getOutlineContours(src);
 
-
   // テスト表示
   dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
   // テスト表示
-
   
   // 大まかな形状をセグメント分けにより取得する
   // 輪郭線でぬりつぶした画像を作成
@@ -914,4 +888,6 @@ const contourFromArray = (array, dstContour) => {
   y.delete;
 }
 
-window.addEventListener('load', inputMesh);
+// window.addEventListener('load', bone);
+
+export default bone;
