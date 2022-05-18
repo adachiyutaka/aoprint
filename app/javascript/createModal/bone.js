@@ -4,12 +4,6 @@ let dst;
 
 const bone = (base64url) => {
 
-  // Delaunayのテスト
-  let vertices = [[1, 1], [3,1], [2, 10], [10,2], [4,2]];
-  let triangles = Delaunay.triangulate(vertices);
-  console.log("triangles", triangles);
-  // Delaunayのテスト
-
   const img = new Image();
   img.src = base64url;
 
@@ -199,6 +193,30 @@ const bone = (base64url) => {
   let hip = {};
   separateByRatio(body.array, neckAndHead.separatePoints, legDefect.far, 8/10, chest, hip);
 
+
+  // Delaunayのテスト
+  // console.log("hip.array[0][0]", hip.array[0][0]);
+  // let vertices = [[1, 1], [3,1], [2, 10], [10,2], [4,2]];
+  let arrayContour = hip.array;
+  let triangles = Delaunay.triangulate(arrayContour);
+  console.log("triangles", triangles);
+  let triangle_i;
+  let triangleContour = new cv.Mat();
+  for(triangle_i = triangles.length; triangle_i; ) {
+    let triangle = [];
+    --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
+    --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
+    --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
+    contourFromArray(triangle, triangleContour);
+    cv.fillConvexPoly(dst, triangleContour, new cv.Scalar((255 + 255 * (triangle_i / triangles.length)) % 255, (155 + 255 * (triangle_i / triangles.length)) % 255, (0 + 255 * (triangle_i / triangles.length)) % 255));
+    // --i; ctx.moveTo(vertices[triangles[i]][0], vertices[triangles[i]][1]);
+    // --i; ctx.lineTo(vertices[triangles[i]][0], vertices[triangles[i]][1]);
+    // --i; ctx.lineTo(vertices[triangles[i]][0], vertices[triangles[i]][1]);
+    // ctx.closePath();
+    // ctx.stroke();
+  }
+  // Delaunayのテスト
+
   let leftLegContour = new cv.Mat();
   let rightLegContour = new cv.Mat();
   let leftUpperLegContour = new cv.Mat();
@@ -264,7 +282,7 @@ const bone = (base64url) => {
   separatedContours.push_back(headContour);
   // separatedContours.push_back(neckContour);
   separatedContours.push_back(chestContour);
-  // separatedContours.push_back(hipContour);
+  separatedContours.push_back(hipContour);
 
   cv.drawContours(dst, separatedContours, -1, new cv.Scalar(200, 255, 255), 1, cv.LINE_8);
   cv.imshow('output15', dst);
@@ -895,7 +913,5 @@ const contourFromArray = (array, dstContour) => {
   x.delete;
   y.delete;
 }
-
-// window.addEventListener('load', bone);
 
 export default bone;

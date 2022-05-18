@@ -103,6 +103,7 @@ var Delaunay;
 
   Delaunay = {
     triangulate: function(vertices, key) {
+      vertices = pointToArray(vertices);
       var n = vertices.length,
           i, j, indices, st, open, closed, edges, dx, dy, a, b, c;
 
@@ -234,3 +235,7 @@ var Delaunay;
   if(typeof module !== "undefined")
     module.exports = Delaunay;
 })();
+
+const pointToArray = (vertices) => {
+  return vertices.map(vertex => [vertex.x, vertex.y]);
+}
