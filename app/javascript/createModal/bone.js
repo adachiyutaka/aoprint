@@ -1,6 +1,14 @@
+import Delaunay from "./delaunay";
+
 let dst;
 
 const bone = (base64url) => {
+
+  // Delaunayのテスト
+  let vertices = [[1, 1], [3,1], [2, 10], [10,2], [4,2]];
+  let triangles = Delaunay.triangulate(vertices);
+  console.log("triangles", triangles);
+  // Delaunayのテスト
 
   const img = new Image();
   img.src = base64url;
