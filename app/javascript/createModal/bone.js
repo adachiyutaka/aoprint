@@ -1,9 +1,9 @@
 import Delaunay from "./delaunay";
+import earcut from 'earcut';
 
 let dst;
 
 const bone = (base64url) => {
-
   const img = new Image();
   img.src = base64url;
 
@@ -199,22 +199,26 @@ const bone = (base64url) => {
   // let vertices = [[1, 1], [3,1], [2, 10], [10,2], [4,2]];
   let arrayContour = hip.array;
   let triangles = Delaunay.triangulate(arrayContour);
-  console.log("triangles", triangles);
-  let triangle_i;
-  let triangleContour = new cv.Mat();
-  for(triangle_i = triangles.length; triangle_i; ) {
-    let triangle = [];
-    --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
-    --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
-    --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
-    contourFromArray(triangle, triangleContour);
-    cv.fillConvexPoly(dst, triangleContour, new cv.Scalar((255 + 255 * (triangle_i / triangles.length)) % 255, (155 + 255 * (triangle_i / triangles.length)) % 255, (0 + 255 * (triangle_i / triangles.length)) % 255));
-    // --i; ctx.moveTo(vertices[triangles[i]][0], vertices[triangles[i]][1]);
-    // --i; ctx.lineTo(vertices[triangles[i]][0], vertices[triangles[i]][1]);
-    // --i; ctx.lineTo(vertices[triangles[i]][0], vertices[triangles[i]][1]);
-    // ctx.closePath();
-    // ctx.stroke();
-  }
+  triangles.flatMap(point => [point.x, point.y]);
+  console.log("triangles.flatMap", triangles);
+  var triangle = earcut([10,0, 0,50, 60,60, 70,10]);
+  console.log("triangle", triangle);
+  // console.log("triangles", triangles);
+  // let triangle_i;
+  // let triangleContour = new cv.Mat();
+  // for(triangle_i = triangles.length; triangle_i; ) {
+  //   let triangle = [];
+  //   --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
+  //   --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
+  //   --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
+  //   contourFromArray(triangle, triangleContour);
+  //   cv.fillConvexPoly(dst, triangleContour, new cv.Scalar((255 + 255 * (triangle_i / triangles.length)) % 255, (155 + 255 * (triangle_i / triangles.length)) % 255, (0 + 255 * (triangle_i / triangles.length)) % 255));
+  //   // --i; ctx.moveTo(vertices[triangles[i]][0], vertices[triangles[i]][1]);
+  //   // --i; ctx.lineTo(vertices[triangles[i]][0], vertices[triangles[i]][1]);
+  //   // --i; ctx.lineTo(vertices[triangles[i]][0], vertices[triangles[i]][1]);
+  //   // ctx.closePath();
+  //   // ctx.stroke();
+  // }
   // Delaunayのテスト
 
   let leftLegContour = new cv.Mat();
