@@ -191,35 +191,9 @@ const bone = (base64url) => {
   // 胴体を切り取る
   let chest = {};
   let hip = {};
-  separateByRatio(body.array, neckAndHead.separatePoints, legDefect.far, 8/10, chest, hip);
+  separateByRatio(body.array, neckAndHead.separatePoints, legDefect.far, 8/10, hip, chest);
 
-
-  // Delaunayのテスト
-  // console.log("hip.array[0][0]", hip.array[0][0]);
-  // let vertices = [[1, 1], [3,1], [2, 10], [10,2], [4,2]];
-  let arrayContour = hip.array;
-  let triangles = Delaunay.triangulate(arrayContour);
-  triangles.flatMap(point => [point.x, point.y]);
-  console.log("triangles.flatMap", triangles);
-  var triangle = earcut([10,0, 0,50, 60,60, 70,10]);
-  console.log("triangle", triangle);
-  // console.log("triangles", triangles);
-  // let triangle_i;
-  // let triangleContour = new cv.Mat();
-  // for(triangle_i = triangles.length; triangle_i; ) {
-  //   let triangle = [];
-  //   --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
-  //   --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
-  //   --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
-  //   contourFromArray(triangle, triangleContour);
-  //   cv.fillConvexPoly(dst, triangleContour, new cv.Scalar((255 + 255 * (triangle_i / triangles.length)) % 255, (155 + 255 * (triangle_i / triangles.length)) % 255, (0 + 255 * (triangle_i / triangles.length)) % 255));
-  //   // --i; ctx.moveTo(vertices[triangles[i]][0], vertices[triangles[i]][1]);
-  //   // --i; ctx.lineTo(vertices[triangles[i]][0], vertices[triangles[i]][1]);
-  //   // --i; ctx.lineTo(vertices[triangles[i]][0], vertices[triangles[i]][1]);
-  //   // ctx.closePath();
-  //   // ctx.stroke();
-  // }
-  // Delaunayのテスト
+  triangulation(outlineArray);
 
   let leftLegContour = new cv.Mat();
   let rightLegContour = new cv.Mat();
@@ -916,6 +890,26 @@ const contourFromArray = (array, dstContour) => {
   xy.delete;
   x.delete;
   y.delete;
+}
+
+const triangulation = (arrayContour) => {
+  // cv.Pointの配列を[point1.x, point1.y, point2.x, point2.y, ...]のようにフラットに変換する
+  let arrayContourFlat = arrayContour.flatMap(point => [point.x, point.y])
+  let triangles = earcut(arrayContourFlat);
+
+  // 作成した三角形の表示
+  let triangle_i;
+  let triangleContour = new cv.Mat();
+  for(triangle_i = triangles.length; triangle_i; ) {
+    let triangle = [];
+    --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
+    --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
+    --triangle_i; triangle.push(arrayContour[triangles[triangle_i]]);
+    contourFromArray(triangle, triangleContour);
+    cv.fillConvexPoly(dst, triangleContour, new cv.Scalar((255 + 255 * (triangle_i * 30 / triangles.length)) % 255, (155 + 255 * (triangle_i * 40 / triangles.length)) % 255, (0 + 255 * (triangle_i * 100 / triangles.length)) % 255));
+  }
+
+  return triangles;
 }
 
 export default bone;

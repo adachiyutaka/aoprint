@@ -6,6 +6,7 @@ class GameObject {
     this.role = 1;
     this.object = '';
     this.script = '';
+    this.mesh = null;
   }
 
   setPosition(x, y, width, height) {
