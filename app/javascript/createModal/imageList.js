@@ -4,7 +4,6 @@ import GameObject from './gameObject.js';
 import objectMove from './objectMove.js';
 import Selected from './selected';
 
-
 const imageList = () => {
   const mode = {updateImage : 1, newGameObject : 2};
   let currentMode = null;

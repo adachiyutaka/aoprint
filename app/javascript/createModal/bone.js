@@ -1,5 +1,6 @@
 import Delaunay from "./delaunay";
 import earcut from 'earcut';
+import _ from 'lodash';
 
 let dst;
 
@@ -190,8 +191,56 @@ const bone = (base64url) => {
 
   // 胴体を切り取る
   let chest = {};
-  let hip = {};
-  separateByRatio(body.array, neckAndHead.separatePoints, legDefect.far, 8/10, hip, chest);
+  let hips = {};
+  separateByRatio(body.array, neckAndHead.separatePoints, legDefect.far, 8/10, hips, chest);
+
+  let boneNamedPoints = [
+    {name: "hips", point: hips.array},
+    {name: "chest", point: chest.array},
+    {name: "upperArm.L", point: leftUpperArm.array},
+    {name: "lowerArm.L", point: leftLowerArm.array},
+    {name: "hand.L", point: leftHand.array},
+    {name: "upperArm.R", point: rightUpperArm.array},
+    {name: "lowerArm.R", point: rightLowerArm.array},
+    {name: "hand.R", point: rightHand.array},
+    {name: "neck", point: neck.array},
+    {name: "head", point: head.array},
+    {name: "upperLeg.L", point: leftUpperLeg.array},
+    {name: "lowerLeg.L", point: leftLowerLeg.array},
+    {name: "foot.L", point: leftFoot.array},
+    {name: "upperLeg.R", point: rightUpperLeg.array},
+    {name: "lowerLeg.R", point: rightLowerLeg.array },
+    {name: "foot.R", point: rightFoot.array},
+  ]
+
+
+
+  // let vertices = [];
+  // boneNamedPoints.forEach(boneNamedPoint => {
+  //   boneNamedPoint.point.forEach(point => {
+      
+  //   });
+  // });
+
+  
+  // パーツのcontourArray, vertices を引数にとる関数
+  // earcut で contourArray を三角分割する
+  // trianglesを宣言する
+  // 三角分割のidひとつひとつについて処理する
+  //  contourArrayのそのidの点を探す
+  //   その点と同じ位置のverticesのidを探す
+  //  trianglesにidを追加する
+  
+  // すべての三角分割の点について処理したtrianglesを返す
+  
+  
+  // 帰ってきた値をpartTrianglesとし、 trianglesに追加する
+
+  let vertices = boneNamedPoints.map(boneNamedPoints => boneNamedPoints.point).reduce((acc, point) => {
+    return _.unionWith(acc, point, _.isEqual);
+  }, []);
+
+  console.log("vertices", vertices);
 
   triangulation(outlineArray);
 
@@ -215,7 +264,7 @@ const bone = (base64url) => {
   let neckContour = new cv.Mat();
   let bodyContour = new cv.Mat();
   let chestContour = new cv.Mat();
-  let hipContour = new cv.Mat();
+  let hipsContour = new cv.Mat();
 
   contourFromArray(leftLeg.array, leftLegContour);
   contourFromArray(leftUpperLeg.array, leftUpperLegContour);
@@ -237,7 +286,7 @@ const bone = (base64url) => {
   contourFromArray(head.array, headContour);
   contourFromArray(body.array, bodyContour);
   contourFromArray(chest.array, chestContour);
-  contourFromArray(hip.array, hipContour);
+  contourFromArray(hips.array, hipsContour);
 
   let separatedContours = new cv.MatVector();
   // separatedContours.push_back(leftLegContour);
@@ -260,7 +309,7 @@ const bone = (base64url) => {
   separatedContours.push_back(headContour);
   // separatedContours.push_back(neckContour);
   separatedContours.push_back(chestContour);
-  separatedContours.push_back(hipContour);
+  separatedContours.push_back(hipsContour);
 
   cv.drawContours(dst, separatedContours, -1, new cv.Scalar(200, 255, 255), 1, cv.LINE_8);
   cv.imshow('output15', dst);
@@ -290,7 +339,7 @@ const bone = (base64url) => {
   neckContour.delete;
   bodyContour.delete;
   chestContour.delete;
-  hipContour.delete;
+  hipsContour.delete;
 
   segmentSrc.delete;
   src.delete;
