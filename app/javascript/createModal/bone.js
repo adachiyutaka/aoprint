@@ -130,52 +130,52 @@ const bone = (base64url) => {
 
   // 股下の点（legDefect.far）を通る水平線で左右の足を切り取る
   let leftLeg = {};
-  separateByLine(outlineArray, 0, 1, -legDefect.far.y, leftLeg, body, legDefect.start);
+  separateByLine(outlineArray, outlineArray, 0, 1, -legDefect.far.y, leftLeg, body, legDefect.start);
 
   let leftUpperLeg = {};
   let leftLowerLeg = {};
   const leftLegTip = findFarthest(leftLeg.array, leftLeg.separatePoints.center);
-  separateByRatio(leftLeg.array, leftLeg.separatePoints, leftLegTip, 4/10, leftLowerLeg, leftUpperLeg);
+  separateByRatio(outlineArray, leftLeg.array, leftLeg.separatePoints, leftLegTip, 4/10, leftLowerLeg, leftUpperLeg);
 
   let leftFoot = {};
-  separateByRatio(leftLowerLeg.array, leftLowerLeg.separatePoints, leftLegTip, 4/6, leftFoot, leftLowerLeg);
+  separateByRatio(outlineArray, leftLowerLeg.array, leftLowerLeg.separatePoints, leftLegTip, 4/6, leftFoot, leftLowerLeg);
 
   let rightLeg = {};
-  separateByLine(body.array, 0, 1, -legDefect.far.y, rightLeg, body, legDefect.end);
+  separateByLine(outlineArray, body.array, 0, 1, -legDefect.far.y, rightLeg, body, legDefect.end);
 
   let rightUpperLeg = {};
   let rightLowerLeg = {};
   const rightLegTip = findFarthest(rightLeg.array, rightLeg.separatePoints.center);
-  separateByRatio(rightLeg.array, rightLeg.separatePoints, rightLegTip, 4/10, rightLowerLeg, rightUpperLeg);
+  separateByRatio(outlineArray, rightLeg.array, rightLeg.separatePoints, rightLegTip, 4/10, rightLowerLeg, rightUpperLeg);
 
   let rightFoot = {};
-  separateByRatio(rightLowerLeg.array, rightLowerLeg.separatePoints, rightLegTip, 4/6, rightFoot, rightLowerLeg);
+  separateByRatio(outlineArray, rightLowerLeg.array, rightLowerLeg.separatePoints, rightLegTip, 4/6, rightFoot, rightLowerLeg);
 
   // 足がない場合
 
   // 腕を判定する
   // 腕の輪郭線を切り取る
   let leftArm = {};
-  separateLeftArm(body.array, defects, boundingRect, bodyRect, leftArm, body);
+  separateLeftArm(outlineArray, body.array, defects, boundingRect, bodyRect, leftArm, body);
 
   let leftUpperArm = {};
   let leftLowerArm = {};
   const leftArmTip = findFarthest(leftArm.array, leftArm.separatePoints.center);
-  separateByRatio(leftArm.array, leftArm.separatePoints, leftArmTip, 4/10, leftLowerArm, leftUpperArm);
+  separateByRatio(outlineArray, leftArm.array, leftArm.separatePoints, leftArmTip, 4/10, leftLowerArm, leftUpperArm);
 
   let leftHand = {};
-  separateByRatio(leftLowerArm.array, leftLowerArm.separatePoints, leftArmTip, 4/6, leftHand, leftLowerArm);
+  separateByRatio(outlineArray, leftLowerArm.array, leftLowerArm.separatePoints, leftArmTip, 4/6, leftHand, leftLowerArm);
 
   let rightArm = {};
-  separateRightArm(body.array, defects, boundingRect, bodyRect, rightArm, body, false);
+  separateRightArm(outlineArray, body.array, defects, boundingRect, bodyRect, rightArm, body);
 
   let rightUpperArm = {};
   let rightLowerArm = {};
   const rightArmTip = findFarthest(rightArm.array, rightArm.separatePoints.center);
-  separateByRatio(rightArm.array, rightArm.separatePoints, rightArmTip, 4/10, rightLowerArm, rightUpperArm);
+  separateByRatio(outlineArray, rightArm.array, rightArm.separatePoints, rightArmTip, 4/10, rightLowerArm, rightUpperArm);
 
   let rightHand = {};
-  separateByRatio(rightLowerArm.array, rightLowerArm.separatePoints, rightArmTip, 4/6, rightHand, rightLowerArm);
+  separateByRatio(outlineArray, rightLowerArm.array, rightLowerArm.separatePoints, rightArmTip, 4/6, rightHand, rightLowerArm);
 
   // 頭の位置を指定する
   let headSeparatePoints = [rightArm.separatePoints.end, leftArm.separatePoints.start];
@@ -187,30 +187,30 @@ const bone = (base64url) => {
   let head = {};
   const headTip = findFarthest(neckAndHead.array, neckAndHead.separatePoints.center);  
 
-  separateByRatio(neckAndHead.array, neckAndHead.separatePoints, headTip, 1/10, head, neck, true);
+  separateByRatio(outlineArray, neckAndHead.array, neckAndHead.separatePoints, headTip, 1/10, head, neck, true);
 
   // 胴体を切り取る
   let chest = {};
   let hips = {};
-  separateByRatio(body.array, neckAndHead.separatePoints, legDefect.far, 8/10, hips, chest);
+  separateByRatio(outlineArray, body.array, neckAndHead.separatePoints, legDefect.far, 8/10, hips, chest);
 
-  let boneNamedPoints = [
-    {name: "hips", point: hips.array},
-    {name: "chest", point: chest.array},
-    {name: "upperArm.L", point: leftUpperArm.array},
-    {name: "lowerArm.L", point: leftLowerArm.array},
-    {name: "hand.L", point: leftHand.array},
-    {name: "upperArm.R", point: rightUpperArm.array},
-    {name: "lowerArm.R", point: rightLowerArm.array},
-    {name: "hand.R", point: rightHand.array},
-    {name: "neck", point: neck.array},
-    {name: "head", point: head.array},
-    {name: "upperLeg.L", point: leftUpperLeg.array},
-    {name: "lowerLeg.L", point: leftLowerLeg.array},
-    {name: "foot.L", point: leftFoot.array},
-    {name: "upperLeg.R", point: rightUpperLeg.array},
-    {name: "lowerLeg.R", point: rightLowerLeg.array },
-    {name: "foot.R", point: rightFoot.array},
+  let boneNamedParts = [
+    {name: "hips", part: hips.array},
+    {name: "chest", part: chest.array},
+    {name: "upperArm.L", part: leftUpperArm.array},
+    {name: "lowerArm.L", part: leftLowerArm.array},
+    {name: "hand.L", part: leftHand.array},
+    {name: "upperArm.R", part: rightUpperArm.array},
+    {name: "lowerArm.R", part: rightLowerArm.array},
+    {name: "hand.R", part: rightHand.array},
+    {name: "neck", part: neck.array},
+    {name: "head", part: head.array},
+    {name: "upperLeg.L", part: leftUpperLeg.array},
+    {name: "lowerLeg.L", part: leftLowerLeg.array},
+    {name: "foot.L", part: leftFoot.array},
+    {name: "upperLeg.R", part: rightUpperLeg.array},
+    {name: "lowerLeg.R", part: rightLowerLeg.array},
+    {name: "foot.R", part: rightFoot.array},
   ]
 
 
@@ -236,9 +236,17 @@ const bone = (base64url) => {
   
   // 帰ってきた値をpartTrianglesとし、 trianglesに追加する
 
-  let vertices = boneNamedPoints.map(boneNamedPoints => boneNamedPoints.point).reduce((acc, point) => {
-    return _.unionWith(acc, point, _.isEqual);
-  }, []);
+  // 切り取った全ての頂点を合わせる(切り取った新しい点があるため)
+  let vertices = outlineArray.slice();
+
+  vertices.forEach((vertex, i) => {
+    cv.circle(dst, vertex, 2, new cv.Scalar((255 + i) % 255, (255 + i) % 255, 255), -1);
+  });
+  cv.imshow('output14', dst);
+  // let vertices = boneNamedPoints.map(boneNamedPoints => boneNamedPoints.point).reduce((acc, point) => {
+  //   return _.unionWith(acc, point, _.isEqual);
+  // }, []);
+
 
   console.log("vertices", vertices);
 
@@ -313,6 +321,7 @@ const bone = (base64url) => {
 
   cv.drawContours(dst, separatedContours, -1, new cv.Scalar(200, 255, 255), 1, cv.LINE_8);
   cv.imshow('output15', dst);
+
 
   outlineContour.delete;
   hull.delete;
@@ -597,7 +606,7 @@ const getMaxArea = (contours, maxAreaObject) => {
 }
 
 // 直線方程式で輪郭線を分割する
-const separateByLine = (originalContourArray, a, b, c, tipPortion, anotherPortion, tip, root = null) => {
+const separateByLine = (outlineArray, originalContourArray, a, b, c, tipPortion, anotherPortion, tip, root = null) => {
   // tip は手足の先端など分割の際に探査の基準とする位置（cv.Point）
   // a, b, c は ax + by + c = 0 の直線方程式の係数
 
@@ -620,11 +629,11 @@ const separateByLine = (originalContourArray, a, b, c, tipPortion, anotherPortio
   let id;
   let onePreviousId;
 
+  // 輪郭線の各点について探査し、最初の点(tip)と線分の位置関係（符号）が反転した点から交点を計算する
   for (let i = 0; i < contourArray.length + 1; ++i) {
     let sign;
-    // jで時計回り、反時計回りを指定する
+    // tipの点から輪郭線の順に探査する
     // 途中でidがマイナスになる場合に対応するため、配列の長さ + id とする
-    // id = (contourArray.length + tipId + j * i) % contourArray.length;
     id = (tipId + i) % contourArray.length;
     let point = contourArray[id];
     let x = point.x;
@@ -716,18 +725,22 @@ const separateByLine = (originalContourArray, a, b, c, tipPortion, anotherPortio
     separatePoints = distance(tipBothSidePoints[0].point, tipBothSidePoints[1].point) <= distance(rootBothSidePoints[0].point, rootBothSidePoints[1].point)? tipBothSidePoints : rootBothSidePoints  
   }
 
+  // 線分と輪郭線の交点を輪郭線の配列に追加する
   separatePoints.forEach(separatePoint => {
     if(separatePoint.sign != 0){
-      // 小数点以下を四捨五入し、前後の点と被らなかった場合、新たに追加する
+      // 小数点以下を四捨五入する
       separatePoint.point.x = Math.round(separatePoint.point.x);
       separatePoint.point.y = Math.round(separatePoint.point.y);
-      let dupPoint = findArrayIndex(contourArray, separatePoint);
-      if(dupPoint == -1){
-        contourArray.splice(separatePoint.id, 0, separatePoint.point);
+      // 前後の点と被らなかった場合、新たに追加する
+      if(findArrayIndex(contourArray, separatePoint) == -1){
+        // 全体の輪郭と、分割するパーツの輪郭にそれぞれ追加する
+        outlineArray.splice(findArrayIndex(outlineArray, contourArray[separatePoint.id]), 0, separatePoint.point);
+        contourArray.splice(findArrayIndex(contourArray, contourArray[separatePoint.id]), 0, separatePoint.point);
       }
     }
   });
 
+  // idを昇順に追っていくと separatePoints[0].id, tipId, separatePoints[1].id の順になるよう変更する
   separatePoints.sort((a, b) => a.id - b.id);
   if(tipId < separatePoints[0].id || separatePoints[1].id < tipId){
     separatePoints.sort((a, b) => b.id - a.id);
@@ -739,7 +752,7 @@ const separateByLine = (originalContourArray, a, b, c, tipPortion, anotherPortio
   separateByPoint(contourArray, separatePoints, tipPortion, anotherPortion);
 }
 
-// 与えられた2つの端（edges）をもとに輪郭線を切り取る
+// 与えられた2つの端（separatePoints）をもとに輪郭線を切り取る
 const separateByPoint = (contourArray, separatePoints, tipPortion, anotherPortion) => {
   let start = separatePoints[0];
   let end = separatePoints[1];
@@ -754,20 +767,19 @@ const separateByPoint = (contourArray, separatePoints, tipPortion, anotherPortio
     // 末端側の配列は、始点からidの最後、id:0 から終点、の二つの輪郭線を合成して作成
     tipPortionArray = contourArray.slice(startId).concat(contourArray.slice(0, endId + 1));
 
-    // 逆側の配列は、終点から始点で切り取る
+    // 根本側の配列は、終点から始点で切り取る
     anotherPortionArray = contourArray.slice(endId, startId + 1);
   }else{
     // 始点から終点までが id:0 をまたいでいない場合
     // 末端側の配列は、始点から終点の輪郭線を切り取る
     tipPortionArray = contourArray.slice(startId, endId + 1).concat();
 
-    // 逆側の配列は、始点からidの最後、id:0 から終点、の二つの輪郭線を合成して作成
+    // 根本側の配列は、始点からidの最後、id:0 から終点、の二つの輪郭線を合成して作成
     anotherPortionArray = contourArray.slice(endId).concat(contourArray.slice(0, startId + 1));
   }
 
   console.log("tipPortionArray", tipPortionArray);
   console.log("anotherPortionArray", anotherPortionArray);
-
 
   const rootPoints = {start: start, end: end, center: new cv.Point((start.x + end.x) / 2, (start.y + end.y) / 2)};
   tipPortion.array = tipPortionArray;
@@ -776,16 +788,16 @@ const separateByPoint = (contourArray, separatePoints, tipPortion, anotherPortio
   anotherPortion.separatePoints = rootPoints;
 }
 
-const separateLeftArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion) => {
-  separateArm(contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, true);
+const separateLeftArm = (outlineArray, contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion) => {
+  separateArm(outlineArray, contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, true);
 }
 
-const separateRightArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion) => {
-  separateArm(contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, false);
+const separateRightArm = (outlineArray, contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion) => {
+  separateArm(outlineArray, contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, false);
 }
 
 // 腕の defect 候補の中からもっとも depth の大きい2点で輪郭線を切り取る
-const separateArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, left = true) => {
+const separateArm = (outlineArray, contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, left = true) => {
 
   let armDefects;
   let start = 0;
@@ -845,7 +857,7 @@ const separateArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, 
 }
 
 // 手足の根元と先端を指定し、割合で切り取る
-const separateByRatio = (contourArray, rootPoints, tip, ratio, tipPortion, anotherPortion, parallel = false) => {
+const separateByRatio = (outlineArray, contourArray, rootPoints, tip, ratio, tipPortion, anotherPortion, parallel = false) => {
   // ratioは先端側と根本側の比率（0.7の場合、根本側が7割）
   // parallel = true にした場合、rootPointsによる線分と並行な線で切り取る
 
@@ -902,7 +914,7 @@ const separateByRatio = (contourArray, rootPoints, tip, ratio, tipPortion, anoth
   }
 
   // 算出した直線で切り取る
-  separateByLine(contourArray, a, b, c, tipPortion, anotherPortion, tip, rootPoints.start);
+  separateByLine(outlineArray, contourArray, a, b, c, tipPortion, anotherPortion, tip, rootPoints.start);
 }
 
 // Point配列の中から指定した点と同じ値のindexを返す
