@@ -1,4 +1,3 @@
-import Delaunay from "./delaunay";
 import earcut from 'earcut';
 import _ from 'lodash';
 
@@ -194,63 +193,47 @@ const bone = (base64url) => {
   let hips = {};
   separateByRatio(outlineArray, body.array, neckAndHead.separatePoints, legDefect.far, 8/10, hips, chest);
 
-  let boneNamedParts = [
-    {name: "hips", part: hips.array},
-    {name: "chest", part: chest.array},
-    {name: "upperArm.L", part: leftUpperArm.array},
-    {name: "lowerArm.L", part: leftLowerArm.array},
-    {name: "hand.L", part: leftHand.array},
-    {name: "upperArm.R", part: rightUpperArm.array},
-    {name: "lowerArm.R", part: rightLowerArm.array},
-    {name: "hand.R", part: rightHand.array},
-    {name: "neck", part: neck.array},
-    {name: "head", part: head.array},
-    {name: "upperLeg.L", part: leftUpperLeg.array},
-    {name: "lowerLeg.L", part: leftLowerLeg.array},
-    {name: "foot.L", part: leftFoot.array},
-    {name: "upperLeg.R", part: rightUpperLeg.array},
-    {name: "lowerLeg.R", part: rightLowerLeg.array},
-    {name: "foot.R", part: rightFoot.array},
+  let boneNamedPoints = [
+    {name: "hips", points: hips.array},
+    {name: "chest", points: chest.array},
+    {name: "upperArm.L", points: leftUpperArm.array},
+    {name: "lowerArm.L", points: leftLowerArm.array},
+    {name: "hand.L", points: leftHand.array},
+    {name: "upperArm.R", points: rightUpperArm.array},
+    {name: "lowerArm.R", points: rightLowerArm.array},
+    {name: "hand.R", points: rightHand.array},
+    {name: "neck", points: neck.array},
+    {name: "head", points: head.array},
+    {name: "upperLeg.L", points: leftUpperLeg.array},
+    {name: "lowerLeg.L", points: leftLowerLeg.array},
+    {name: "foot.L", points: leftFoot.array},
+    {name: "upperLeg.R", points: rightUpperLeg.array},
+    {name: "lowerLeg.R", points: rightLowerLeg.array},
+    {name: "foot.R", points: rightFoot.array},
   ]
 
+  // パーツの輪郭ごとに三角分割して一つの配列にまとめる
+  // 各頂点と関連するパーツ名の配列を作成する
 
+  // 三角形をまとめた配列の初期化
+  let triangles = [];
+  // 各頂点と関連するパーツ名の配列の初期化
+  let boneNamesOnVertices = new Array(outlineArray.length).fill().map(i => []);
 
-  // let vertices = [];
-  // boneNamedPoints.forEach(boneNamedPoint => {
-  //   boneNamedPoint.point.forEach(point => {
-      
-  //   });
-  // });
-
-  
-  // パーツのcontourArray, vertices を引数にとる関数
-  // earcut で contourArray を三角分割する
-  // trianglesを宣言する
-  // 三角分割のidひとつひとつについて処理する
-  //  contourArrayのそのidの点を探す
-  //   その点と同じ位置のverticesのidを探す
-  //  trianglesにidを追加する
-  
-  // すべての三角分割の点について処理したtrianglesを返す
-  
-  
-  // 帰ってきた値をpartTrianglesとし、 trianglesに追加する
-
-  // 切り取った全ての頂点を合わせる(切り取った新しい点があるため)
-  let vertices = outlineArray.slice();
-
-  vertices.forEach((vertex, i) => {
-    cv.circle(dst, vertex, 2, new cv.Scalar((255 + i) % 255, (255 + i) % 255, 255), -1);
+  // パーツの輪郭ごとに処理する
+  boneNamedPoints.forEach(boneNamedPoint => {
+    let contourArray = boneNamedPoint.points;
+    // 三角分割する
+    let partTriangles = triangulation(contourArray);
+    // 三角分割で得られた配列は、パーツごとの輪郭戦のidで指定されているため、全体の輪郭戦のidに指定し直す
+    partTriangles = partTriangles.map(pointId => findArrayIndex(outlineArray, contourArray[pointId]));
+    // 指定し直した配列を追加する
+    triangles.push(...partTriangles);
+    // パーツの各点のidと同じidに関連するパーツ名の配列を作成する
+    partTriangles.forEach(pointId => {
+      boneNamesOnVertices[pointId] = _.union(boneNamesOnVertices[pointId], [boneNamedPoint.name]);
+    });
   });
-  cv.imshow('output14', dst);
-  // let vertices = boneNamedPoints.map(boneNamedPoints => boneNamedPoints.point).reduce((acc, point) => {
-  //   return _.unionWith(acc, point, _.isEqual);
-  // }, []);
-
-
-  console.log("vertices", vertices);
-
-  triangulation(outlineArray);
 
   let leftLegContour = new cv.Mat();
   let rightLegContour = new cv.Mat();
