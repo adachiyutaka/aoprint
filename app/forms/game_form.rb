@@ -13,13 +13,15 @@ class GameForm
     canvas_size = JSON.parse(canvas, symbolize_names: true)
     stage = Stage.create(width: canvas_size[:width], height: canvas_size[:height], game_id: @game.id)
 
+    puts "this is test line"
     puts "objects in game_form: "
     puts objects
     # TODO: 1object対多positionに対応する必要あり
     # 各オブジェクトを作成
     JSON.parse(objects, symbolize_names: true).each do |object|
       # GameObjectの作成
-      game_object = GameObject.create(symbol: object[:symbol], game_id: game.id, role_id: object[:role])
+      # JSに合わせているため "meshData" はupperCamel表記
+      game_object = GameObject.create(symbol: object[:symbol], game_id: game.id, role_id: object[:role], mesh_data: object[:meshData])
 
       if object[:image]
         # Imageが既存のものかどうか

@@ -90,8 +90,7 @@ class CreateController {
         gameObject.role = property.selectedIndex;
         if(gameObject.role == roleIndex.player){
           console.log("updateInfoValue make bone");
-          let meshData = bone(gameObject.image.base64url);
-          gameObject.setMesh(meshData.vertices, meshData.triangles, meshData.boneNamesOnVertices);
+          this.updateMeshData();
         }
         console.log("gameObject", gameObject);
         break
@@ -109,6 +108,12 @@ class CreateController {
     }
     this.updatePreview();
     this.updateInfoInput();
+  }
+
+  updateMeshData() {
+    let gameObject = this.selectedGameObject;
+    let meshData = bone(gameObject.image.base64url);
+    gameObject.setMesh(meshData.vertices, meshData.triangles, meshData.boneNamesOnVertices);
   }
 
   // ObjectMoveの移動量を設定する
