@@ -90,8 +90,10 @@ class CreateController {
         gameObject.role = property.selectedIndex;
         if(gameObject.role == roleIndex.player){
           console.log("updateInfoValue make bone");
-          bone(gameObject.image.base64url);
+          let meshData = bone(gameObject.image.base64url);
+          gameObject.setMesh(meshData.vertices, meshData.triangles, meshData.boneNamesOnVertices);
         }
+        console.log("gameObject", gameObject);
         break
     }
 

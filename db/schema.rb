@@ -38,6 +38,7 @@ ActiveRecord::Schema.define(version: 2022_01_05_060155) do
     t.string "name", default: ""
     t.string "text", default: ""
     t.integer "role_id", default: 1
+    t.json "mesh_data"
     t.bigint "game_id"
     t.bigint "image_id"
     t.bigint "script_id"

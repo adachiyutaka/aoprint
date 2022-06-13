@@ -155,7 +155,7 @@ const bone = (base64url) => {
   // 腕を判定する
   // 腕の輪郭線を切り取る
   let leftArm = {};
-  separateLeftArm(outlineArray, body.array, defects, boundingRect, bodyRect, leftArm, body);
+  separateLeftArm(body.array, defects, boundingRect, bodyRect, leftArm, body);
 
   let leftUpperArm = {};
   let leftLowerArm = {};
@@ -166,7 +166,7 @@ const bone = (base64url) => {
   separateByRatio(outlineArray, leftLowerArm.array, leftLowerArm.separatePoints, leftArmTip, 4/6, leftHand, leftLowerArm);
 
   let rightArm = {};
-  separateRightArm(outlineArray, body.array, defects, boundingRect, bodyRect, rightArm, body);
+  separateRightArm(body.array, defects, boundingRect, bodyRect, rightArm, body);
 
   let rightUpperArm = {};
   let rightLowerArm = {};
@@ -235,6 +235,17 @@ const bone = (base64url) => {
     });
   });
 
+  boneNamesOnVertices.forEach((boneNamesOnVertex, index) => {
+    if(boneNamesOnVertex.length == 0){
+      cv.circle(dst, outlineArray[index], 3, new cv.Scalar(255, 0, 0), -1);
+    }
+  });
+  cv.imshow('output14', dst);
+
+  console.log("boneNamesOnVertices", boneNamesOnVertices);
+  console.log("boneNamedPoints", boneNamedPoints);
+  console.log("outlineArray", outlineArray);
+
   let leftLegContour = new cv.Mat();
   let rightLegContour = new cv.Mat();
   let leftUpperLegContour = new cv.Mat();
@@ -297,8 +308,8 @@ const bone = (base64url) => {
   // separatedContours.push_back(rightUpperArmContour);
   separatedContours.push_back(rightLowerArmContour);
   // separatedContours.push_back(rightHandContour);
-  separatedContours.push_back(headContour);
-  // separatedContours.push_back(neckContour);
+  // separatedContours.push_back(headContour);
+  separatedContours.push_back(neckContour);
   separatedContours.push_back(chestContour);
   separatedContours.push_back(hipsContour);
 
@@ -335,6 +346,8 @@ const bone = (base64url) => {
 
   segmentSrc.delete;
   src.delete;
+
+  return {vertices: outlineArray, triangles: triangles, boneNamesOnVertices: boneNamesOnVertices};
 }
 
 // 最外部の輪郭線を取得する
@@ -714,8 +727,9 @@ const separateByLine = (outlineArray, originalContourArray, a, b, c, tipPortion,
       // 小数点以下を四捨五入する
       separatePoint.point.x = Math.round(separatePoint.point.x);
       separatePoint.point.y = Math.round(separatePoint.point.y);
+      console.log("round separatePoint", separatePoint);
       // 前後の点と被らなかった場合、新たに追加する
-      if(findArrayIndex(contourArray, separatePoint) == -1){
+      if(findArrayIndex(contourArray, separatePoint.point) == -1){
         // 全体の輪郭と、分割するパーツの輪郭にそれぞれ追加する
         outlineArray.splice(findArrayIndex(outlineArray, contourArray[separatePoint.id]), 0, separatePoint.point);
         contourArray.splice(findArrayIndex(contourArray, contourArray[separatePoint.id]), 0, separatePoint.point);
@@ -771,16 +785,16 @@ const separateByPoint = (contourArray, separatePoints, tipPortion, anotherPortio
   anotherPortion.separatePoints = rootPoints;
 }
 
-const separateLeftArm = (outlineArray, contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion) => {
-  separateArm(outlineArray, contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, true);
+const separateLeftArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion) => {
+  separateArm(contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, true);
 }
 
-const separateRightArm = (outlineArray, contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion) => {
-  separateArm(outlineArray, contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, false);
+const separateRightArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion) => {
+  separateArm(contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, false);
 }
 
 // 腕の defect 候補の中からもっとも depth の大きい2点で輪郭線を切り取る
-const separateArm = (outlineArray, contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, left = true) => {
+const separateArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, left = true) => {
 
   let armDefects;
   let start = 0;
