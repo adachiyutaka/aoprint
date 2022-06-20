@@ -100,7 +100,8 @@ class GamesController < ApplicationController
     # Objectをhash化
     objects = []
     game.game_objects.each do |obj|
-      object = {symbol: obj.symbol, image: imageToBase64(obj.images[0].image)}
+      # key名がupperCamelなのは、C#クラスとの互換のため
+      object = {symbol: obj.symbol, image: imageToBase64(obj.images[0].image), meshData: obj.mesh_data}
       object[:role] = obj.role.id
       objects << object
     end
