@@ -193,23 +193,116 @@ const bone = (base64url) => {
   let hips = {};
   separateByRatio(outlineArray, body.array, neckAndHead.separatePoints, legDefect.far, 8/10, hips, chest);
 
+  console.log("chest.rootPoints", chest.rootPoints)
+  console.log("hips.rootPoints", hips.rootPoints)
+  
   let boneNamedPoints = [
-    {name: "hips", points: hips.array},
-    {name: "chest", points: chest.array},
-    {name: "upperArm.L", points: leftUpperArm.array},
-    {name: "lowerArm.L", points: leftLowerArm.array},
-    {name: "hand.L", points: leftHand.array},
-    {name: "upperArm.R", points: rightUpperArm.array},
-    {name: "lowerArm.R", points: rightLowerArm.array},
-    {name: "hand.R", points: rightHand.array},
-    {name: "neck", points: neck.array},
-    {name: "head", points: head.array},
-    {name: "upperLeg.L", points: leftUpperLeg.array},
-    {name: "lowerLeg.L", points: leftLowerLeg.array},
-    {name: "foot.L", points: leftFoot.array},
-    {name: "upperLeg.R", points: rightUpperLeg.array},
-    {name: "lowerLeg.R", points: rightLowerLeg.array},
-    {name: "foot.R", points: rightFoot.array},
+    {name: "hips", points: hips},
+    {name: "chest", points: chest},
+    {name: "upperArm.L", points: leftUpperArm},
+    {name: "lowerArm.L", points: leftLowerArm},
+    {name: "hand.L", points: leftHand},
+    {name: "upperArm.R", points: rightUpperArm},
+    {name: "lowerArm.R", points: rightLowerArm},
+    {name: "hand.R", points: rightHand},
+    {name: "neck", points: neck},
+    {name: "head", points: head},
+    {name: "upperLeg.L", points: leftUpperLeg},
+    {name: "lowerLeg.L", points: leftLowerLeg},
+    {name: "foot.L", points: leftFoot},
+    {name: "upperLeg.R", points: rightUpperLeg},
+    {name: "lowerLeg.R", points: rightLowerLeg},
+    {name: "foot.R", points: rightFoot},
+  ]
+
+  let boneId = [
+    "hips", 
+    "spine", 
+    "chest", 
+    "chest.Upper", 
+    "collarbone.L", 
+    "upperArm.L", 
+    "lowerArm.L", 
+    "hand.L", 
+    "indexProximal.L", 
+    "indexIntermediate.L", 
+    "indexDistal.L", 
+    "indexDistal.L_end", 
+    "middleProximal.L", 
+    "middleIntermediate.L", 
+    "middleDistal.L", 
+    "middleDistal.L_end", 
+    "thumbProximal.L", 
+    "thumbIntermediate.L", 
+    "thumbDistal.L", 
+    "thumbDistal.L_end", 
+    "collarbone.R", 
+    "upperArm.R", 
+    "lowerArm.R", 
+    "hand.R", 
+    "indexProximal.R", 
+    "indexIntermediate.R", 
+    "indexDistal.R", 
+    "indexDistal.R_end", 
+    "middleProximal.R", 
+    "middleIntermediate.R", 
+    "middleDistal.R", 
+    "middleDistal.R_end", 
+    "thumbProximal.R", 
+    "thumbIntermediate.R", 
+    "thumbDistal.R", 
+    "thumbDistal.R_end", 
+    "neck", 
+    "head", 
+    "eye.L", 
+    "eye.L_end", 
+    "eye.R", 
+    "eye.R_end", 
+    "jaw", 
+    "jaw_end", 
+    "upperLeg.L", 
+    "lowerLeg.L", 
+    "foot.L", 
+    "toe.L", 
+    "toe.L_end", 
+    "upperLeg.R", 
+    "lowerLeg.R", 
+    "foot.R", 
+    "toe.R", 
+    "toe.R_end"]
+  
+  let boneHierachy = [
+    "hips", [
+      "chest", [
+        "neck", [
+          "head"
+        ]
+      ], [
+        "upperArm.L", [
+          "lowerArm.L", [
+            "hand.L"
+          ]
+        ]
+      ], [
+        "upperArm.R", [
+          "lowerArm.R", [
+            "hand.R"
+          ]
+        ]
+      ]
+    ], [
+      "upperLeg.L", [
+        "lowerLeg.L", [
+          "foot.L"
+        ]
+      ]
+    ], [
+      "upperLeg.R", [
+        "lowerLeg.R", [
+          "foot.R"
+        ]
+      ]
+    ]
   ]
 
   // パーツの輪郭ごとに三角分割して一つの配列にまとめる
@@ -219,10 +312,12 @@ const bone = (base64url) => {
   let triangles = [];
   // 各頂点と関連するパーツ名の配列の初期化
   let boneNamesOnVertices = new Array(outlineArray.length).fill().map(i => []);
+  let boneIdOnVertices = new Array(outlineArray.length).fill().map(i => []);
+  let boneWeightOnVertices = new Array(outlineArray.length).fill().map(i => []);
 
   // パーツの輪郭ごとに処理する
   boneNamedPoints.forEach(boneNamedPoint => {
-    let contourArray = boneNamedPoint.points;
+    let contourArray = boneNamedPoint.points.array;
     // 三角分割する
     let partTriangles = triangulation(contourArray);
     // 三角分割で得られた配列は、パーツごとの輪郭戦のidで指定されているため、全体の輪郭戦のidに指定し直す
@@ -235,6 +330,12 @@ const bone = (base64url) => {
     });
   });
 
+  boneWeight(outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices);
+
+  console.log("boneId", boneId);
+  console.log("boneIdOnVertices", boneIdOnVertices);
+  console.log("boneWeightOnVertices", boneWeightOnVertices);
+  
   boneNamesOnVertices.forEach((boneNamesOnVertex, index) => {
     if(boneNamesOnVertex.length == 0){
       cv.circle(dst, outlineArray[index], 3, new cv.Scalar(255, 0, 0), -1);
@@ -316,6 +417,10 @@ const bone = (base64url) => {
   cv.drawContours(dst, separatedContours, -1, new cv.Scalar(200, 255, 255), 1, cv.LINE_8);
   cv.imshow('output15', dst);
 
+  boneWeightOnVertices.forEach((boneWeights, index) => {
+    cv.circle(dst, outlineArray[index], 3, new cv.Scalar(255 * boneWeights[0], 255 - (255 * boneWeights[0]), 0), -1);
+  });
+  cv.imshow('output16', dst);
 
   outlineContour.delete;
   hull.delete;
@@ -347,7 +452,7 @@ const bone = (base64url) => {
   segmentSrc.delete;
   src.delete;
 
-  return {vertices: outlineArray, triangles: triangles, boneNamesOnVertices: boneNamesOnVertices};
+  return {vertices: outlineArray, triangles: triangles, boneIdOnVertices: boneIdOnVertices, boneWeightOnVertices: boneWeightOnVertices};
 }
 
 // 最外部の輪郭線を取得する
@@ -778,11 +883,11 @@ const separateByPoint = (contourArray, separatePoints, tipPortion, anotherPortio
   console.log("tipPortionArray", tipPortionArray);
   console.log("anotherPortionArray", anotherPortionArray);
 
-  const rootPoints = {start: start, end: end, center: new cv.Point((start.x + end.x) / 2, (start.y + end.y) / 2)};
+  const points = {start: start, end: end, center: new cv.Point((start.x + end.x) / 2, (start.y + end.y) / 2)};
   tipPortion.array = tipPortionArray;
-  tipPortion.separatePoints = rootPoints;
+  tipPortion.separatePoints = points;
   anotherPortion.array = anotherPortionArray;
-  anotherPortion.separatePoints = rootPoints;
+  anotherPortion.separatePoints = points;
 }
 
 const separateLeftArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion) => {
@@ -912,6 +1017,7 @@ const separateByRatio = (outlineArray, contourArray, rootPoints, tip, ratio, tip
 
   // 算出した直線で切り取る
   separateByLine(outlineArray, contourArray, a, b, c, tipPortion, anotherPortion, tip, rootPoints.start);
+  anotherPortion.rootPoints = rootPoints;
 }
 
 // Point配列の中から指定した点と同じ値のindexを返す
@@ -968,6 +1074,81 @@ const triangulation = (arrayContour) => {
   }
 
   return triangles;
+}
+
+const boneWeight = (outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices) => {
+  let arrayCount = 0;
+  boneHierachy.forEach(bones => {
+    if(Array.isArray(bones)){
+      arrayCount ++;
+    }
+  });
+  console.log("arrayCount", arrayCount);
+  
+  let parentBoneName = boneHierachy[0];
+  let points = boneNamedPoints.find(boneNamedPoint => boneNamedPoint.name == parentBoneName).points;
+  console.log("parentBoneName", parentBoneName);
+  console.log("points", points);
+
+
+  if(arrayCount == 1){
+    console.log("arrayCount == 1");
+    let childBoneName = boneHierachy[1][0];
+    let rootPoint = points.rootPoints.center;
+    let separatePoint = points.separatePoints.center;
+    let slope = (separatePoint.y - rootPoint.y) / (separatePoint.x - rootPoint.x);
+    let orthogonalSlope = - 1 / slope;
+    // y - separatePoint.y = slope * (x - separatePoint.x)
+    // y = slope * x - slope * separatePoint.x + separatePoint.y
+
+    // y - point.y = orthogonalSlope * (x - point.x)
+    // y = orthogonalSlope * x - orthogonalSlope * point.x + point.y
+
+    // y=ax+b と y=cx+d の交点は (d-b/a-c, ad-bc/a-c)
+    console.log("slope", slope);
+
+    points.array.forEach(point => {
+      let id = findArrayIndex(outlineArray, point);
+      let a = slope;
+      let b = - slope * separatePoint.x + separatePoint.y;
+      let c = orthogonalSlope;
+      let d = - orthogonalSlope * point.x + point.y;
+      let intersection = {};
+      intersection.x = (d - b) / (a - c);
+      intersection.y = (a * d - b * c) / (a - c);
+      console.log("intersection", intersection, "separatePoint", separatePoint, "rootPoint", rootPoint);
+
+      let boneLength = distance(rootPoint, separatePoint);
+      let intersectionLength = distance(rootPoint, intersection);
+      let parentWeight = Math.min(intersectionLength / boneLength, 1);
+      let childWeight = 1 - parentWeight;
+      if(boneIdOnVertices[id].length == 0){
+        boneIdOnVertices[id].push(boneId.findIndex(name => name == parentBoneName), boneId.findIndex(name => name == childBoneName));
+      }
+      if(boneWeightOnVertices[id].length == 0){
+        boneWeightOnVertices[id].push(parentWeight, childWeight);      
+      }
+    });
+    boneWeight(outlineArray, boneHierachy[1], boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices);
+  }else{
+    console.log("arrayCount != 1");
+    points.array.forEach(point => {
+      let id = findArrayIndex(outlineArray, point);
+      if(boneIdOnVertices[id].length == 0){
+        boneIdOnVertices[id].push(boneId.findIndex(name => name == parentBoneName));
+      }
+      if(boneWeightOnVertices[id].length == 0){
+        boneWeightOnVertices[id].push(1);      
+      }
+    });
+    if(arrayCount != 0){
+      console.log("arrayCount != 0");
+      boneHierachy.shift();
+      boneHierachy.forEach(bones => {
+        boneWeight(outlineArray, bones, boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices);
+      });
+    }
+  }
 }
 
 export default bone;

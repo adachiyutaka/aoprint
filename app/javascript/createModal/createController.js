@@ -113,7 +113,7 @@ class CreateController {
   updateMeshData() {
     let gameObject = this.selectedGameObject;
     let meshData = bone(gameObject.image.base64url);
-    gameObject.setMesh(meshData.vertices, meshData.triangles, meshData.boneNamesOnVertices);
+    gameObject.setMesh(meshData.vertices, meshData.triangles, meshData.boneIdOnVertices, meshData.boneWeightOnVertices);
   }
 
   // ObjectMoveの移動量を設定する

@@ -101,6 +101,7 @@ class GamesController < ApplicationController
     objects = []
     game.game_objects.each do |obj|
       # key名がupperCamelなのは、C#クラスとの互換のため
+      puts obj
       object = {symbol: obj.symbol, image: imageToBase64(obj.images[0].image), meshData: obj.mesh_data}
       object[:role] = obj.role.id
       objects << object
@@ -123,7 +124,7 @@ class GamesController < ApplicationController
 
     # key名がupperCamelなのは、C#クラスとの互換のため
     hash = {stage: stage_size, objects: objects, positions: positions, objectPositions: object_positions}
-
+    puts hash
     render json: hash
   end
 
