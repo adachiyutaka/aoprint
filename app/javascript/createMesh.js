@@ -21,7 +21,7 @@ const inputMesh = () => {
 }
 
 const createMesh = (img) => {
-  for (let i = 1; i < 40; i++) {
+  for (let i = 1; i < 100; i++) {
     const output = document.createElement('canvas');
     output.id = "output" + i;
     output.setAttribute('width', img.naturalWidth);

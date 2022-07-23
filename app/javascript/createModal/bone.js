@@ -417,10 +417,20 @@ const bone = (base64url) => {
   cv.drawContours(dst, separatedContours, -1, new cv.Scalar(200, 255, 255), 1, cv.LINE_8);
   cv.imshow('output15', dst);
 
-  boneWeightOnVertices.forEach((boneWeights, index) => {
-    cv.circle(dst, outlineArray[index], 3, new cv.Scalar(255 * boneWeights[0], 255 - (255 * boneWeights[0]), 0), -1);
+  boneId.forEach((markedBoneName, boneName_i) => {
+    let clone = dst.clone();
+    boneWeightOnVertices.forEach((boneWeights, index) => {
+      let boneNames = boneIdOnVertices[index].map(id => boneId[id]);
+      // let markedBoneName = "upperLeg.L";
+      let markedBoneId;
+      if(boneNames.includes(markedBoneName)){
+        markedBoneId = boneNames.indexOf(markedBoneName);
+        cv.circle(clone, outlineArray[index], 3, new cv.Scalar(255 * boneWeights[markedBoneId], 255 * boneWeights[markedBoneId], 0), -1);
+      }
+    });
+    let outputId = 16 + boneName_i;
+    cv.imshow('output' + outputId, clone);
   });
-  cv.imshow('output16', dst);
 
   outlineContour.delete;
   hull.delete;
@@ -1076,26 +1086,35 @@ const triangulation = (arrayContour) => {
   return triangles;
 }
 
-const boneWeight = (outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices) => {
-  let arrayCount = 0;
+const boneWeight = (outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices, parentBoneName = "hips") => {
+
+  // 最上位のボーンの次の階層にいくつボーンがあるか調べる
+  // (upperArm.L > lowerArm.L なら 1, hip > spine, upperLeg.L, upperLeg.R なら 3）
+  let childBoneCount = 0;
   boneHierachy.forEach(bones => {
+    // 配列かどうかを調べる
     if(Array.isArray(bones)){
-      arrayCount ++;
+      childBoneCount ++;
     }
   });
-  console.log("arrayCount", arrayCount);
-  
-  let parentBoneName = boneHierachy[0];
-  let points = boneNamedPoints.find(boneNamedPoint => boneNamedPoint.name == parentBoneName).points;
-  console.log("parentBoneName", parentBoneName);
+  console.log("childBoneCount", childBoneCount);
+
+  // ボーン名とパーツの輪郭線の情報を取得
+  let boneName = boneHierachy[0];
+  let points = boneNamedPoints.find(boneNamedPoint => boneNamedPoint.name == boneName).points;
+  console.log("boneName", boneName);
   console.log("points", points);
 
 
-  if(arrayCount == 1){
-    console.log("arrayCount == 1");
+  // 子ボーン（次の階層のボーン）の数が1の場合
+  if(childBoneCount == 1){
+    console.log("childBoneCount == 1");
+    // 子ボーンの名前を取得
     let childBoneName = boneHierachy[1][0];
+    // ボーンの根本と先端の位置を取得
     let rootPoint = points.rootPoints.center;
     let separatePoint = points.separatePoints.center;
+    // ボーンの傾きと直行する傾きを算出
     let slope = (separatePoint.y - rootPoint.y) / (separatePoint.x - rootPoint.x);
     let orthogonalSlope = - 1 / slope;
     // y - separatePoint.y = slope * (x - separatePoint.x)
@@ -1107,8 +1126,10 @@ const boneWeight = (outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdO
     // y=ax+b と y=cx+d の交点は (d-b/a-c, ad-bc/a-c)
     console.log("slope", slope);
 
+    // 輪郭線の各点と根本、先端との位置関係を計算し、ウェイトづけする
     points.array.forEach(point => {
-      let id = findArrayIndex(outlineArray, point);
+      // ボーンの根本と先端を結ぶ線分と、それに直行する輪郭線の一つの点を通る線分の交点を求める
+      // y = ax + b, y = cx + d の2直線の交点は、x = (d - b) / (a - c), y =  (a * d - b * c) / (a - c)
       let a = slope;
       let b = - slope * separatePoint.x + separatePoint.y;
       let c = orthogonalSlope;
@@ -1118,34 +1139,54 @@ const boneWeight = (outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdO
       intersection.y = (a * d - b * c) / (a - c);
       console.log("intersection", intersection, "separatePoint", separatePoint, "rootPoint", rootPoint);
 
+      // ボーンの線分と、親ボーンの根本〜交点までの線分の長さを求める
       let boneLength = distance(rootPoint, separatePoint);
       let intersectionLength = distance(rootPoint, intersection);
-      let parentWeight = Math.min(intersectionLength / boneLength, 1);
-      let childWeight = 1 - parentWeight;
-      if(boneIdOnVertices[id].length == 0){
-        boneIdOnVertices[id].push(boneId.findIndex(name => name == parentBoneName), boneId.findIndex(name => name == childBoneName));
-      }
-      if(boneWeightOnVertices[id].length == 0){
-        boneWeightOnVertices[id].push(parentWeight, childWeight);      
-      }
+      // 2つの長さの割合をそれぞれ親ボーン、子ボーンのウェイトとする
+      let weightRatio = Math.min(intersectionLength / boneLength, 1);
+      let parentWeight = Math.max(0.5 - weightRatio, 0);
+      let childWeight = Math.max(weightRatio - 0.5, 0);
+      let weight = 1 - (parentWeight + childWeight);
+
+      // 輪郭全体におけるid（verticesのid）を取得する
+      let id = findArrayIndex(outlineArray, point);
+      // 各点における関連ボーンのidのリスト（boneIdOnVertices）に該当するボーン、子ボーンのidを追加する
+      boneIdOnVertices[id] = [boneId.findIndex(name => name == parentBoneName), boneId.findIndex(name => name == boneName), boneId.findIndex(name => name == childBoneName)];
+      // 各点における関連ボーンのウェイトのリスト（boneWeightOnVertices）に該当するボーン、子ボーンのウェイトを追加する
+      boneWeightOnVertices[id] = [parentWeight, weight, childWeight];
+      // // 各点における関連ボーンのidのリスト（boneIdOnVertices）に該当するボーン、子ボーンのidを追加する
+      // if(boneIdOnVertices[id].length == 0){
+      //   boneIdOnVertices[id].push(boneId.findIndex(name => name == parentBoneName), boneId.findIndex(name => name == boneName), boneId.findIndex(name => name == childBoneName));
+      // }
+      // // 各点における関連ボーンのウェイトのリスト（boneWeightOnVertices）に該当するボーン、子ボーンのウェイトを追加する
+      // if(boneWeightOnVertices[id].length == 0){
+      //   boneWeightOnVertices[id].push(parentWeight, weight, childWeight);
+      // }
     });
-    boneWeight(outlineArray, boneHierachy[1], boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices);
+    // 子ボーンについても再起的にウェイトを設定する
+    boneWeight(outlineArray, boneHierachy[1], boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices, boneName);
+
+  // 子ボーン（次の階層のボーン）の数が1でない場合
   }else{
-    console.log("arrayCount != 1");
+    console.log("childBoneCount != 1");
+    
+    // ボーンの輪郭線の各点にボーンidとウェイト（1）を設定する
     points.array.forEach(point => {
       let id = findArrayIndex(outlineArray, point);
       if(boneIdOnVertices[id].length == 0){
-        boneIdOnVertices[id].push(boneId.findIndex(name => name == parentBoneName));
+        boneIdOnVertices[id].push(boneId.findIndex(name => name == boneName));
       }
       if(boneWeightOnVertices[id].length == 0){
-        boneWeightOnVertices[id].push(1);      
+        boneWeightOnVertices[id].push(1);
       }
     });
-    if(arrayCount != 0){
-      console.log("arrayCount != 0");
+
+    // 子ボーンの数が2以上の場合、それぞれの子ボーンについても再起的にウェイトを設定する
+    if(childBoneCount != 0){
+      console.log("childBoneCount != 0");
       boneHierachy.shift();
       boneHierachy.forEach(bones => {
-        boneWeight(outlineArray, bones, boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices);
+        boneWeight(outlineArray, bones, boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices, boneName);
       });
     }
   }
