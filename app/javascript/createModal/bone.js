@@ -133,22 +133,22 @@ const bone = (base64url) => {
 
   let leftUpperLeg = {};
   let leftLowerLeg = {};
-  const leftLegTip = findFarthest(leftLeg.array, leftLeg.separatePoints.center);
-  separateByRatio(outlineArray, leftLeg.array, leftLeg.separatePoints, leftLegTip, 4/10, leftLowerLeg, leftUpperLeg);
+  const leftLegTip = findFarthest(leftLeg.array, leftLeg.rootPoints.center);
+  separateByRatio(outlineArray, leftLeg.array, leftLeg.rootPoints, leftLegTip, 4/10, leftLowerLeg, leftUpperLeg);
 
   let leftFoot = {};
-  separateByRatio(outlineArray, leftLowerLeg.array, leftLowerLeg.separatePoints, leftLegTip, 4/6, leftFoot, leftLowerLeg);
+  separateByRatio(outlineArray, leftLowerLeg.array, leftLowerLeg.rootPoints, leftLegTip, 4/6, leftFoot, leftLowerLeg);
 
   let rightLeg = {};
   separateByLine(outlineArray, body.array, 0, 1, -legDefect.far.y, rightLeg, body, legDefect.end);
 
   let rightUpperLeg = {};
   let rightLowerLeg = {};
-  const rightLegTip = findFarthest(rightLeg.array, rightLeg.separatePoints.center);
-  separateByRatio(outlineArray, rightLeg.array, rightLeg.separatePoints, rightLegTip, 4/10, rightLowerLeg, rightUpperLeg);
+  const rightLegTip = findFarthest(rightLeg.array, rightLeg.rootPoints.center);
+  separateByRatio(outlineArray, rightLeg.array, rightLeg.rootPoints, rightLegTip, 4/10, rightLowerLeg, rightUpperLeg);
 
   let rightFoot = {};
-  separateByRatio(outlineArray, rightLowerLeg.array, rightLowerLeg.separatePoints, rightLegTip, 4/6, rightFoot, rightLowerLeg);
+  separateByRatio(outlineArray, rightLowerLeg.array, rightLowerLeg.rootPoints, rightLegTip, 4/6, rightFoot, rightLowerLeg);
 
   // 足がない場合
 
@@ -159,39 +159,39 @@ const bone = (base64url) => {
 
   let leftUpperArm = {};
   let leftLowerArm = {};
-  const leftArmTip = findFarthest(leftArm.array, leftArm.separatePoints.center);
-  separateByRatio(outlineArray, leftArm.array, leftArm.separatePoints, leftArmTip, 4/10, leftLowerArm, leftUpperArm);
+  const leftArmTip = findFarthest(leftArm.array, leftArm.rootPoints.center);
+  separateByRatio(outlineArray, leftArm.array, leftArm.rootPoints, leftArmTip, 4/10, leftLowerArm, leftUpperArm);
 
   let leftHand = {};
-  separateByRatio(outlineArray, leftLowerArm.array, leftLowerArm.separatePoints, leftArmTip, 4/6, leftHand, leftLowerArm);
+  separateByRatio(outlineArray, leftLowerArm.array, leftLowerArm.rootPoints, leftArmTip, 4/6, leftHand, leftLowerArm);
 
   let rightArm = {};
   separateRightArm(body.array, defects, boundingRect, bodyRect, rightArm, body);
 
   let rightUpperArm = {};
   let rightLowerArm = {};
-  const rightArmTip = findFarthest(rightArm.array, rightArm.separatePoints.center);
-  separateByRatio(outlineArray, rightArm.array, rightArm.separatePoints, rightArmTip, 4/10, rightLowerArm, rightUpperArm);
+  const rightArmTip = findFarthest(rightArm.array, rightArm.rootPoints.center);
+  separateByRatio(outlineArray, rightArm.array, rightArm.rootPoints, rightArmTip, 4/10, rightLowerArm, rightUpperArm);
 
   let rightHand = {};
-  separateByRatio(outlineArray, rightLowerArm.array, rightLowerArm.separatePoints, rightArmTip, 4/6, rightHand, rightLowerArm);
+  separateByRatio(outlineArray, rightLowerArm.array, rightLowerArm.rootPoints, rightArmTip, 4/6, rightHand, rightLowerArm);
 
   // 頭の位置を指定する
-  let headSeparatePoints = [rightArm.separatePoints.end, leftArm.separatePoints.start];
+  let headSeparatePoints = [rightArm.rootPoints.end, leftArm.rootPoints.start];
 
   // 頭を切り取る
   let neckAndHead = {};
   separateByPoint(body.array, headSeparatePoints, neckAndHead, body);
   let neck = {};
   let head = {};
-  const headTip = findFarthest(neckAndHead.array, neckAndHead.separatePoints.center);  
+  const headTip = findFarthest(neckAndHead.array, neckAndHead.rootPoints.center);  
 
-  separateByRatio(outlineArray, neckAndHead.array, neckAndHead.separatePoints, headTip, 1/10, head, neck, true);
+  separateByRatio(outlineArray, neckAndHead.array, neckAndHead.rootPoints, headTip, 1/10, head, neck, true);
 
   // 胴体を切り取る
   let chest = {};
   let hips = {};
-  separateByRatio(outlineArray, body.array, neckAndHead.separatePoints, legDefect.far, 8/10, hips, chest);
+  separateByRatio(outlineArray, body.array, neckAndHead.rootPoints, legDefect.far, 8/10, hips, chest);
 
   console.log("chest.rootPoints", chest.rootPoints)
   console.log("hips.rootPoints", hips.rootPoints)
@@ -271,7 +271,7 @@ const bone = (base64url) => {
     "toe.R", 
     "toe.R_end"]
   
-  let boneHierachy = [
+  let boneHierarchy = [
     "hips", [
       "chest", [
         "neck", [
@@ -330,8 +330,14 @@ const bone = (base64url) => {
     });
   });
 
-  boneWeight(outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices);
+  boneWeight(outlineArray, boneHierarchy, boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices);
 
+  // アーマチュアを作成する
+  // boneHerarchyを利用するため、配列をコピーする
+  let armarture = boneHierarchy.slice();
+  makeArmature(boneNamedPoints, armarture);
+
+  console.log("armature", armarture);
   console.log("boneId", boneId);
   console.log("boneIdOnVertices", boneIdOnVertices);
   console.log("boneWeightOnVertices", boneWeightOnVertices);
@@ -417,19 +423,28 @@ const bone = (base64url) => {
   cv.drawContours(dst, separatedContours, -1, new cv.Scalar(200, 255, 255), 1, cv.LINE_8);
   cv.imshow('output15', dst);
 
+  let outputId = 16;
   boneId.forEach((markedBoneName, boneName_i) => {
+    let nameExist = false;
     let clone = dst.clone();
     boneWeightOnVertices.forEach((boneWeights, index) => {
       let boneNames = boneIdOnVertices[index].map(id => boneId[id]);
       // let markedBoneName = "upperLeg.L";
       let markedBoneId;
       if(boneNames.includes(markedBoneName)){
+        nameExist = true;
         markedBoneId = boneNames.indexOf(markedBoneName);
         cv.circle(clone, outlineArray[index], 3, new cv.Scalar(255 * boneWeights[markedBoneId], 255 * boneWeights[markedBoneId], 0), -1);
       }
     });
-    let outputId = 16 + boneName_i;
-    cv.imshow('output' + outputId, clone);
+    if(nameExist){
+      outputId += 1;
+      let outputIdStr = 'output' + outputId;
+      let boneNameP = document.createElement('p');
+      boneNameP.textContent = markedBoneName;
+      document.getElementById(outputIdStr).before(boneNameP);
+      cv.imshow(outputIdStr, clone);
+    }
   });
 
   outlineContour.delete;
@@ -533,10 +548,21 @@ const getOutlineContours = (src) => {
     }
   }
 
+  let outlineApproxContours = new cv.MatVector();
+  for (let i = 0; i < outlineContours.size(); ++i) {
+    let tmp = new cv.Mat();
+    let cnt = outlineContours.get(i);
+    cv.approxPolyDP(cnt, tmp, 1, true);
+    outlineApproxContours.push_back(tmp);
+    cnt.delete(); tmp.delete();
+  }
+
+  outlineContours.delete;
+
   contours.delete;
   hierarchy.delete;
 
-  return outlineContours;
+  return outlineApproxContours;
 }
 
 // 画像の分割
@@ -717,7 +743,7 @@ const getMaxArea = (contours, maxAreaObject) => {
 }
 
 // 直線方程式で輪郭線を分割する
-const separateByLine = (outlineArray, originalContourArray, a, b, c, tipPortion, anotherPortion, tip, root = null) => {
+const separateByLine = (outlineArray, originalContourArray, a, b, c, tipPortion, rootPortion, tip, root = null) => {
   // tip は手足の先端など分割の際に探査の基準とする位置（cv.Point）
   // a, b, c は ax + by + c = 0 の直線方程式の係数
 
@@ -833,7 +859,7 @@ const separateByLine = (outlineArray, originalContourArray, a, b, c, tipPortion,
     let tipBothSidePoints = bothSidePoints(separatePoints, minId, maxId, tipId);
     let rootBothSidePoints = bothSidePoints(separatePoints, minId, maxId, rootId);;
 
-    separatePoints = distance(tipBothSidePoints[0].point, tipBothSidePoints[1].point) <= distance(rootBothSidePoints[0].point, rootBothSidePoints[1].point)? tipBothSidePoints : rootBothSidePoints  
+    separatePoints = distance(tipBothSidePoints[0].point, tipBothSidePoints[1].point) <= distance(rootBothSidePoints[0].point, rootBothSidePoints[1].point)? tipBothSidePoints : rootBothSidePoints;
   }
 
   // 線分と輪郭線の交点を輪郭線の配列に追加する
@@ -861,17 +887,17 @@ const separateByLine = (outlineArray, originalContourArray, a, b, c, tipPortion,
   separatePoints = separatePoints.map(separatePoint => separatePoint.point);
 
   // 指定した点で輪郭を切り取る
-  separateByPoint(contourArray, separatePoints, tipPortion, anotherPortion);
+  separateByPoint(contourArray, separatePoints, tipPortion, rootPortion);
 }
 
 // 与えられた2つの端（separatePoints）をもとに輪郭線を切り取る
-const separateByPoint = (contourArray, separatePoints, tipPortion, anotherPortion) => {
+const separateByPoint = (contourArray, separatePoints, tipPortion, rootPortion) => {
   let start = separatePoints[0];
   let end = separatePoints[1];
   let startId = findArrayIndex(contourArray, start);
   let endId = findArrayIndex(contourArray, end);
   let tipPortionArray;
-  let anotherPortionArray;
+  let rootPortionArray;
 
   // 始点と終点が id:0 をまたいでいるか判定
   if(startId > endId){
@@ -880,36 +906,36 @@ const separateByPoint = (contourArray, separatePoints, tipPortion, anotherPortio
     tipPortionArray = contourArray.slice(startId).concat(contourArray.slice(0, endId + 1));
 
     // 根本側の配列は、終点から始点で切り取る
-    anotherPortionArray = contourArray.slice(endId, startId + 1);
+    rootPortionArray = contourArray.slice(endId, startId + 1);
   }else{
     // 始点から終点までが id:0 をまたいでいない場合
     // 末端側の配列は、始点から終点の輪郭線を切り取る
     tipPortionArray = contourArray.slice(startId, endId + 1).concat();
 
     // 根本側の配列は、始点からidの最後、id:0 から終点、の二つの輪郭線を合成して作成
-    anotherPortionArray = contourArray.slice(endId).concat(contourArray.slice(0, startId + 1));
+    rootPortionArray = contourArray.slice(endId).concat(contourArray.slice(0, startId + 1));
   }
 
   console.log("tipPortionArray", tipPortionArray);
-  console.log("anotherPortionArray", anotherPortionArray);
+  console.log("rootPortionArray", rootPortionArray);
 
   const points = {start: start, end: end, center: new cv.Point((start.x + end.x) / 2, (start.y + end.y) / 2)};
   tipPortion.array = tipPortionArray;
-  tipPortion.separatePoints = points;
-  anotherPortion.array = anotherPortionArray;
-  anotherPortion.separatePoints = points;
+  tipPortion.rootPoints = points;
+  rootPortion.array = rootPortionArray;
+  rootPortion.separatePoints = points;
 }
 
-const separateLeftArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion) => {
-  separateArm(contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, true);
+const separateLeftArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, rootPortion) => {
+  separateArm(contourArray, defects, boundingRect, bodyRect, tipPortion, rootPortion, true);
 }
 
-const separateRightArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion) => {
-  separateArm(contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, false);
+const separateRightArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, rootPortion) => {
+  separateArm(contourArray, defects, boundingRect, bodyRect, tipPortion, rootPortion, false);
 }
 
 // 腕の defect 候補の中からもっとも depth の大きい2点で輪郭線を切り取る
-const separateArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, anotherPortion, left = true) => {
+const separateArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, rootPortion, left = true) => {
 
   let armDefects;
   let start = 0;
@@ -965,11 +991,11 @@ const separateArm = (contourArray, defects, boundingRect, bodyRect, tipPortion, 
     separatePoints[start] = armDefects[1].far;
   }
   // 指定した点で腕を切り取る
-  separateByPoint(contourArray, separatePoints, tipPortion, anotherPortion);
+  separateByPoint(contourArray, separatePoints, tipPortion, rootPortion);
 }
 
 // 手足の根元と先端を指定し、割合で切り取る
-const separateByRatio = (outlineArray, contourArray, rootPoints, tip, ratio, tipPortion, anotherPortion, parallel = false) => {
+const separateByRatio = (outlineArray, contourArray, rootPoints, tip, ratio, tipPortion, rootPortion, parallel = false) => {
   // ratioは先端側と根本側の比率（0.7の場合、根本側が7割）
   // parallel = true にした場合、rootPointsによる線分と並行な線で切り取る
 
@@ -1026,8 +1052,9 @@ const separateByRatio = (outlineArray, contourArray, rootPoints, tip, ratio, tip
   }
 
   // 算出した直線で切り取る
-  separateByLine(outlineArray, contourArray, a, b, c, tipPortion, anotherPortion, tip, rootPoints.start);
-  anotherPortion.rootPoints = rootPoints;
+  separateByLine(outlineArray, contourArray, a, b, c, tipPortion, rootPortion, tip, rootPoints.start);
+  rootPortion.rootPoints = rootPoints;
+  tipPortion.tipPoint = tip;
 }
 
 // Point配列の中から指定した点と同じ値のindexを返す
@@ -1086,12 +1113,13 @@ const triangulation = (arrayContour) => {
   return triangles;
 }
 
-const boneWeight = (outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices, parentBoneName = "hips") => {
+// ボーンのウェイトを計算する
+const boneWeight = (outlineArray, boneHierarchy, boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices, parentBoneName = "hips") => {
 
   // 最上位のボーンの次の階層にいくつボーンがあるか調べる
   // (upperArm.L > lowerArm.L なら 1, hip > spine, upperLeg.L, upperLeg.R なら 3）
   let childBoneCount = 0;
-  boneHierachy.forEach(bones => {
+  boneHierarchy.forEach(bones => {
     // 配列かどうかを調べる
     if(Array.isArray(bones)){
       childBoneCount ++;
@@ -1100,7 +1128,7 @@ const boneWeight = (outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdO
   console.log("childBoneCount", childBoneCount);
 
   // ボーン名とパーツの輪郭線の情報を取得
-  let boneName = boneHierachy[0];
+  let boneName = boneHierarchy[0];
   let points = boneNamedPoints.find(boneNamedPoint => boneNamedPoint.name == boneName).points;
   console.log("boneName", boneName);
   console.log("points", points);
@@ -1110,7 +1138,7 @@ const boneWeight = (outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdO
   if(childBoneCount == 1){
     console.log("childBoneCount == 1");
     // 子ボーンの名前を取得
-    let childBoneName = boneHierachy[1][0];
+    let childBoneName = boneHierarchy[1][0];
     // ボーンの根本と先端の位置を取得
     let rootPoint = points.rootPoints.center;
     let separatePoint = points.separatePoints.center;
@@ -1143,9 +1171,9 @@ const boneWeight = (outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdO
       let boneLength = distance(rootPoint, separatePoint);
       let intersectionLength = distance(rootPoint, intersection);
       // 2つの長さの割合をそれぞれ親ボーン、子ボーンのウェイトとする
-      let weightRatio = Math.min(intersectionLength / boneLength, 1);
-      let parentWeight = Math.max(0.5 - weightRatio, 0);
-      let childWeight = Math.max(weightRatio - 0.5, 0);
+      let weightRatio = Math.round(Math.min(intersectionLength / boneLength, 1) * 10) / 10;
+      let parentWeight = Math.round(Math.max(0.5 - weightRatio, 0) * 10) / 10;
+      let childWeight = Math.round(Math.max(weightRatio - 0.5, 0) * 10) / 10;
       let weight = 1 - (parentWeight + childWeight);
 
       // 輪郭全体におけるid（verticesのid）を取得する
@@ -1162,9 +1190,22 @@ const boneWeight = (outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdO
       // if(boneWeightOnVertices[id].length == 0){
       //   boneWeightOnVertices[id].push(parentWeight, weight, childWeight);
       // }
+      if(boneName.match(/upperArm/)){
+        let rootStartId = findArrayIndex(outlineArray, points.rootPoints.start);
+        let rootEndId = findArrayIndex(outlineArray, points.rootPoints.end);
+        if(boneName.match(/\.L/)){
+          boneIdOnVertices[rootStartId] = [boneId.findIndex(name => name =="collarbone.L")];
+          boneIdOnVertices[rootEndId] = [boneId.findIndex(name => name =="collarbone.L")];
+        }else{
+          boneIdOnVertices[rootStartId] = [boneId.findIndex(name => name =="collarbone.R")];
+          boneIdOnVertices[rootEndId] = [boneId.findIndex(name => name =="collarbone.R")];
+        }
+        boneWeightOnVertices[rootStartId] = [1];
+        boneWeightOnVertices[rootEndId] = [1];
+      }
     });
     // 子ボーンについても再起的にウェイトを設定する
-    boneWeight(outlineArray, boneHierachy[1], boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices, boneName);
+    boneWeight(outlineArray, boneHierarchy[1], boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices, boneName);
 
   // 子ボーン（次の階層のボーン）の数が1でない場合
   }else{
@@ -1184,11 +1225,30 @@ const boneWeight = (outlineArray, boneHierachy, boneNamedPoints, boneId, boneIdO
     // 子ボーンの数が2以上の場合、それぞれの子ボーンについても再起的にウェイトを設定する
     if(childBoneCount != 0){
       console.log("childBoneCount != 0");
-      boneHierachy.shift();
-      boneHierachy.forEach(bones => {
-        boneWeight(outlineArray, bones, boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices, boneName);
-      });
+      for(let i = 1; i < boneHierarchy.length; ++i){
+        boneWeight(outlineArray, boneHierarchy[i], boneNamedPoints, boneId, boneIdOnVertices, boneWeightOnVertices, boneName);
+      }
     }
+  }
+}
+
+// アーマチュアを作成する
+const makeArmature = (boneNamedPoints, boneHierarchy) => {
+  // この階層の第二要素に、ボーンの付け根の座標を挿入する
+  let boneName = boneHierarchy[0];
+  let bonePoints = boneNamedPoints.find(bone => bone.name == boneName).points;
+  boneHierarchy.splice(1, 0, bonePoints.rootPoints.center);
+
+  // 次の階層がある場合
+  if(boneHierarchy.length > 2){
+    // 第0, 1要素（ボーン名、座標）を飛ばして、残りについて再起する
+    for(let i = 2; i < boneHierarchy.length; ++i){
+      makeArmature(boneNamedPoints, boneHierarchy[i]);
+    }
+  // 次の階層がない場合
+  }else{
+    // 先端のボーン名と先端の座標を追加する
+    boneHierarchy.push([boneName + "_end", bonePoints.tipPoint]);
   }
 }
 

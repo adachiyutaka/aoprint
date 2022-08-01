@@ -389,7 +389,7 @@ const getOutlineContours = (src) => {
   contours.delete;
   hierarchy.delete;
 
-  return outlineContours;
+  return outlineApproxContours;
 }
 
 // 画像の分割
