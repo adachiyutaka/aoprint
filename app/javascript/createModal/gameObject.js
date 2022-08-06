@@ -17,8 +17,8 @@ class GameObject {
     this.image = new Image(id, base64url);
   }
 
-  setMesh(vertices, triangles, boneIdOnVertices, boneWeightOnVertices) {
-    this.meshData = new MeshData(vertices, triangles, boneIdOnVertices, boneWeightOnVertices);
+  setMesh(vertices, triangles, armature, boneIdOnVertices, boneWeightOnVertices) {
+    this.meshData = new MeshData(vertices, triangles, armature, boneIdOnVertices, boneWeightOnVertices);
   }
 }
 
@@ -39,9 +39,10 @@ class Image {
 }
 
 class MeshData {
-  constructor(vertices, triangles, boneIdOnVertices, boneWeightOnVertices) {
+  constructor(vertices, triangles, armature, boneIdOnVertices, boneWeightOnVertices) {
     this.vertices = vertices;
     this.triangles = triangles;
+    this.armature = armature;
     this.boneIdOnVertices = boneIdOnVertices;
     this.boneWeightOnVertices = boneWeightOnVertices;
   }
