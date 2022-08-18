@@ -941,7 +941,7 @@ const separateByPoint = (contourArray, separatePoints, tipPortion, rootPortion) 
   console.log("tipPortionArray", tipPortionArray);
   console.log("rootPortionArray", rootPortionArray);
 
-  const points = {start: start, end: end, center: new cv.Point((start.x + end.x) / 2, (start.y + end.y) / 2)};
+  const points = {start: start, end: end, center: new cv.Point(Math.round((start.x + end.x) / 2), Math.round((start.y + end.y) / 2))};
   tipPortion.array = tipPortionArray;
   tipPortion.rootPoints = points;
   rootPortion.array = rootPortionArray;
@@ -1259,10 +1259,13 @@ const boneWeight = (outlineArray, boneHierarchy, boneNamedPoints, boneId, boneId
         // 子ボーンのウェイトと、ボーンのウェイトを計算する
         let childWeight = Math.round(Math.max(weightRatio - 0.5, 0) * 10) / 10;
         weight = 1 - (parentWeight + childWeight);
-        let childId = [boneId.findIndex(name => name == childBoneName)];
+        let childId = boneId.findIndex(name => name == childBoneName);
+        console.log("boneIdOnVertices[verticesId]", boneIdOnVertices[verticesId]);
 
         // 各点における関連ボーンのidのリスト（boneIdOnVertices）に該当するボーン、子ボーンのidを追加する
         boneIdOnVertices[verticesId] = [parendId, id, childId];
+        console.log("boneIdOnVertices[verticesId]", boneIdOnVertices[verticesId]);
+
         // 各点における関連ボーンのウェイトのリスト（boneWeightOnVertices）に該当するボーン、子ボーンのウェイトを追加する
         boneWeightOnVertices[verticesId] = [parentWeight, weight, childWeight];
 
