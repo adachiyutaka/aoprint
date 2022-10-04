@@ -3,6 +3,7 @@ import _ from 'lodash';
 import e from 'turbolinks';
 
 let dst;
+let cloneScr;
 
 const bone = (base64url) => {
   const img = new Image();
@@ -14,6 +15,8 @@ const bone = (base64url) => {
 
   // テスト表示
   dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+  cloneScr = src.clone();
+
   // テスト表示
   
   // 大まかな形状をセグメント分けにより取得する
@@ -188,6 +191,7 @@ const bone = (base64url) => {
   const headTip = findFarthest(neckAndHead.array, neckAndHead.rootPoints.center);
   separateByRatio(outlineArray, neckAndHead.array, neckAndHead.rootPoints, headTip, 1/10, head, neck, true);
 
+  console.log("chest and head")
   // 胴体を切り取る
   let chest = {};
   let hips = {};
@@ -322,13 +326,30 @@ const bone = (base64url) => {
   // 三角形をまとめた配列の初期化
   let triangles = [];
   // 各頂点と関連するパーツ名の配列の初期化
-  let boneNamesOnVertices = new Array(outlineArray.length).fill().map(i => []);
+  // let boneNamesOnVertices = new Array(outlineArray.length).fill().map(i => []);
   let boneIdOnVertices = new Array(outlineArray.length).fill().map(i => []);
   let boneWeightOnVertices = new Array(outlineArray.length).fill().map(i => []);
 
   // パーツの輪郭ごとに処理する
+  //debug用
+  let bNP_i = 36;
+  //debug用
+
   boneNamedPoints.forEach(boneNamedPoint => {
     let contourArray = boneNamedPoint.points.array;
+
+    //debug用
+    let clone = dst.clone();
+    let outputIdStr = 'output' + bNP_i;
+    let boneNamedcontour = new cv.Mat();
+    let boneNamedcontours = new cv.MatVector();
+    contourFromArray(contourArray, boneNamedcontour);
+    boneNamedcontours.push_back(boneNamedcontour);
+    // cv.drawContours(clone, boneNamedcontours, -1, new cv.Scalar(200, 255, 255), 3, cv.LINE_8);
+    // cv.imshow(outputIdStr, clone);
+    bNP_i += 1;
+    //debug用
+    
     if(contourArray){
     // 三角分割する
     let partTriangles = triangulation(contourArray);
@@ -337,9 +358,9 @@ const bone = (base64url) => {
     // 指定し直した配列を追加する
     triangles.push(...partTriangles);
     // パーツの各点のidと同じidに関連するパーツ名の配列を作成する
-    partTriangles.forEach(pointId => {
-      boneNamesOnVertices[pointId] = _.union(boneNamesOnVertices[pointId], [boneNamedPoint.name]);
-    });
+    // partTriangles.forEach(pointId => {
+    //   boneNamesOnVertices[pointId] = _.union(boneNamesOnVertices[pointId], [boneNamedPoint.name]);
+    // });
     }
   });
   
@@ -355,14 +376,14 @@ const bone = (base64url) => {
   console.log("boneIdOnVertices", boneIdOnVertices);
   console.log("boneWeightOnVertices", boneWeightOnVertices);
   
-  boneNamesOnVertices.forEach((boneNamesOnVertex, index) => {
-    if(boneNamesOnVertex.length == 0){
-      cv.circle(dst, outlineArray[index], 3, new cv.Scalar(255, 0, 0), -1);
-    }
-  });
-  cv.imshow('output14', dst);
+  // boneNamesOnVertices.forEach((boneNamesOnVertex, index) => {
+  //   if(boneNamesOnVertex.length == 0){
+  //     cv.circle(dst, outlineArray[index], 3, new cv.Scalar(255, 0, 0), -1);
+  //   }
+  // });
+  // cv.imshow('output14', dst);
 
-  console.log("boneNamesOnVertices", boneNamesOnVertices);
+  // console.log("boneNamesOnVertices", boneNamesOnVertices);
   console.log("boneNamedPoints", boneNamedPoints);
   console.log("outlineArray", outlineArray);
 
@@ -415,22 +436,22 @@ const bone = (base64url) => {
   // separatedContours.push_back(rightLegContour);
   // separatedContours.push_back(leftArmContour);
   // separatedContours.push_back(rightArmContour);
-  // separatedContours.push_back(bodyContour);
+  separatedContours.push_back(bodyContour);
   // separatedContours.push_back(leftUpperLegContour);
-  separatedContours.push_back(leftLowerLegContour);
+  // separatedContours.push_back(leftLowerLegContour);
   // separatedContours.push_back(leftFootContour);
   // separatedContours.push_back(rightUpperLegContour);
-  separatedContours.push_back(rightLowerLegContour);
+  // separatedContours.push_back(rightLowerLegContour);
   // separatedContours.push_back(rightFootContour);
   // separatedContours.push_back(leftUpperArmContour);
-  separatedContours.push_back(leftLowerArmContour);
+  // separatedContours.push_back(leftLowerArmContour);
   // separatedContours.push_back(leftHandContour);
   // separatedContours.push_back(rightUpperArmContour);
-  separatedContours.push_back(rightLowerArmContour);
+  // separatedContours.push_back(rightLowerArmContour);
   // separatedContours.push_back(rightHandContour);
   // separatedContours.push_back(headContour);
-  separatedContours.push_back(neckContour);
-  separatedContours.push_back(chestContour);
+  // separatedContours.push_back(neckContour);
+  // separatedContours.push_back(chestContour);
   separatedContours.push_back(hipsContour);
 
   cv.drawContours(dst, separatedContours, -1, new cv.Scalar(200, 255, 255), 1, cv.LINE_8);
@@ -783,6 +804,7 @@ const separateByLine = (outlineArray, originalContourArray, a, b, c, tipPortion,
   }else{
     rootId = findArrayIndex(contourArray, findFarthest(contourArray, tip));
   }
+
   let tipSign;
   let separatePoint;
   let id;
@@ -818,18 +840,20 @@ const separateByLine = (outlineArray, originalContourArray, a, b, c, tipPortion,
     }
 
     if(tipSign == sign){
+      // スタート地点の符号と同じ符号になった場合
+      // まだ交点に達していないので次の点を調べる
       onePreviousId = id;
       continue;
     }else if(sign == 0){
       // 符号が0になった場合（たまたま、輪郭の点が分割のための直線の上にある）
+      // 現在の頂点を切り離す際の点とする
       separatePoint = point;
-      // break;
     }else if(tipSign != sign){
       // スタート地点の符号と異なる符号になった場合（輪郭線が直線をはじめてまたいだ）
       // その前後の2点の間に、新しい分割用の点（2点を結ぶ直線と、分割のための直線の交点）を作成する
-      // 初めてまたいだ点の一つ前の点を算出する
+      // 初めてまたいだ点の一つ前の点を取得する
       let onePreviousPoint = contourArray[onePreviousId]; // 一つ前の点
-      // let onePreviousPoint = new cv.Point(contour.data32S[onePreviousId * 2], contour.data32S[onePreviousId * 2 + 1]); // 一つ前の点
+
       if(x == onePreviousPoint.x){
         // 2点を結ぶ直線が垂直になる場合
         separatePoint = new cv.Point(x, - a / b * x - c / b);
@@ -854,10 +878,13 @@ const separateByLine = (outlineArray, originalContourArray, a, b, c, tipPortion,
         }
       }
     }
+    // 分割する点の配列にid, 符号とともに追加する
+    // 交点によって点を求めた場合（tipSign != signの場合）、idは交点の一つ後の点のid
     separatePoints.push({point: separatePoint, id: id, sign: sign});
+    // 分割の線をまたいだので、符号を反転させる
     tipSign *= -1;
   }
-
+  
   // 直線をまたいだ点が2つ以上あった場合、2つにしぼる
   if(separatePoints.length > 2){
     separatePoints.sort((a ,b) => a.id - b.id);
@@ -881,8 +908,20 @@ const separateByLine = (outlineArray, originalContourArray, a, b, c, tipPortion,
     let tipBothSidePoints = bothSidePoints(separatePoints, minId, maxId, tipId);
     let rootBothSidePoints = bothSidePoints(separatePoints, minId, maxId, rootId);;
 
+    // 2点間の距離が小さい方を分割の点とする
     separatePoints = distance(tipBothSidePoints[0].point, tipBothSidePoints[1].point) <= distance(rootBothSidePoints[0].point, rootBothSidePoints[1].point)? tipBothSidePoints : rootBothSidePoints;
   }
+
+
+  cv.circle(cloneScr, contourArray[tipId], 5, new cv.Scalar(200, 0, 200), -1);
+  cv.circle(dst, contourArray[tipId], 5, new cv.Scalar(200, 0, 200), -1);
+  cv.circle(cloneScr, contourArray[rootId], 5, new cv.Scalar(200, 200, 200), -1);
+  cv.circle(dst, contourArray[rootId], 5, new cv.Scalar(200, 200, 200), -1);
+  cv.imshow('output13', cloneScr);
+  cv.imshow('output13', dst);
+
+  console.log("by line separatePoints:", separatePoints);
+  console.log("by line originalContourArray:", originalContourArray);
 
   // 線分と輪郭線の交点を輪郭線の配列に追加する
   separatePoints.forEach(separatePoint => {
@@ -894,11 +933,15 @@ const separateByLine = (outlineArray, originalContourArray, a, b, c, tipPortion,
       // 前後の点と被らなかった場合、新たに追加する
       if(findArrayIndex(contourArray, separatePoint.point) == -1){
         // 全体の輪郭と、分割するパーツの輪郭にそれぞれ追加する
-        outlineArray.splice(findArrayIndex(outlineArray, contourArray[separatePoint.id]), 0, separatePoint.point);
-        contourArray.splice(findArrayIndex(contourArray, contourArray[separatePoint.id]), 0, separatePoint.point);
+        // contourArrayにspliceで頂点を追加すると、2つ目でidがずれてしまうため、元の輪郭（originalContourArray）から頂点を取得し
+        // さらにその点から全体の輪郭と、分割するパーツの輪郭における挿入する地点のidを取得する
+        let originalPoint = originalContourArray[separatePoint.id];
+        outlineArray.splice(findArrayIndex(outlineArray, originalPoint), 0, separatePoint.point);
+        contourArray.splice(findArrayIndex(contourArray, originalPoint), 0, separatePoint.point);
       }
     }
   });
+  console.log("by line splices contourArray:", contourArray);
 
   // idを昇順に追っていくと separatePoints[0].id, tipId, separatePoints[1].id の順になるよう変更する
   separatePoints.sort((a, b) => a.id - b.id);
@@ -908,6 +951,7 @@ const separateByLine = (outlineArray, originalContourArray, a, b, c, tipPortion,
 
   separatePoints = separatePoints.map(separatePoint => separatePoint.point);
 
+  console.log("contourArray", contourArray);
   // 指定した点で輪郭を切り取る
   separateByPoint(contourArray, separatePoints, tipPortion, rootPortion);
 }
@@ -1164,8 +1208,6 @@ const boneWeight = (outlineArray, boneHierarchy, boneNamedPoints, boneId, boneId
   }
   // 子ボーン（次の階層のボーン）の数が2以上の場合、ウェイト(1)を設定し、それぞれの子ボーンについても再起的にウェイトを設定する
   else if(childBoneCount >= 2){
-    console.log("childBoneCount >= 2");
-
     // ボーンの輪郭線の各点にボーンidとウェイト(1)を設定する
     bonePoints.points.array.forEach(point => {
       // 各点のverticesにおけるid
@@ -1180,14 +1222,18 @@ const boneWeight = (outlineArray, boneHierarchy, boneNamedPoints, boneId, boneId
       // 新たに登録するウェイトは、1 / 現在のウェイト数 + 1 とする
       // すでに登録されているウェイトを再計算した合計
       let weightSum = 0;
-      boneWeightOnVertices[id].forEach(weight => {
+      console.log("childBoneCount >= 2, boneName: ", boneName, "weightCount: ", weightCount);
+      console.log("old weight", boneWeightOnVertices[id]);
+      boneWeightOnVertices[id].forEach((weight, weight_i) => {
         // すでに登録されているウェイトは、現在のウェイト数 / 現在のウェイト数 + 1 倍に圧縮する
         // 小数点第一位で四捨五入する
-        weight *= Math.round(weightCount/(weightCount + 1) * 10) / 10;
+        weight = Math.round((weight/(weightCount + 1)) * 10) / 10;
+        boneWeightOnVertices[id][weight_i] = weight;
         weightSum += weight;
       })
       // すでに登録されているウェイトが一つもない場合、新たなウェイトは１になる
       boneWeightOnVertices[id].push(1 - weightSum);
+      console.log("new weight", boneWeightOnVertices[id]);
     });
     
     for(let i = 1; i < boneHierarchy.length; ++i){
