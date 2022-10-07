@@ -4,7 +4,9 @@ import GameObject from './gameObject.js';
 import objectMove from './objectMove.js';
 import Selected from './selected';
 
+// オブジェクト新規作成ボタン、オブジェクト情報のイメージをクリックでイメージリストを開く
 const imageList = () => {
+  // 新規作成と既存オブジェクト情報の更新の2通りの場合がある
   const mode = {updateImage : 1, newGameObject : 2};
   let currentMode = null;
   let currentGameObject = null;
@@ -13,7 +15,7 @@ const imageList = () => {
   const imageList = document.getElementById('image_list');
   const background = document.getElementById('modal_background');
   const infoImage = document.getElementById('info_image');
-  const imageButton = document.getElementById('add_object_btn');
+  const newObjectButton = document.getElementById('add_object_btn');
   const imageModal = document.getElementById('image_modal');
   const imageExitButton = document.getElementById('image_exit_btn');
   const imageBackground = document.getElementById('image_modal_background');
@@ -47,9 +49,11 @@ const imageList = () => {
 
   // イメージ選択モーダルのsubmitボタンの処理
   const submit = () => {
+    // イメージ更新の場合
     if (currentMode == mode.updateImage){
       CreateController.updateImage(document.getElementsByClassName('gameobject-image selected')[0].src);
     }
+    // GameObject新規作成の場合
     else if (currentMode == mode.newGameObject){
       makePreviewObject(currentGameObject);
     }
@@ -73,12 +77,13 @@ const imageList = () => {
   // イメージ選択モーダルの表示
   // GameObject新規作成ボタンと、info画像変更ボタンの2通りがある
   infoImage.addEventListener('click', () => {imageDisplay(mode.updateImage)});
-  imageButton.addEventListener('click', () => {imageDisplay(mode.newGameObject)});
+  newObjectButton.addEventListener('click', () => {imageDisplay(mode.newGameObject)});
 
   // イメージ選択モーダルの非表示
   imageBackground.addEventListener('click', imageExit);
   imageExitButton.addEventListener('click', imageExit);
 
+  // 決定ボタン
   submitButton.addEventListener('click', () => {
     submit();
     imageExit();
@@ -134,11 +139,11 @@ const imageList = () => {
               });
             });
   
-            // 画像リストに画像アップロードボタンを移動
-            const stageLabel = document.getElementById('stage_label');
+            // 画像リストのアップロード欄に画像アップロードボタン（フォームのラベル）を移動
+            const imageInputLabel = document.getElementById('image_input_label');
             const imageCardsUpload = document.getElementById('image_cards_upload');
-            imageCardsUpload.appendChild(stageLabel);
-            stageLabel.classList.remove('hidden');
+            imageCardsUpload.appendChild(imageInputLabel);
+            imageInputLabel.classList.remove('hidden');
           } else {
             alert('リクエストに問題が発生しました');
           }
@@ -162,10 +167,10 @@ const imageList = () => {
 
 
   // ローカル画像の読み込みボタンの処理
-  const stageForm = document.getElementById('game_form_stage_input');
+  const imageInputForm = document.getElementById('game_form_image_input');
 
   // 画像を輪郭で切り取り、PresetGameObjectへ登録する
-  stageForm.addEventListener('change', (e) => {
+  imageInputForm.addEventListener('change', (e) => {
     // ユーザーがセットしたファイルから画像ファイルを読み取り
     const file = e.target.files[0];
 
