@@ -1,6 +1,6 @@
 import updateInfoPosition from "./updateInfoPosition";
 import GameObject from './gameObject.js';
-import bone from "./bone";
+import makeMesh from "./mesh/makeMesh";
 
 const roleIndex = {object: 0, player: 1, enemy: 2, item: 3, goal: 4};
 
@@ -89,7 +89,7 @@ class CreateController {
       case 'role_select':
         gameObject.role = property.selectedIndex;
         if(gameObject.role == roleIndex.player){
-          console.log("updateInfoValue make bone");
+          console.log("updateInfoValue make mesh");
           this.updateMeshData();
         }
         console.log("gameObject", gameObject);
@@ -103,8 +103,8 @@ class CreateController {
   updateImage(base64url) {
     this.selectedGameObject.image.base64url = base64url;
     if(this.selectedGameObject.role == roleIndex.player){
-      console.log("updateImage make bone");
-      bone(base64url);
+      console.log("updateImage make mesh");
+      makeMesh(base64url);
     }
     this.updatePreview();
     this.updateInfoInput();
@@ -112,7 +112,7 @@ class CreateController {
 
   updateMeshData() {
     let gameObject = this.selectedGameObject;
-    let meshData = bone(gameObject.image.base64url);
+    let meshData = makeMesh(gameObject.image.base64url);
     gameObject.setMesh(meshData.vertices, meshData.triangles, meshData.armature, meshData.boneIdOnVertices, meshData.boneWeightOnVertices);
   }
 
