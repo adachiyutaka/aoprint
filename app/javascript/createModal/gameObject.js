@@ -3,7 +3,7 @@ class GameObject {
     this.symbol = '';
     this.position = null;
     this.image = null;
-    this.role = 1;
+    this.role = 0;
     this.object = '';
     this.script = '';
     this.meshData = null;

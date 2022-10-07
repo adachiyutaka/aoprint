@@ -1,5 +1,6 @@
 import CreateController from './createController.js';
 
+// infoの位置を更新する
 const updateInfoPosition = () => {
   let x;
   let y;
