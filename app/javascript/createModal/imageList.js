@@ -208,10 +208,10 @@ const imageList = () => {
     });
   });
 
-
   // ImageList内のGroupe名要素を作成する
   const makeImageListGroupe = (groupeName) => {
     let div = document.createElement('div');
+    // variableNameは変数名（英語表記）、indexNameはリストに表示する日本語名
     let variableName = groupeName.column;
     let indexName = groupeName.index;
   

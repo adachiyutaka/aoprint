@@ -25,13 +25,13 @@ class CreateController {
     json.forEach(groupe => {
       // GameObjectを生成し、画像、サイズ、位置データを設定、presetGOGroupsに格納
       let gameObjects = [];
-      groupe.gameObjects.forEach(go => {
+      groupe.gameObjects.forEach(presetGO => {
         let gameObject = new GameObject();
-        let image = go.image;
-        let position = go.position;
+        let image = presetGO.image;
+        let position = presetGO.position;
         gameObject.setPosition(0, 0, position.width, position.height);
         gameObject.setImage(image.id, image.base64url);
-        gameObject.role = go.role;
+        gameObject.role = presetGO.role;
         gameObjects.push(gameObject);
       });
       this.presetGOGroups.push({'name': groupe.name, 'gameObjects': gameObjects});
